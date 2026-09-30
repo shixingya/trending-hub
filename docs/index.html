@@ -360,6 +360,40 @@
       background: var(--accent); color: #fff; text-align: center; padding: 0.3rem;
       font-size: 0.75rem; z-index: 999; cursor: pointer;
     }
+    .share-image-preview {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;
+      flex-direction: column; gap: 1rem;
+    }
+    .share-image-preview.active { display: flex; }
+    .share-image-preview canvas {
+      max-width: 90%; max-height: 70vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .share-image-actions { display: flex; gap: 1rem; }
+    .share-image-actions button {
+      background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.5rem;
+      border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+    }
+    .share-image-actions button:hover { transform: scale(1.05); }
+    .share-image-actions button.secondary { background: var(--bg-input); color: var(--text); }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem; margin-top: 1rem;
+    }
+    .stats-card {
+      background: var(--bg-input); border-radius: 12px; padding: 1rem;
+      border: 1px solid var(--border);
+    }
+    .stats-card-title {
+      font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .stats-chart { width: 100%; height: 200px; }
+    .stats-number {
+      font-size: 2rem; font-weight: 700; color: var(--accent);
+      text-align: center; padding: 1rem 0;
+    }
+    .stats-label { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
   </style>
 </head>
 <body>
@@ -372,9 +406,11 @@
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
       <button class="share-btn" onclick="showMorningBrief()">早报</button>
+      <button class="share-btn" onclick="generateShareImage()">生成图片</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
+      <button class="share-btn" onclick="showStats()">统计</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
   </header>
@@ -409,6 +445,14 @@
         <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
       <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="share-image-preview" id="shareImagePreview" onclick="if(event.target===this)closeShareImage()">
+    <canvas id="shareCanvas"></canvas>
+    <div class="share-image-actions">
+      <button onclick="downloadShareImage()">下载图片</button>
+      <button class="secondary" onclick="closeShareImage()">关闭</button>
     </div>
   </div>
 
@@ -1237,6 +1281,284 @@
       const targetTab = tabs.querySelector(`.tab[data-type="source"][data-key="${key}"]`);
       if (targetTab) targetTab.classList.add('active');
       renderContent();
+    }
+
+    function generateShareImage() {
+      if (allData.length === 0) return;
+      const canvas = document.getElementById('shareCanvas');
+      const ctx = canvas.getContext('2d');
+      const width = 800;
+      const height = 1200;
+      canvas.width = width;
+      canvas.height = height;
+
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(0.5, '#16213e');
+      gradient.addColorStop(1, '#0f3460');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Trending Hub', width / 2, 80);
+
+      ctx.font = '24px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      ctx.fillText(`全网热点 · ${dateStr}`, width / 2, 120);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(100, 150);
+      ctx.lineTo(width - 100, 150);
+      ctx.stroke();
+
+      const picks = getDailyPicks().slice(0, 5);
+      let y = 200;
+
+      if (picks.length > 0) {
+        ctx.fillStyle = '#feca57';
+        ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('🔥 全网必看', 60, y);
+        y += 40;
+
+        picks.forEach((item, i) => {
+          ctx.fillStyle = i < 3 ? '#ff6b6b' : '#48dbfb';
+          ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          ctx.fillText(`${i + 1}`, 60, y);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          const title = item.title.length > 35 ? item.title.substring(0, 35) + '...' : item.title;
+          ctx.fillText(title, 100, y);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          ctx.fillText(`${item.sources.length} 平台`, width - 150, y);
+
+          y += 45;
+        });
+      }
+
+      y += 20;
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(width - 60, y);
+      ctx.stroke();
+      y += 30;
+
+      ctx.fillStyle = '#48dbfb';
+      ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('📊 各平台 TOP 1', 60, y);
+      y += 40;
+
+      const topSources = allData.filter(s => s.items.length > 0).slice(0, 8);
+      topSources.forEach(source => {
+        if (y > height - 200) return;
+
+        ctx.fillStyle = source.color;
+        ctx.fillRect(60, y - 20, 30, 30);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(source.icon, 75, y);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '18px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.fillText(source.source, 100, y);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        const topTitle = source.items[0]?.title || '';
+        const displayTitle = topTitle.length > 30 ? topTitle.substring(0, 30) + '...' : topTitle;
+        ctx.fillText(displayTitle, 250, y);
+
+        y += 40;
+      });
+
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('扫码查看更多热点 →', width / 2, height - 100);
+
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      ctx.fillText(`${allData.length} 大平台 · ${total} 条热点`, width / 2, height - 70);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '14px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillText('https://shixingya.github.io/trending-hub/', width / 2, height - 40);
+
+      document.getElementById('shareImagePreview').classList.add('active');
+    }
+
+    function downloadShareImage() {
+      const canvas = document.getElementById('shareCanvas');
+      const link = document.createElement('a');
+      const date = new Date().toISOString().split('T')[0];
+      link.download = `trending-hub-${date}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function closeShareImage() {
+      document.getElementById('shareImagePreview').classList.remove('active');
+    }
+
+    function showStats() {
+      if (allData.length === 0) return;
+
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const avgPerSource = Math.round(total / allData.length);
+      const maxSource = allData.reduce((max, s) => s.items.length > max.items.length ? s : max, allData[0]);
+
+      const categoryCounts = {};
+      for (const source of allData) {
+        for (const item of source.items) {
+          const cat = categorize(item.title);
+          categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        }
+      }
+
+      let body = `
+        <div class="stats-grid">
+          <div class="stats-card">
+            <div class="stats-number">${allData.length}</div>
+            <div class="stats-label">数据平台</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-number">${total}</div>
+            <div class="stats-label">热点总数</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-number">${avgPerSource}</div>
+            <div class="stats-label">平均每平台</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-number">${maxSource.items.length}</div>
+            <div class="stats-label">${maxSource.source} (最多)</div>
+          </div>
+        </div>
+
+        <div class="stats-card" style="margin-top:1rem">
+          <div class="stats-card-title">📊 各平台热点数量</div>
+          <canvas id="platformChart" class="stats-chart"></canvas>
+        </div>
+
+        <div class="stats-card" style="margin-top:1rem">
+          <div class="stats-card-title">🏷️ 话题分类分布</div>
+          <canvas id="categoryChart" class="stats-chart"></canvas>
+        </div>
+      `;
+
+      document.getElementById('modalTitle').textContent = '数据统计';
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('topicModal').classList.add('active');
+
+      setTimeout(() => {
+        drawPlatformChart();
+        drawCategoryChart(categoryCounts);
+      }, 100);
+    }
+
+    function drawPlatformChart() {
+      const canvas = document.getElementById('platformChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth * 2;
+      const height = canvas.height = 400;
+      canvas.style.height = '200px';
+
+      const sorted = [...allData].sort((a, b) => b.items.length - a.items.length).slice(0, 10);
+      const maxVal = Math.max(...sorted.map(s => s.items.length));
+      const barWidth = (width - 100) / sorted.length;
+      const chartHeight = height - 80;
+
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#666';
+      ctx.font = '20px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+
+      sorted.forEach((source, i) => {
+        const barHeight = (source.items.length / maxVal) * chartHeight;
+        const x = 50 + i * barWidth;
+        const y = height - 40 - barHeight;
+
+        const gradient = ctx.createLinearGradient(x, y, x, height - 40);
+        gradient.addColorStop(0, source.color);
+        gradient.addColorStop(1, source.color + '80');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x + 5, y, barWidth - 10, barHeight);
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#fff';
+        ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.fillText(source.items.length, x + barWidth / 2, y - 10);
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#888';
+        ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        const name = source.source.length > 6 ? source.source.substring(0, 6) + '..' : source.source;
+        ctx.fillText(name, x + barWidth / 2, height - 15);
+      });
+    }
+
+    function drawCategoryChart(categoryCounts) {
+      const canvas = document.getElementById('categoryChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth * 2;
+      const height = canvas.height = 400;
+      canvas.style.height = '200px';
+
+      const categories_sorted = Object.entries(categoryCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8);
+      const total = categories_sorted.reduce((sum, [, count]) => sum + count, 0);
+
+      const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff'];
+      const centerX = width / 3;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) / 3;
+
+      let startAngle = -Math.PI / 2;
+      categories_sorted.forEach(([cat, count], i) => {
+        const sliceAngle = (count / total) * 2 * Math.PI;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+
+        startAngle = endAngle;
+      });
+
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#fff';
+      ctx.font = '20px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'left';
+
+      const legendX = width * 2 / 3;
+      let legendY = 60;
+      categories_sorted.forEach(([cat, count], i) => {
+        const percentage = ((count / total) * 100).toFixed(1);
+        const catName = categories[cat]?.name || cat;
+
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillRect(legendX, legendY - 15, 20, 20);
+
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#fff';
+        ctx.font = '18px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.fillText(`${catName} (${percentage}%)`, legendX + 30, legendY);
+
+        legendY += 35;
+      });
     }
   </script>
 </body>
