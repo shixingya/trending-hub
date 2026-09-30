@@ -1,7 +1,7 @@
 {
   "name": "trending-hub",
   "version": "1.0.0",
-  "description": "全网热门话题聚合器 - 发现知乎、微博、百度、GitHub等平台热点",
+  "description": "全网热门话题聚合器 - 发现百度、B站、抖音、头条等平台热点",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "dev": "tsx src/server.ts",
     "fetch": "tsx src/index.ts",
+    "fetch:docs": "tsx src/fetch-docs.ts",
     "test": "tsx src/test.ts"
   },
   "keywords": [
