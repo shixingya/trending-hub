@@ -4,210 +4,273 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trending Hub - 全网热点聚合</title>
+  <meta name="description" content="一站式发现知乎、微博、百度、B站、抖音、头条、澎湃等平台热点话题">
+  <meta name="keywords" content="热点,热榜,trending,知乎,微博,百度,B站,抖音,头条">
   <style>
+    :root {
+      --bg: #0f0f0f;
+      --bg-card: #1a1a1a;
+      --bg-header: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      --bg-input: #222;
+      --border: #2a2a2a;
+      --border-hover: #444;
+      --text: #e0e0e0;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --accent: #48dbfb;
+      --accent-red: #ff6b6b;
+      --accent-yellow: #feca57;
+      --tab-bg: #222;
+      --tab-border: #444;
+      --tab-active-bg: #333;
+      --tab-active-border: #888;
+      --rank-bg: #333;
+      --rank-color: #888;
+      --hover-bg: #222;
+      --shadow: rgba(0,0,0,0.3);
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f5;
+      --bg-card: #fff;
+      --bg-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --bg-input: #f0f0f0;
+      --border: #e0e0e0;
+      --border-hover: #ccc;
+      --text: #333;
+      --text-secondary: #666;
+      --text-muted: #999;
+      --accent: #0066ff;
+      --accent-red: #e53e3e;
+      --accent-yellow: #d69e2e;
+      --tab-bg: #fff;
+      --tab-border: #ddd;
+      --tab-active-bg: #667eea;
+      --tab-active-border: #667eea;
+      --rank-bg: #f0f0f0;
+      --rank-color: #999;
+      --hover-bg: #f8f8f8;
+      --shadow: rgba(0,0,0,0.08);
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
     header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      padding: 2rem;
+      background: var(--bg-header);
+      padding: 1.5rem 2rem;
       text-align: center;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border);
+      position: relative;
     }
     header h1 {
       font-size: 2rem;
       background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
-    header p { color: #888; font-size: 0.9rem; }
-    header .links { margin-top: 0.75rem; }
-    header .links a {
-      color: #48dbfb;
-      text-decoration: none;
-      font-size: 0.85rem;
-      margin: 0 0.5rem;
+    [data-theme="light"] header h1 {
+      background: linear-gradient(90deg, #fff, #e0e0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    header .links a:hover { text-decoration: underline; }
+    header p { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+    [data-theme="light"] header p { color: rgba(255,255,255,0.85); }
+    .header-links { margin-top: 0.5rem; display: flex; gap: 1rem; justify-content: center; align-items: center; }
+    .header-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.8rem; }
+    .header-links a:hover { color: #fff; }
+    .theme-toggle {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      padding: 0.3rem 0.7rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+    .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+    .search-bar {
+      padding: 0.75rem 2rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .search-input {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: block;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-muted); }
     .tabs {
       display: flex;
       gap: 0.5rem;
-      padding: 1rem 2rem;
+      padding: 0.75rem 2rem;
       overflow-x: auto;
-      background: #1a1a1a;
-      border-bottom: 1px solid #333;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
-    .tab-group {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .tab-group-label {
-      font-size: 0.75rem;
-      color: #666;
-      margin-right: 0.25rem;
-    }
-    .tab-divider {
-      width: 1px;
-      height: 20px;
-      background: #444;
-      margin: 0 0.5rem;
-    }
+    .tab-group { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+    .tab-group-label { font-size: 0.7rem; color: var(--text-muted); margin-right: 0.2rem; }
+    .tab-divider { width: 1px; height: 18px; background: var(--border-hover); margin: 0 0.4rem; }
     .tab {
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      padding: 0.35rem 0.8rem;
+      border-radius: 16px;
       cursor: pointer;
-      font-size: 0.85rem;
-      border: 1px solid #444;
-      background: #222;
-      color: #ccc;
+      font-size: 0.8rem;
+      border: 1px solid var(--tab-border);
+      background: var(--tab-bg);
+      color: var(--text-secondary);
       transition: all 0.2s;
       white-space: nowrap;
+      user-select: none;
     }
-    .tab:hover { border-color: #666; }
-    .tab.active { background: #333; border-color: #888; color: #fff; }
-    .container {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
+    .tab:hover { border-color: var(--text-muted); color: var(--text); }
+    .tab.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); color: var(--text); font-weight: 500; }
+    .container { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
     .source-section {
-      background: #1a1a1a;
+      background: var(--bg-card);
       border-radius: 12px;
-      margin-bottom: 1.5rem;
-      border: 1px solid #2a2a2a;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border);
       overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+      animation: fadeIn 0.3s ease;
     }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .source-header {
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1.25rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      border-bottom: 1px solid #2a2a2a;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--border);
     }
     .source-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.9rem;
-      color: #fff;
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 0.8rem; color: #fff; flex-shrink: 0;
     }
-    .source-name { font-weight: 600; font-size: 1rem; }
-    .source-count { color: #666; font-size: 0.8rem; margin-left: 0.5rem; }
-    .source-error { color: #ff6b6b; font-size: 0.85rem; margin-left: auto; }
+    .source-name { font-weight: 600; font-size: 0.9rem; }
+    .source-count { color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
+    .source-error { color: var(--accent-red); font-size: 0.8rem; }
     .item-list { list-style: none; }
     .item {
       display: flex;
       align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.75rem 1.5rem;
-      border-bottom: 1px solid #1f1f1f;
+      gap: 0.6rem;
+      padding: 0.6rem 1.25rem;
+      border-bottom: 1px solid var(--border);
       transition: background 0.15s;
     }
-    .item:hover { background: #222; }
+    .item:hover { background: var(--hover-bg); }
     .item:last-child { border-bottom: none; }
     .item-rank {
-      min-width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: #333;
-      color: #888;
+      min-width: 22px; height: 22px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 600;
+      background: var(--rank-bg); color: var(--rank-color);
+      flex-shrink: 0; margin-top: 1px;
     }
-    .item:nth-child(-n+3) .item-rank { background: #ff6b6b; color: #fff; }
+    .item:nth-child(-n+3) .item-rank { background: var(--accent-red); color: #fff; }
     .item-content { flex: 1; min-width: 0; }
-    .item-title {
-      font-size: 0.9rem;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-    .item-title a { color: #e0e0e0; text-decoration: none; }
-    .item-title a:hover { color: #48dbfb; }
+    .item-title { font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
+    .item-title a { color: var(--text); text-decoration: none; transition: color 0.15s; }
+    .item-title a:hover { color: var(--accent); }
     .item-desc {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 0.25rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .item-hot {
-      font-size: 0.75rem;
-      color: #ff6b6b;
-      white-space: nowrap;
+    .item-hot { font-size: 0.7rem; color: var(--accent-red); white-space: nowrap; flex-shrink: 0; }
+    .item-source-tag {
+      font-size: 0.65rem; color: var(--text-muted); background: var(--bg-input);
+      padding: 0.1rem 0.4rem; border-radius: 8px; margin-left: 0.4rem;
+      display: inline-block; vertical-align: middle;
     }
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
-    }
+    .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
     .loading::after {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #444;
-      border-top-color: #48dbfb;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-left: 0.5rem;
-      vertical-align: middle;
+      content: ''; display: inline-block; width: 18px; height: 18px;
+      border: 2px solid var(--border-hover); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      margin-left: 0.5rem; vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .refresh-time {
-      text-align: center;
-      color: #555;
-      font-size: 0.8rem;
-      padding: 1rem;
+    .refresh-time { text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 0.75rem; }
+    .stats-bar {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--text-muted);
     }
+    .stats-bar span { display: flex; align-items: center; gap: 0.3rem; }
+    .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+    footer {
+      text-align: center; padding: 2rem 1rem; color: var(--text-muted);
+      font-size: 0.75rem; border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
     @media (max-width: 600px) {
-      header h1 { font-size: 1.5rem; }
-      .tabs { padding: 0.75rem 1rem; }
-      .item { padding: 0.6rem 1rem; }
+      header h1 { font-size: 1.4rem; }
+      .tabs { padding: 0.5rem 0.75rem; }
+      .search-bar { padding: 0.5rem 0.75rem; }
+      .item { padding: 0.5rem 0.75rem; }
+      .source-header { padding: 0.6rem 0.75rem; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Trending Hub</h1>
-    <p>全网热点聚合 - 百度 / B站 / 抖音 / 头条</p>
-    <div class="links">
-      <a href="https://github.com/shixingya/trending-hub">GitHub</a>
+    <p>全网热点聚合 - 7大平台实时热点</p>
+    <div class="header-links">
+      <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
   </header>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索热点话题..." oninput="onSearch(this.value)">
+  </div>
+
   <div class="tabs" id="tabs"></div>
+  <div class="stats-bar" id="statsBar"></div>
+
   <div class="container" id="content">
     <div class="loading">正在加载热点数据</div>
   </div>
   <div class="refresh-time" id="refreshTime"></div>
 
+  <footer>
+    <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
+    <p style="margin-top:0.3rem">每2小时自动更新 | <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a></p>
+  </footer>
+
   <script>
     let allData = [];
     let activeSource = 'all';
     let activeCategory = 'all';
+    let searchQuery = '';
 
     const categories = {
-      entertainment: { name: '娱乐', keywords: ['明星', '演员', '导演', '电影', '电视剧', '综艺', '娱乐', '八卦', '演唱会', '偶像', '粉丝', '热搜', '恋情', '离婚', '结婚', '出轨', '代言', '票房', '收视', '颁奖', '选秀', '网红', '直播', '抖音', '快手'] },
-      military: { name: '军事', keywords: ['军事', '军队', '武器', '战争', '国防', '导弹', '战斗机', '航母', '坦克', '军演', '阅兵', '部队', '军官', '士兵', '核武', '卫星', '火箭军', '海军', '空军', '陆军'] },
-      sports: { name: '体育', keywords: ['体育', '足球', '篮球', '奥运', '比赛', '冠军', '金牌', '世界杯', 'NBA', 'CBA', '中超', '联赛', '球队', '球员', '教练', '裁判', '进球', '得分', '马拉松', '游泳', '乒乓球'] },
-      tech: { name: '科技', keywords: ['科技', 'AI', '芯片', '手机', '电脑', '苹果', '华为', '小米', '人工智能', '5G', '互联网', '软件', '硬件', '算法', '数据', '云计算', '区块链', '比特币', '无人驾驶', '机器人'] },
-      society: { name: '社会', keywords: ['社会', '事件', '事故', '案件', '警方', '法院', '判决', '维权', '投诉', '曝光', '调查', '通报', '回应', '道歉', '争议', '热搜', '网友', '舆论'] },
-      region: { name: '地区', keywords: ['北京', '上海', '广州', '深圳', '杭州', '成都', '武汉', '南京', '重庆', '天津', '西安', '苏州', '长沙', '郑州', '东莞', '青岛', '沈阳', '宁波', '昆明'] }
+      entertainment: { name: '娱乐', keywords: ['明星','演员','导演','电影','电视剧','综艺','娱乐','八卦','演唱会','偶像','粉丝','热搜','恋情','离婚','结婚','出轨','代言','票房','收视','颁奖','选秀','网红','直播','抖音','快手','金鹰','金鸡','百花','奥斯卡','歌手','演员'] },
+      military: { name: '军事', keywords: ['军事','军队','武器','战争','国防','导弹','战斗机','航母','坦克','军演','阅兵','部队','军官','士兵','核武','卫星','火箭军','海军','空军','陆军','歼','舰','军机'] },
+      sports: { name: '体育', keywords: ['体育','足球','篮球','奥运','比赛','冠军','金牌','世界杯','NBA','CBA','中超','联赛','球队','球员','教练','裁判','进球','得分','马拉松','游泳','乒乓球','亚运','世乒'] },
+      tech: { name: '科技', keywords: ['科技','AI','芯片','手机','电脑','苹果','华为','小米','人工智能','5G','互联网','软件','硬件','算法','数据','云计算','区块链','比特币','无人驾驶','机器人','GPT','大模型','OpenAI','iPhone','安卓','芯片'] },
+      society: { name: '社会', keywords: ['社会','事件','事故','案件','警方','法院','判决','维权','投诉','曝光','调查','通报','回应','道歉','争议','网友','舆论','诈骗','盗窃','杀人','死亡','去世'] },
+      region: { name: '地区', keywords: ['北京','上海','广州','深圳','杭州','成都','武汉','南京','重庆','天津','西安','苏州','长沙','郑州','东莞','青岛','沈阳','宁波','昆明'] },
+      finance: { name: '财经', keywords: ['股市','A股','基金','投资','理财','房价','楼市','经济','GDP','央行','降息','加息','汇率','通胀','消费','出口','进口','贸易','关税','企业','上市','融资','IPO'] },
+      edu: { name: '教育', keywords: ['高考','考研','大学','教育','学校','学生','老师','教师','考试','录取','志愿','分数','毕业','论文','留学','培训','幼儿园','小学','中学'] }
     };
 
     function categorize(title) {
@@ -219,16 +282,47 @@
       return 'other';
     }
 
+    function toggleTheme() {
+      const body = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      if (body.getAttribute('data-theme') === 'light') {
+        body.removeAttribute('data-theme');
+        btn.textContent = 'Light';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.setAttribute('data-theme', 'light');
+        btn.textContent = 'Dark';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('themeToggle').textContent = 'Dark';
+    }
+
+    function onSearch(query) {
+      searchQuery = query.trim().toLowerCase();
+      renderContent();
+    }
+
     async function loadTrending() {
       try {
         const res = await fetch('data/trending.json?t=' + Date.now());
         allData = await res.json();
         renderTabs();
+        renderStats();
         renderContent();
       } catch (err) {
         document.getElementById('content').innerHTML =
           '<div class="source-section"><div class="source-header"><span class="source-error">加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。</span></div></div>';
       }
+    }
+
+    function renderStats() {
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const bar = document.getElementById('statsBar');
+      bar.innerHTML = `<span>共 ${allData.length} 个平台</span><span>${total} 条热点</span>`;
     }
 
     function renderTabs() {
@@ -259,8 +353,17 @@
     }
 
     function filterItems(items) {
-      if (activeCategory === 'all') return items;
-      return items.filter(item => categorize(item.title) === activeCategory);
+      let filtered = items;
+      if (activeCategory !== 'all') {
+        filtered = filtered.filter(item => categorize(item.title) === activeCategory);
+      }
+      if (searchQuery) {
+        filtered = filtered.filter(item =>
+          item.title.toLowerCase().includes(searchQuery) ||
+          (item.description && item.description.toLowerCase().includes(searchQuery))
+        );
+      }
+      return filtered;
     }
 
     function renderContent() {
@@ -270,9 +373,11 @@
         : allData.filter(s => s.key === activeSource);
 
       let html = '';
+      let totalShown = 0;
       for (const source of sources) {
         const items = filterItems(source.items);
-        if (items.length === 0 && activeCategory !== 'all') continue;
+        if (items.length === 0 && (activeCategory !== 'all' || searchQuery)) continue;
+        totalShown += items.length;
         html += `<div class="source-section">
           <div class="source-header">
             <div class="source-icon" style="background:${source.color}">${source.icon}</div>
@@ -282,7 +387,7 @@
           </div>`;
         if (items.length > 0) {
           html += '<ul class="item-list">';
-          const maxItems = Math.min(items.length, 30);
+          const maxItems = Math.min(items.length, 50);
           for (let i = 0; i < maxItems; i++) {
             const item = items[i];
             const url = item.url || '#';
@@ -290,23 +395,34 @@
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
-                ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
+                ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
             </li>`;
           }
           html += '</ul>';
+        } else {
+          html += '<div class="empty-state">暂无匹配内容</div>';
         }
         html += '</div>';
       }
-      container.innerHTML = html || '<div class="source-section"><div class="source-header"><span class="source-error">该分类暂无数据</span></div></div>';
+      if (!html) {
+        html = '<div class="source-section"><div class="empty-state">该分类暂无数据</div></div>';
+      }
+      container.innerHTML = html;
 
       const latestFetch = allData.find(s => s.fetchedAt);
       if (latestFetch) {
         document.getElementById('refreshTime').textContent =
           `数据更新于 ${new Date(latestFetch.fetchedAt).toLocaleString('zh-CN')}`;
       }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
     }
 
     function formatHot(num) {
@@ -316,6 +432,7 @@
     }
 
     loadTrending();
+    setInterval(() => loadTrending(), 10 * 60 * 1000);
   </script>
 </body>
 </html>
