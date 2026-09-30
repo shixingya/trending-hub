@@ -40,6 +40,12 @@ async function main() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
   const outputFile = path.join(dataDir, 'trending.json');
+  const prevFile = path.join(dataDir, 'trending-prev.json');
+
+  if (fs.existsSync(outputFile)) {
+    fs.copyFileSync(outputFile, prevFile);
+  }
+
   fs.writeFileSync(outputFile, JSON.stringify(results));
 
   // Generate RSS feed

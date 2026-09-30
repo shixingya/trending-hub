@@ -203,6 +203,11 @@
       padding: 0.1rem 0.4rem; border-radius: 8px; margin-left: 0.4rem;
       display: inline-block; vertical-align: middle;
     }
+    .item-new-badge {
+      font-size: 0.6rem; color: #fff; background: var(--accent-red);
+      padding: 0.05rem 0.35rem; border-radius: 6px; margin-left: 0.3rem;
+      display: inline-block; vertical-align: middle; font-weight: 600;
+    }
     .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
     .skeleton { padding: 0.6rem 1.25rem; }
     .skeleton-line {
@@ -292,6 +297,7 @@
 
   <script>
     let allData = [];
+    let prevData = [];
     let activeSource = 'all';
     let activeCategory = 'all';
     let searchQuery = '';
@@ -344,6 +350,11 @@
       try {
         const res = await fetch('data/trending.json?t=' + Date.now());
         allData = await res.json();
+        prevTitleSet = null;
+        try {
+          const prevRes = await fetch('data/trending-prev.json?t=' + Date.now());
+          prevData = await prevRes.json();
+        } catch { prevData = []; }
         renderTabs();
         renderStats();
         renderContent();
@@ -355,8 +366,19 @@
 
     function renderStats() {
       const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      let newCount = 0;
+      if (prevData.length > 0) {
+        const ps = buildPrevTitleSet();
+        for (const source of allData) {
+          for (const item of source.items) {
+            if (!ps.has(item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase())) newCount++;
+          }
+        }
+      }
       const bar = document.getElementById('statsBar');
-      bar.innerHTML = `<span>共 ${allData.length} 个平台</span><span>${total} 条热点</span>`;
+      let html = `<span>共 ${allData.length} 个平台</span><span>${total} 条热点</span>`;
+      if (newCount > 0) html += `<span style="color:var(--accent-red)">${newCount} 条新上榜</span>`;
+      bar.innerHTML = html;
     }
 
     function renderTabs() {
@@ -506,7 +528,7 @@
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
                 ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
@@ -540,6 +562,23 @@
       if (num >= 10000) return (num / 10000).toFixed(1) + '万';
       if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
       return String(num);
+    }
+
+    function buildPrevTitleSet() {
+      const set = new Set();
+      for (const source of prevData) {
+        for (const item of source.items) {
+          set.add(item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase());
+        }
+      }
+      return set;
+    }
+
+    let prevTitleSet = null;
+    function isNew(title) {
+      if (!prevTitleSet && prevData.length > 0) prevTitleSet = buildPrevTitleSet();
+      if (!prevTitleSet) return false;
+      return !prevTitleSet.has(title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase());
     }
 
     function relativeTime(dateStr) {
