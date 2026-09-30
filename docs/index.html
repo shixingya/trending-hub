@@ -161,7 +161,16 @@
       align-items: center;
       gap: 0.6rem;
       border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
     }
+    .source-header .collapse-icon {
+      margin-left: auto; font-size: 0.7rem; color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .source-section.collapsed .source-header .collapse-icon { transform: rotate(-90deg); }
+    .source-section.collapsed .item-list,
+    .source-section.collapsed .empty-state { display: none; }
     .source-icon {
       width: 28px; height: 28px; border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
@@ -339,6 +348,9 @@
     if (localStorage.getItem('theme') === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       document.getElementById('themeToggle').textContent = 'Dark';
+    } else if (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('themeToggle').textContent = 'Dark';
     }
 
     function onSearch(query) {
@@ -512,11 +524,12 @@
         if (items.length === 0 && (activeCategory !== 'all' || searchQuery)) continue;
         totalShown += items.length;
         html += `<div class="source-section">
-          <div class="source-header">
+          <div class="source-header" onclick="this.parentElement.classList.toggle('collapsed')">
             <div class="source-icon" style="background:${source.color}">${source.icon}</div>
             <span class="source-name">${source.source}</span>
             <span class="source-count">${items.length} 条</span>
             ${source.error ? `<span class="source-error">${source.error}</span>` : ''}
+            <span class="collapse-icon">▼</span>
           </div>`;
         if (items.length > 0) {
           html += '<ul class="item-list">';
