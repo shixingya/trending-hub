@@ -1,6 +1,20 @@
 # Trending Hub
 
-全网热门话题聚合器，一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点。
+<div align="center">
+
+**全网热门话题聚合器**
+
+[![GitHub stars](https://img.shields.io/github/stars/shixingya/trending-hub?style=social)](https://github.com/shixingya/trending-hub/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/shixingya/trending-hub?style=social)](https://github.com/shixingya/trending-hub/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/issues)
+[![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
+[![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
+
+一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点
+
+[在线体验](https://shixingya.github.io/trending-hub/) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
+
+</div>
 
 ## 特性
 
@@ -15,10 +29,6 @@
 - RESTful API，方便二次开发
 - GitHub Actions 每 2 小时自动更新，纯静态部署零成本
 - 仅抓取标题和链接，不存储原文内容
-
-## 在线体验
-
-https://shixingya.github.io/trending-hub/
 
 ## 快速开始
 
