@@ -1,5 +1,6 @@
 export { baidu } from './baidu.js';
 export { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
+export { baiduTieba } from './baidu-tieba.js';
 export { bilibili } from './bilibili.js';
 export { bilibiliRank } from './bilibili-rank.js';
 export { bilibiliHot } from './bilibili-hot.js';
@@ -17,6 +18,7 @@ export { neteaseMusic } from './netease-music.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
+import { baiduTieba } from './baidu-tieba.js';
 import { bilibili } from './bilibili.js';
 import { bilibiliRank } from './bilibili-rank.js';
 import { bilibiliHot } from './bilibili-hot.js';
@@ -37,6 +39,7 @@ export const allSources: TrendingSource[] = [
   zhihu,
   zhihuDaily,
   baidu,
+  baiduTieba,
   weibo,
   bilibili,
   bilibiliRank,
