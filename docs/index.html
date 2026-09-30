@@ -1290,6 +1290,53 @@
       updateUILanguage();
     }
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      const minSwipe = 100;
+
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipe) {
+        if (diffX > 0) {
+          navigatePlatform('prev');
+        } else {
+          navigatePlatform('next');
+        }
+      } else if (diffY > minSwipe && Math.abs(diffY) > Math.abs(diffX)) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function navigatePlatform(direction) {
+      const platformKeys = ['all', ...allData.map(s => s.key)];
+      const currentIndex = platformKeys.indexOf(activeSource);
+      let newIndex;
+
+      if (direction === 'prev') {
+        newIndex = currentIndex > 0 ? currentIndex - 1 : platformKeys.length - 1;
+      } else {
+        newIndex = currentIndex < platformKeys.length - 1 ? currentIndex + 1 : 0;
+      }
+
+      switchSource(platformKeys[newIndex]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     document.addEventListener('keydown', (e) => {
       if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
         e.preventDefault();
