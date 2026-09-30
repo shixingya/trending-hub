@@ -1,17 +1,19 @@
 # Trending Hub
 
-全网热门话题聚合器，一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家等平台热点。
+全网热门话题聚合器，一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点。
 
 ## 特性
 
-- 聚合 7 大平台热榜：知乎、百度、B站、抖音、头条、澎湃、IT之家
-- 暗色/亮色主题切换
+- 聚合 11 大平台热榜：知乎、百度、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派
+- 暗色/亮色主题切换，自动跟随系统
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
-- 跨平台对比，同一话题多平台热度一目了然
+- 全网热搜榜中榜：跨平台热度 TOP 20
+- 跨平台对比，同一话题多平台同时上榜一目了然
+- RSS 订阅，在阅读器中追踪热点
+- PWA 支持，可添加到手机主屏幕
 - RESTful API，方便二次开发
-- 10 分钟缓存，避免频繁请求
-- GitHub Actions 自动更新，无需服务器
+- GitHub Actions 每 2 小时自动更新，纯静态部署零成本
 - 仅抓取标题和链接，不存储原文内容
 
 ## 在线体验
@@ -48,37 +50,42 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `baidu` / `bilibili` / `douyin` / `toutiao` / `thepaper` / `ithome`
+source 可选值：`zhihu` / `baidu` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai`
 
 ### CLI 抓取
 ```bash
 npm run fetch
 ```
 
-数据保存到 `docs/data/trending.json`
+数据保存到 `docs/data/trending.json`，RSS 保存到 `docs/data/feed.xml`
 
 ## 项目结构
 
 ```
 src/
-├── index.ts          # 入口 & 抓取逻辑
-├── fetch-docs.ts     # GitHub Actions 入口
-├── server.ts         # Express Web 服务器
-├── types.ts          # 类型定义
-└── sources/          # 各平台数据源
-    ├── zhihu.ts      # 知乎热榜
-    ├── baidu.ts      # 百度热搜
-    ├── bilibili.ts   # B站热门
-    ├── douyin.ts     # 抖音热点
-    ├── toutiao.ts    # 头条热榜
-    ├── thepaper.ts   # 澎湃新闻
-    └── ithome.ts     # IT之家
+├── index.ts              # 入口 & 抓取逻辑
+├── fetch-docs.ts         # GitHub Actions 入口（含 RSS 生成）
+├── server.ts             # Express Web 服务器
+├── types.ts              # 类型定义
+└── sources/              # 各平台数据源
+    ├── zhihu.ts            # 知乎热榜
+    ├── baidu.ts            # 百度热搜
+    ├── bilibili.ts         # B站热门
+    ├── bilibili-rank.ts    # B站排行榜
+    ├── bilibili-hot.ts     # B站热搜
+    ├── bilibili-popular.ts # B站综合热门
+    ├── douyin.ts           # 抖音热点
+    ├── toutiao.ts          # 头条热榜
+    ├── thepaper.ts         # 澎湃新闻
+    ├── ithome.ts           # IT之家
+    └── sspai.ts            # 少数派
 docs/
-├── index.html        # GitHub Pages 前端
+├── index.html          # GitHub Pages 前端
+├── manifest.json       # PWA 配置
+├── sitemap.xml         # SEO 站点地图
 └── data/
-    └── trending.json # 自动更新的数据文件
-public/
-└── index.html        # 本地开发前端
+    ├── trending.json   # 自动更新的数据文件
+    └── feed.xml        # RSS 订阅
 ```
 
 ## 添加新数据源
@@ -100,7 +107,7 @@ export const mySource: TrendingSource = {
 };
 ```
 
-然后在 `src/sources/index.ts` 中注册即可。
+然后在 `src/sources/index.ts` 中注册即可。详见 [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 部署
 
@@ -122,8 +129,9 @@ npm run dev
 
 - TypeScript + Node.js
 - Express（本地开发服务器）
-- GitHub Actions（定时数据抓取）
-- 纯 HTML/CSS/JS 前端（零依赖）
+- GitHub Actions（定时数据抓取 + RSS 生成）
+- 纯 HTML/CSS/JS 前端（零依赖，零构建）
+- PWA + Service Worker
 
 ## 免责声明
 
