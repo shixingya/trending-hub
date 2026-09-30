@@ -303,6 +303,7 @@
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
+      <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
@@ -816,6 +817,19 @@
             content += '\n';
           });
           content += '\n';
+        }
+      } else if (format === 'csv') {
+        filename = `trending-${date}.csv`;
+        mimeType = 'text/csv';
+        content = '\uFEFF平台,排名,标题,链接,热度\n';
+        for (const source of allData) {
+          if (source.items.length === 0) continue;
+          source.items.slice(0, 20).forEach((item, i) => {
+            const title = `"${(item.title || '').replace(/"/g, '""')}"`;
+            const url = `"${(item.url || '').replace(/"/g, '""')}"`;
+            const hot = item.hot || '';
+            content += `${source.source},${i + 1},${title},${url},${hot}\n`;
+          });
         }
       }
 
