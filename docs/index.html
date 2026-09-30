@@ -411,6 +411,7 @@
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" onclick="showStats()">统计</button>
+      <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
   </header>
@@ -431,9 +432,9 @@
   <div class="refresh-time" id="refreshTime"></div>
 
   <footer>
-    <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem">每2小时自动更新 · 24大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
-    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
+    <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
+    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 24大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -517,19 +518,237 @@
     let searchQuery = '';
     let sortedSources = new Set();
     let expandedSources = new Set();
+    let currentLang = localStorage.getItem('lang') || 'zh';
+
+    const translations = {
+      zh: {
+        title: 'Trending Hub - 全网热点聚合',
+        subtitle: '全网热点聚合 - 24大平台实时热点',
+        searchPlaceholder: '搜索热点话题... (按 / 聚焦)',
+        exportMD: '导出MD',
+        exportCSV: '导出CSV',
+        morningBrief: '早报',
+        generateImage: '生成图片',
+        random: '随机',
+        share: '分享',
+        focus: '专注',
+        stats: '统计',
+        light: 'Light',
+        dark: 'Dark',
+        en: 'EN',
+        zh: '中文',
+        categories: '分类',
+        platforms: '平台',
+        all: '全部',
+        bookmarks: '收藏',
+        entertainment: '娱乐',
+        military: '军事',
+        sports: '体育',
+        tech: '科技',
+        society: '社会',
+        region: '地区',
+        finance: '财经',
+        edu: '教育',
+        gaming: '游戏',
+        auto: '汽车',
+        health: '健康',
+        dailyPicks: '每日精选',
+        dailyPicksDesc: '今日必看 TOP 10',
+        topHot: '全网热搜榜中榜',
+        topHotDesc: '热度 TOP 20',
+        crossPlatform: '跨平台热搜',
+        crossPlatformDesc: '个话题在多个平台同时上榜',
+        loadMore: '加载更多',
+        items: '条',
+        platformsCount: '个平台',
+        hotTopics: '条热点',
+        newItems: '条新上榜',
+        sortByHot: '按热度排序',
+        noBookmarks: '暂无收藏，点击话题旁的 ☆ 添加收藏',
+        myBookmarks: '我的收藏',
+        noMatch: '暂无匹配内容',
+        noData: '该分类暂无数据',
+        updated: '数据更新于',
+        footer: 'Trending Hub - 仅供学习研究，数据版权归原作者原平台所有',
+        footerUpdate: '每2小时自动更新',
+        footerPlatforms: '24大平台',
+        starOnGitHub: 'Star on GitHub',
+        suggestSource: '建议新数据源',
+        shortcuts: '快捷键',
+        searchKey: '搜索',
+        themeKey: '主题',
+        allKey: '全部',
+        closeKey: '关闭',
+        justNow: '刚刚',
+        minutesAgo: '分钟前',
+        hoursAgo: '小时前',
+        daysAgo: '天前',
+        platformsUnit: '平台',
+        morningBriefTitle: '早安·今日热点速览',
+        mustSee: '全网必看',
+        platformTop3: '各平台 TOP 3',
+        copyBrief: '复制早报文本',
+        copied: '✓ 已复制',
+        topicDetailSingle: '仅在单个平台发现',
+        topicDetailMulti: '在 {count} 个平台同时上榜',
+        view: '查看',
+        statsTitle: '数据统计',
+        statsPlatforms: '数据平台',
+        statsTotal: '热点总数',
+        statsAvg: '平均每平台',
+        statsMax: '(最多)',
+        statsPlatformChart: '各平台热点数量',
+        statsCategoryChart: '话题分类分布',
+        shareImageDownload: '下载图片',
+        shareImageClose: '关闭',
+        shareImageScan: '扫码查看更多热点 →',
+        focusModeHint: '专注模式 (ESC 退出)',
+        loadFailed: '加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。'
+      },
+      en: {
+        title: 'Trending Hub - Global Hot Topics',
+        subtitle: 'Trending Hub - 24 Platforms Real-time Hot Topics',
+        searchPlaceholder: 'Search topics... (Press / to focus)',
+        exportMD: 'Export MD',
+        exportCSV: 'Export CSV',
+        morningBrief: 'Brief',
+        generateImage: 'Image',
+        random: 'Random',
+        share: 'Share',
+        focus: 'Focus',
+        stats: 'Stats',
+        light: 'Light',
+        dark: 'Dark',
+        en: 'EN',
+        zh: '中文',
+        categories: 'Categories',
+        platforms: 'Platforms',
+        all: 'All',
+        bookmarks: 'Bookmarks',
+        entertainment: 'Entertainment',
+        military: 'Military',
+        sports: 'Sports',
+        tech: 'Tech',
+        society: 'Society',
+        region: 'Region',
+        finance: 'Finance',
+        edu: 'Education',
+        gaming: 'Gaming',
+        auto: 'Auto',
+        health: 'Health',
+        dailyPicks: 'Daily Picks',
+        dailyPicksDesc: 'TOP 10 Must See Today',
+        topHot: 'Top Hot Topics',
+        topHotDesc: 'TOP 20 by Heat',
+        crossPlatform: 'Cross-platform',
+        crossPlatformDesc: 'topics trending on multiple platforms',
+        loadMore: 'Load More',
+        items: 'items',
+        platformsCount: 'platforms',
+        hotTopics: 'hot topics',
+        newItems: 'new items',
+        sortByHot: 'Sort by heat',
+        noBookmarks: 'No bookmarks yet. Click ☆ next to topics to add.',
+        myBookmarks: 'My Bookmarks',
+        noMatch: 'No matching content',
+        noData: 'No data in this category',
+        updated: 'Updated',
+        footer: 'Trending Hub - For learning only. All rights belong to original owners.',
+        footerUpdate: 'Auto-update every 2 hours',
+        footerPlatforms: '24 platforms',
+        starOnGitHub: 'Star on GitHub',
+        suggestSource: 'Suggest new source',
+        shortcuts: 'Shortcuts',
+        searchKey: 'Search',
+        themeKey: 'Theme',
+        allKey: 'All',
+        closeKey: 'Close',
+        justNow: 'just now',
+        minutesAgo: 'min ago',
+        hoursAgo: 'hours ago',
+        daysAgo: 'days ago',
+        platformsUnit: 'platforms',
+        morningBriefTitle: 'Morning Brief · Today\'s Hot Topics',
+        mustSee: 'Must See',
+        platformTop3: 'Platform TOP 3',
+        copyBrief: 'Copy Brief Text',
+        copied: '✓ Copied',
+        topicDetailSingle: 'Found on single platform',
+        topicDetailMulti: 'Trending on {count} platforms',
+        view: 'View',
+        statsTitle: 'Statistics',
+        statsPlatforms: 'Platforms',
+        statsTotal: 'Total Topics',
+        statsAvg: 'Avg per Platform',
+        statsMax: '(Most)',
+        statsPlatformChart: 'Topics per Platform',
+        statsCategoryChart: 'Category Distribution',
+        shareImageDownload: 'Download',
+        shareImageClose: 'Close',
+        shareImageScan: 'Scan for more topics →',
+        focusModeHint: 'Focus Mode (ESC to exit)',
+        loadFailed: 'Load failed. Data may not be generated yet. GitHub Actions updates every 2 hours.'
+      }
+    };
+
+    function t(key, params = {}) {
+      let text = translations[currentLang][key] || translations['zh'][key] || key;
+      Object.keys(params).forEach(k => {
+        text = text.replace(`{${k}}`, params[k]);
+      });
+      return text;
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      localStorage.setItem('lang', currentLang);
+      updateUILanguage();
+    }
+
+    function updateUILanguage() {
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+      document.title = t('title');
+      document.querySelector('meta[name="description"]').content = t('subtitle');
+      
+      document.querySelector('header h1').textContent = 'Trending Hub';
+      document.querySelector('header p').textContent = t('subtitle');
+      
+      document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+      
+      const buttons = document.querySelectorAll('.header-links .share-btn, .header-links .theme-toggle');
+      if (buttons[0]) buttons[0].textContent = t('exportMD');
+      if (buttons[1]) buttons[1].textContent = t('exportCSV');
+      if (buttons[2]) buttons[2].textContent = t('morningBrief');
+      if (buttons[3]) buttons[3].textContent = t('generateImage');
+      if (buttons[4]) buttons[4].textContent = t('random');
+      if (buttons[5]) buttons[5].textContent = t('share');
+      if (buttons[6]) buttons[6].textContent = focusMode ? t('focus') : t('focus');
+      if (buttons[7]) buttons[7].textContent = t('stats');
+      if (buttons[8]) buttons[8].textContent = currentLang === 'zh' ? 'EN' : '中文';
+      
+      const themeBtn = document.getElementById('themeToggle');
+      if (themeBtn) {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        themeBtn.textContent = isLight ? t('dark') : t('light');
+      }
+      
+      renderTabs();
+      renderContent();
+      updateRefreshTime();
+    }
 
     const categories = {
-      entertainment: { name: '娱乐', keywords: ['明星','演员','导演','电影','电视剧','综艺','娱乐','八卦','演唱会','偶像','粉丝','热搜','恋情','离婚','结婚','出轨','代言','票房','收视','颁奖','选秀','网红','直播','抖音','快手','金鹰','金鸡','百花','奥斯卡','歌手','演员'] },
-      military: { name: '军事', keywords: ['军事','军队','武器','战争','国防','导弹','战斗机','航母','坦克','军演','阅兵','部队','军官','士兵','核武','卫星','火箭军','海军','空军','陆军','歼','舰','军机'] },
-      sports: { name: '体育', keywords: ['体育','足球','篮球','奥运','比赛','冠军','金牌','世界杯','NBA','CBA','中超','联赛','球队','球员','教练','裁判','进球','得分','马拉松','游泳','乒乓球','亚运','世乒'] },
-      tech: { name: '科技', keywords: ['科技','AI','芯片','手机','电脑','苹果','华为','小米','人工智能','5G','互联网','软件','硬件','算法','数据','云计算','区块链','比特币','无人驾驶','机器人','GPT','大模型','OpenAI','iPhone','安卓','芯片'] },
-      society: { name: '社会', keywords: ['社会','事件','事故','案件','警方','法院','判决','维权','投诉','曝光','调查','通报','回应','道歉','争议','网友','舆论','诈骗','盗窃','杀人','死亡','去世'] },
-      region: { name: '地区', keywords: ['北京','上海','广州','深圳','杭州','成都','武汉','南京','重庆','天津','西安','苏州','长沙','郑州','东莞','青岛','沈阳','宁波','昆明'] },
-      finance: { name: '财经', keywords: ['股市','A股','基金','投资','理财','房价','楼市','经济','GDP','央行','降息','加息','汇率','通胀','消费','出口','进口','贸易','关税','企业','上市','融资','IPO'] },
-      edu: { name: '教育', keywords: ['高考','考研','大学','教育','学校','学生','老师','教师','考试','录取','志愿','分数','毕业','论文','留学','培训','幼儿园','小学','中学'] },
-      gaming: { name: '游戏', keywords: ['游戏','原神','王者荣耀','英雄联盟','LOL','吃鸡','绝地求生','Steam','主机','PS5','Xbox','Switch','任天堂','暴雪','网易游戏','手游','网游','电竞','赛事','战队'] },
-      auto: { name: '汽车', keywords: ['汽车','车','新能源','电动车','特斯拉','比亚迪','蔚来','小鹏','理想','宝马','奔驰','奥迪','丰田','大众','驾照','4S店','油耗','续航','充电'] },
-      health: { name: '健康', keywords: ['健康','医疗','医院','医生','疫苗','病毒','疫情','养生','减肥','健身','睡眠','心理','抑郁','癌症','糖尿病','高血压','中药','西药','保健'] }
+      entertainment: { nameKey: 'entertainment', keywords: ['明星','演员','导演','电影','电视剧','综艺','娱乐','八卦','演唱会','偶像','粉丝','热搜','恋情','离婚','结婚','出轨','代言','票房','收视','颁奖','选秀','网红','直播','抖音','快手','金鹰','金鸡','百花','奥斯卡','歌手','演员'] },
+      military: { nameKey: 'military', keywords: ['军事','军队','武器','战争','国防','导弹','战斗机','航母','坦克','军演','阅兵','部队','军官','士兵','核武','卫星','火箭军','海军','空军','陆军','歼','舰','军机'] },
+      sports: { nameKey: 'sports', keywords: ['体育','足球','篮球','奥运','比赛','冠军','金牌','世界杯','NBA','CBA','中超','联赛','球队','球员','教练','裁判','进球','得分','马拉松','游泳','乒乓球','亚运','世乒'] },
+      tech: { nameKey: 'tech', keywords: ['科技','AI','芯片','手机','电脑','苹果','华为','小米','人工智能','5G','互联网','软件','硬件','算法','数据','云计算','区块链','比特币','无人驾驶','机器人','GPT','大模型','OpenAI','iPhone','安卓','芯片'] },
+      society: { nameKey: 'society', keywords: ['社会','事件','事故','案件','警方','法院','判决','维权','投诉','曝光','调查','通报','回应','道歉','争议','网友','舆论','诈骗','盗窃','杀人','死亡','去世'] },
+      region: { nameKey: 'region', keywords: ['北京','上海','广州','深圳','杭州','成都','武汉','南京','重庆','天津','西安','苏州','长沙','郑州','东莞','青岛','沈阳','宁波','昆明'] },
+      finance: { nameKey: 'finance', keywords: ['股市','A股','基金','投资','理财','房价','楼市','经济','GDP','央行','降息','加息','汇率','通胀','消费','出口','进口','贸易','关税','企业','上市','融资','IPO'] },
+      edu: { nameKey: 'edu', keywords: ['高考','考研','大学','教育','学校','学生','老师','教师','考试','录取','志愿','分数','毕业','论文','留学','培训','幼儿园','小学','中学'] },
+      gaming: { nameKey: 'gaming', keywords: ['游戏','原神','王者荣耀','英雄联盟','LOL','吃鸡','绝地求生','Steam','主机','PS5','Xbox','Switch','任天堂','暴雪','网易游戏','手游','网游','电竞','赛事','战队'] },
+      auto: { nameKey: 'auto', keywords: ['汽车','车','新能源','电动车','特斯拉','比亚迪','蔚来','小鹏','理想','宝马','奔驰','奥迪','丰田','大众','驾照','4S店','油耗','续航','充电'] },
+      health: { nameKey: 'health', keywords: ['健康','医疗','医院','医生','疫苗','病毒','疫情','养生','减肥','健身','睡眠','心理','抑郁','癌症','糖尿病','高血压','中药','西药','保健'] }
     };
 
     function categorize(title) {
@@ -598,22 +817,22 @@
         }
       }
       const bar = document.getElementById('statsBar');
-      let html = `<span>共 ${allData.length} 个平台</span><span>${total} 条热点</span>`;
-      if (newCount > 0) html += `<span style="color:var(--accent-red)">${newCount} 条新上榜</span>`;
+      let html = `<span>${t('platformsCount')} ${allData.length}</span><span>${total} ${t('hotTopics')}</span>`;
+      if (newCount > 0) html += `<span style="color:var(--accent-red)">${newCount} ${t('newItems')}</span>`;
       bar.innerHTML = html;
     }
 
     function renderTabs() {
       const tabs = document.getElementById('tabs');
       const bookmarkCount = getBookmarks().length;
-      let html = '<div class="tab-group"><span class="tab-group-label">分类</span>';
-      html += `<div class="tab" data-type="source" data-key="bookmarks">☆ 收藏${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
-      html += '<div class="tab active" data-type="category" data-key="all">全部</div>';
+      let html = `<div class="tab-group"><span class="tab-group-label">${t('categories')}</span>`;
+      html += `<div class="tab" data-type="source" data-key="bookmarks">☆ ${t('bookmarks')}${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
+      html += `<div class="tab active" data-type="category" data-key="all">${t('all')}</div>`;
       for (const [key, cat] of Object.entries(categories)) {
-        html += `<div class="tab" data-type="category" data-key="${key}">${cat.name}</div>`;
+        html += `<div class="tab" data-type="category" data-key="${key}">${t(cat.nameKey)}</div>`;
       }
-      html += '</div><div class="tab-divider"></div><div class="tab-group"><span class="tab-group-label">平台</span>';
-      html += '<div class="tab active" data-type="source" data-key="all">全部</div>';
+      html += `</div><div class="tab-divider"></div><div class="tab-group"><span class="tab-group-label">${t('platforms')}</span>`;
+      html += `<div class="tab active" data-type="source" data-key="all">${t('all')}</div>`;
       for (const source of allData) {
         html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${source.items.length}</span></div>`;
       }
@@ -723,18 +942,18 @@
         const bookmarks = getBookmarks();
         let html = '';
         if (bookmarks.length === 0) {
-          html = '<div class="source-section"><div class="empty-state">暂无收藏，点击话题旁的 ☆ 添加收藏</div></div>';
+          html = `<div class="source-section"><div class="empty-state">${t('noBookmarks')}</div></div>`;
         } else {
           html += '<div class="source-section">';
           html += '<div class="source-header"><div class="source-icon" style="background:var(--accent-yellow)">★</div>';
-          html += `<span class="source-name">我的收藏</span><span class="source-count">${bookmarks.length} 条</span></div>`;
+          html += `<span class="source-name">${t('myBookmarks')}</span><span class="source-count">${bookmarks.length} ${t('items')}</span></div>`;
           html += '<ul class="item-list">';
           bookmarks.forEach((item, i) => {
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
                 <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></div>
-                <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.2rem">${new Date(item.time).toLocaleString('zh-CN')}</div>
+                <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.2rem">${new Date(item.time).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')}</div>
               </div>
               <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(item.title).replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}');renderContent()" title="取消收藏" style="color:var(--accent-yellow)">★</button>
             </li>`;
@@ -755,8 +974,8 @@
         if (dailyPicks.length > 0) {
           html += '<div class="source-section" style="border: 2px solid var(--accent);background:linear-gradient(135deg, rgba(72,219,251,0.05), rgba(255,107,107,0.05));">';
           html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#48dbfb,#ff6b6b)">★</div>';
-          html += '<span class="source-name">每日精选</span>';
-          html += '<span class="source-count">今日必看 TOP 10</span></div>';
+          html += `<span class="source-name">${t('dailyPicks')}</span>`;
+          html += `<span class="source-count">${t('dailyPicksDesc')}</span></div>`;
           html += '<ul class="item-list">';
           dailyPicks.forEach((item, i) => {
             const tags = item.sources.slice(0, 3).map(s => {
@@ -771,7 +990,7 @@
                 <div style="margin-top:0.3rem">${tags}${moreTag}</div>
                 ${item.descriptions[0] ? `<div class="item-desc">${escapeHtml(item.descriptions[0])}</div>` : ''}
               </div>
-              <span class="item-hot">${item.sources.length} 平台</span>
+              <span class="item-hot">${item.sources.length} ${t('platformsUnit')}</span>
             </li>`;
           });
           html += '</ul></div>';
@@ -781,8 +1000,8 @@
         if (topHot.length > 0) {
           html += '<div class="source-section" style="border: 1px solid var(--accent-yellow);">';
           html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#feca57,#ff6b6b)">🔥</div>';
-          html += '<span class="source-name">全网热搜榜中榜</span>';
-          html += '<span class="source-count">热度 TOP 20</span></div>';
+          html += `<span class="source-name">${t('topHot')}</span>`;
+          html += `<span class="source-count">${t('topHotDesc')}</span></div>`;
           html += '<ul class="item-list">';
           topHot.forEach((item, i) => {
             html += `<li class="item">
@@ -802,8 +1021,8 @@
         if (crossTopics.length > 0) {
           html += '<div class="source-section" style="border: 1px solid var(--accent-red);">';
           html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#ff6b6b,#feca57)"></div>';
-          html += '<span class="source-name">跨平台热搜</span>';
-          html += `<span class="source-count">${crossTopics.length} 个话题在多个平台同时上榜</span></div>`;
+          html += `<span class="source-name">${t('crossPlatform')}</span>`;
+          html += `<span class="source-count">${crossTopics.length} ${t('crossPlatformDesc')}</span></div>`;
           html += '<ul class="item-list">';
           crossTopics.forEach((topic, i) => {
             const tags = topic.sources.map(s => {
@@ -816,7 +1035,7 @@
               <div class="item-content">
                 <div class="item-title"><a href="${firstUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(topic.title)}</a> ${tags}</div>
               </div>
-              <span class="item-hot">${topic.sources.length} 平台</span>
+              <span class="item-hot">${topic.sources.length} ${t('platformsUnit')}</span>
             </li>`;
           });
           html += '</ul></div>';
@@ -832,9 +1051,9 @@
           <div class="source-header" onclick="this.parentElement.classList.toggle('collapsed')">
             <div class="source-icon" style="background:${source.color}">${source.icon}</div>
             <span class="source-name">${source.source}</span>
-            <span class="source-count">${items.length} 条</span>
+            <span class="source-count">${items.length} ${t('items')}</span>
             ${source.error ? `<span class="source-error">${source.error}</span>` : ''}
-            <button class="sort-toggle" onclick="sortSource('${source.key}');event.stopPropagation()" title="按热度排序">热度</button>
+            <button class="sort-toggle" onclick="sortSource('${source.key}');event.stopPropagation()" title="${t('sortByHot')}">${t('sortByHot')}</button>
             <span class="collapse-icon">▼</span>
           </div>`;
         if (items.length > 0) {
@@ -861,22 +1080,22 @@
           }
           html += '</ul>';
           if (!isExpanded && items.length > 50) {
-            html += `<button class="load-more-btn" onclick="expandSource('${source.key}');event.stopPropagation()">加载更多 (${items.length - 50} 条)</button>`;
+            html += `<button class="load-more-btn" onclick="expandSource('${source.key}');event.stopPropagation()">${t('loadMore')} (${items.length - 50} ${t('items')})</button>`;
           }
         } else {
-          html += '<div class="empty-state">暂无匹配内容</div>';
+          html += `<div class="empty-state">${t('noMatch')}</div>`;
         }
         html += '</div>';
       }
       if (!html) {
-        html = '<div class="source-section"><div class="empty-state">该分类暂无数据</div></div>';
+        html = `<div class="source-section"><div class="empty-state">${t('noData')}</div></div>`;
       }
       container.innerHTML = html;
 
       const latestFetch = allData.find(s => s.fetchedAt);
       if (latestFetch) {
         document.getElementById('refreshTime').textContent =
-          `数据更新于 ${relativeTime(latestFetch.fetchedAt)}`;
+          `${t('updated')} ${relativeTime(latestFetch.fetchedAt)}`;
       }
     }
 
@@ -901,26 +1120,26 @@
       document.getElementById('modalTitle').textContent = title;
       let body = '';
       if (matches.length <= 1) {
-        body = '<div class="modal-section"><div class="modal-section-title">仅在单个平台发现</div>';
+        body = `<div class="modal-section"><div class="modal-section-title">${t('topicDetailSingle')}</div>`;
         if (matches.length === 1) {
           const m = matches[0];
           body += `<div class="modal-platform-item">
             <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
             <div class="modal-platform-name">${m.source}</div>
             ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
-            <a class="modal-platform-link" href="${m.url}" target="_blank">查看</a>
+            <a class="modal-platform-link" href="${m.url}" target="_blank">${t('view')}</a>
           </div>`;
         }
         body += '</div>';
       } else {
-        body = `<div class="modal-section"><div class="modal-section-title">在 ${matches.length} 个平台同时上榜</div>`;
+        body = `<div class="modal-section"><div class="modal-section-title">${t('topicDetailMulti', {count: matches.length})}</div>`;
         matches.sort((a, b) => (b.hot || 0) - (a.hot || 0));
         for (const m of matches) {
           body += `<div class="modal-platform-item">
             <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
             <div class="modal-platform-name">${m.source}${m.description ? ` <span style="color:var(--text-muted);font-size:0.75rem">${escapeHtml(m.description)}</span>` : ''}</div>
             ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
-            <a class="modal-platform-link" href="${m.url}" target="_blank">查看</a>
+            <a class="modal-platform-link" href="${m.url}" target="_blank">${t('view')}</a>
           </div>`;
         }
         body += '</div>';
@@ -936,9 +1155,13 @@
     function showMorningBrief() {
       if (allData.length === 0) return;
       const now = new Date();
-      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
-      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-      const dayStr = `星期${weekdays[now.getDay()]}`;
+      const dateStr = currentLang === 'zh' 
+        ? `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`
+        : `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+      const weekdays = currentLang === 'zh' 
+        ? ['日', '一', '二', '三', '四', '五', '六']
+        : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayStr = currentLang === 'zh' ? `星期${weekdays[now.getDay()]}` : weekdays[now.getDay()];
 
       const picks = getDailyPicks();
       const topBySource = allData.filter(s => s.items.length > 0).map(s => ({
@@ -949,23 +1172,23 @@
       }));
 
       let body = `<div style="text-align:center;margin-bottom:1rem">
-        <div style="font-size:1.2rem;font-weight:600">☀️ 早安·今日热点速览</div>
+        <div style="font-size:1.2rem;font-weight:600">☀️ ${t('morningBriefTitle')}</div>
         <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">${dateStr} ${dayStr}</div>
       </div>`;
 
       if (picks.length > 0) {
-        body += '<div class="modal-section"><div class="modal-section-title">🔥 全网必看</div>';
+        body += `<div class="modal-section"><div class="modal-section-title">🔥 ${t('mustSee')}</div>`;
         picks.slice(0, 5).forEach((item, i) => {
           body += `<div style="padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.9rem">
             <span style="color:var(--accent-red);font-weight:600;margin-right:0.5rem">${i + 1}</span>
             <a href="${item.url}" target="_blank" style="color:var(--text-primary);text-decoration:none">${escapeHtml(item.title)}</a>
-            <span style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">${item.sources.length}平台</span>
+            <span style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">${item.sources.length}${t('platformsUnit')}</span>
           </div>`;
         });
         body += '</div>';
       }
 
-      body += '<div class="modal-section"><div class="modal-section-title">📊 各平台 TOP 3</div>';
+      body += `<div class="modal-section"><div class="modal-section-title">📊 ${t('platformTop3')}</div>`;
       topBySource.forEach(s => {
         body += `<div style="margin-bottom:0.6rem">
           <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.2rem">
@@ -978,10 +1201,10 @@
       body += '</div>';
 
       body += `<div style="text-align:center;margin-top:1rem">
-        <button class="share-btn" onclick="copyMorningBrief()" style="background:var(--accent);color:#fff;padding:0.4rem 1rem;border-radius:8px;border:none;cursor:pointer">📋 复制早报文本</button>
+        <button class="share-btn" onclick="copyMorningBrief()" style="background:var(--accent);color:#fff;padding:0.4rem 1rem;border-radius:8px;border:none;cursor:pointer">📋 ${t('copyBrief')}</button>
       </div>`;
 
-      document.getElementById('modalTitle').textContent = '每日早报';
+      document.getElementById('modalTitle').textContent = t('morningBrief');
       document.getElementById('modalBody').innerHTML = body;
       document.getElementById('topicModal').classList.add('active');
     }
@@ -1044,11 +1267,11 @@
     function relativeTime(dateStr) {
       const diff = Date.now() - new Date(dateStr).getTime();
       const mins = Math.floor(diff / 60000);
-      if (mins < 1) return '刚刚';
-      if (mins < 60) return `${mins} 分钟前`;
+      if (mins < 1) return t('justNow');
+      if (mins < 60) return `${mins} ${t('minutesAgo')}`;
       const hours = Math.floor(mins / 60);
-      if (hours < 24) return `${hours} 小时前`;
-      return `${Math.floor(hours / 24)} 天前`;
+      if (hours < 24) return `${hours} ${t('hoursAgo')}`;
+      return `${Math.floor(hours / 24)} ${t('daysAgo')}`;
     }
 
     function updateRefreshTime() {
@@ -1062,6 +1285,10 @@
     loadTrending();
     setInterval(() => loadTrending(), 10 * 60 * 1000);
     setInterval(() => updateRefreshTime(), 60 * 1000);
+
+    if (currentLang === 'en') {
+      updateUILanguage();
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
@@ -1431,34 +1658,34 @@
         <div class="stats-grid">
           <div class="stats-card">
             <div class="stats-number">${allData.length}</div>
-            <div class="stats-label">数据平台</div>
+            <div class="stats-label">${t('statsPlatforms')}</div>
           </div>
           <div class="stats-card">
             <div class="stats-number">${total}</div>
-            <div class="stats-label">热点总数</div>
+            <div class="stats-label">${t('statsTotal')}</div>
           </div>
           <div class="stats-card">
             <div class="stats-number">${avgPerSource}</div>
-            <div class="stats-label">平均每平台</div>
+            <div class="stats-label">${t('statsAvg')}</div>
           </div>
           <div class="stats-card">
             <div class="stats-number">${maxSource.items.length}</div>
-            <div class="stats-label">${maxSource.source} (最多)</div>
+            <div class="stats-label">${maxSource.source} ${t('statsMax')}</div>
           </div>
         </div>
 
         <div class="stats-card" style="margin-top:1rem">
-          <div class="stats-card-title">📊 各平台热点数量</div>
+          <div class="stats-card-title">📊 ${t('statsPlatformChart')}</div>
           <canvas id="platformChart" class="stats-chart"></canvas>
         </div>
 
         <div class="stats-card" style="margin-top:1rem">
-          <div class="stats-card-title">🏷️ 话题分类分布</div>
+          <div class="stats-card-title">🏷️ ${t('statsCategoryChart')}</div>
           <canvas id="categoryChart" class="stats-chart"></canvas>
         </div>
       `;
 
-      document.getElementById('modalTitle').textContent = '数据统计';
+      document.getElementById('modalTitle').textContent = t('statsTitle');
       document.getElementById('modalBody').innerHTML = body;
       document.getElementById('topicModal').classList.add('active');
 
