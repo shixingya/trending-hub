@@ -396,11 +396,11 @@
         for (const item of source.items) {
           const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
           if (normalized.length < 6) continue;
-          if (!titleMap[normalized]) titleMap[normalized] = { title: item.title, sources: [], urls: {} };
+          if (!titleMap[normalized]) titleMap[normalized] = { title: item.title, sources: [], urls: {}, maxHot: 0 };
           if (!titleMap[normalized].sources.includes(source.source)) {
             titleMap[normalized].sources.push(source.source);
             titleMap[normalized].urls[source.key] = item.url;
-            if (item.hot && !titleMap[normalized].maxHot) titleMap[normalized].maxHot = item.hot;
+            if (item.hot > (titleMap[normalized].maxHot || 0)) titleMap[normalized].maxHot = item.hot;
           }
         }
       }
@@ -408,6 +408,16 @@
         .filter(t => t.sources.length >= 2)
         .sort((a, b) => (b.maxHot || 0) - (a.maxHot || 0))
         .slice(0, 10);
+    }
+
+    function getTopHotTopics() {
+      const all = [];
+      for (const source of allData) {
+        for (const item of source.items) {
+          if (item.hot) all.push({ ...item, sourceName: source.source, sourceIcon: source.icon, sourceColor: source.color, sourceKey: source.key });
+        }
+      }
+      return all.sort((a, b) => (b.hot || 0) - (a.hot || 0)).slice(0, 20);
     }
 
     function renderContent() {
@@ -418,6 +428,27 @@
 
       let html = '';
       if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+        const topHot = getTopHotTopics();
+        if (topHot.length > 0) {
+          html += '<div class="source-section" style="border: 1px solid var(--accent-yellow);">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#feca57,#ff6b6b)">🔥</div>';
+          html += '<span class="source-name">全网热搜榜中榜</span>';
+          html += '<span class="source-count">热度 TOP 20</span></div>';
+          html += '<ul class="item-list">';
+          topHot.forEach((item, i) => {
+            html += `<li class="item">
+              <span class="item-rank">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                <span class="item-source-tag" style="background:${item.sourceColor};color:#fff">${item.sourceIcon}</span></div>
+                ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
+              </div>
+              <span class="item-hot">${formatHot(item.hot)}</span>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+
         const crossTopics = findCrossPlatformTopics();
         if (crossTopics.length > 0) {
           html += '<div class="source-section" style="border: 1px solid var(--accent-red);">';
