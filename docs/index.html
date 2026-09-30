@@ -215,6 +215,16 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .item-hot { font-size: 0.7rem; color: var(--accent-red); white-space: nowrap; flex-shrink: 0; }
+    .item-actions {
+      display: none; gap: 0.3rem; margin-left: 0.5rem;
+    }
+    .item:hover .item-actions { display: flex; }
+    .item-action-btn {
+      background: var(--bg-input); border: none; color: var(--text-muted);
+      padding: 0.15rem 0.4rem; border-radius: 6px; cursor: pointer;
+      font-size: 0.65rem; transition: all 0.15s;
+    }
+    .item-action-btn:hover { background: var(--accent); color: #fff; }
     .item-source-tag {
       font-size: 0.65rem; color: var(--text-muted); background: var(--bg-input);
       padding: 0.1rem 0.4rem; border-radius: 8px; margin-left: 0.4rem;
@@ -556,6 +566,9 @@
                 <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
                 ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
               </div>
+              <div class="item-actions">
+                <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
+              </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
             </li>`;
           }
@@ -674,6 +687,15 @@
       const source = sources[Math.floor(Math.random() * sources.length)];
       const item = source.items[Math.floor(Math.random() * source.items.length)];
       if (item && item.url) window.open(item.url, '_blank');
+    }
+
+    function copyLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = '✓';
+        setTimeout(() => btn.textContent = orig, 1500);
+      });
     }
   </script>
 </body>
