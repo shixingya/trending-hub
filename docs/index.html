@@ -865,13 +865,19 @@
     }
 
     function shareSite() {
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const text = `🔥 全网热点聚合 - ${total} 条热点\n\n` +
+        allData.filter(s => s.items.length > 0).slice(0, 5).map(s =>
+          `${s.source} TOP3:\n${s.items.slice(0, 3).map((item, i) => `  ${i + 1}. ${item.title}`).join('\n')}`
+        ).join('\n\n') +
+        `\n\n查看更多: ${location.href}`;
       if (navigator.share) {
-        navigator.share({ title: 'Trending Hub - 全网热点聚合', text: '发现全网最热话题', url: location.href });
+        navigator.share({ title: 'Trending Hub - 全网热点聚合', text, url: location.href });
       } else {
-        navigator.clipboard.writeText(location.href).then(() => {
-          const btn = document.querySelector('.share-btn');
-          btn.textContent = '已复制!';
-          setTimeout(() => btn.textContent = '分享', 2000);
+        navigator.clipboard.writeText(text).then(() => {
+          const btns = document.querySelectorAll('.share-btn');
+          const btn = btns[btns.length - 1];
+          if (btn) { const orig = btn.textContent; btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = orig, 2000); }
         });
       }
     }
@@ -974,6 +980,14 @@
       const btn = document.querySelector(`[data-source-key="${key}"] .sort-toggle`);
       if (btn) btn.classList.toggle('active', sortedSources.has(key));
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
+      if (e.key === 't' || e.key === 'T') { toggleTheme(); }
+      if (e.key === '0') { switchSource('all'); }
+      if (e.key === 'Escape') { closeModal(); }
+    });
   </script>
 </body>
 </html>
