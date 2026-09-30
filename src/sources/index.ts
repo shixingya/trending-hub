@@ -13,6 +13,7 @@ export { ithome } from './ithome.js';
 export { sspai } from './sspai.js';
 export { weibo } from './weibo.js';
 export { doubanMovie } from './douban-movie.js';
+export { neteaseMusic } from './netease-music.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -29,6 +30,7 @@ import { ithome } from './ithome.js';
 import { sspai } from './sspai.js';
 import { weibo } from './weibo.js';
 import { doubanMovie } from './douban-movie.js';
+import { neteaseMusic } from './netease-music.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -49,5 +51,6 @@ export const allSources: TrendingSource[] = [
   baiduGame,
   baiduCar,
   baiduTravel,
-  doubanMovie
+  doubanMovie,
+  neteaseMusic
 ];
