@@ -229,6 +229,14 @@
     }
     .scroll-top:hover { transform: scale(1.1); }
     .scroll-top.visible { display: flex; }
+    .share-btn {
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      padding: 0.3rem 0.7rem; border-radius: 12px; cursor: pointer;
+      font-size: 0.8rem; transition: background 0.2s;
+    }
+    .share-btn:hover { background: rgba(255,255,255,0.25); }
+    [data-theme="light"] .share-btn { background: rgba(0,0,0,0.1); color: #333; }
+    [data-theme="light"] .share-btn:hover { background: rgba(0,0,0,0.15); }
     @media (max-width: 600px) {
       header h1 { font-size: 1.4rem; }
       .tabs { padding: 0.5rem 0.75rem; }
@@ -244,6 +252,8 @@
     <p>全网热点聚合 - 7大平台实时热点</p>
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
+      <a href="data/feed.xml" target="_blank">RSS</a>
+      <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
   </header>
@@ -494,6 +504,18 @@
     window.addEventListener('scroll', () => {
       document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
     });
+
+    function shareSite() {
+      if (navigator.share) {
+        navigator.share({ title: 'Trending Hub - 全网热点聚合', text: '发现全网最热话题', url: location.href });
+      } else {
+        navigator.clipboard.writeText(location.href).then(() => {
+          const btn = document.querySelector('.share-btn');
+          btn.textContent = '已复制!';
+          setTimeout(() => btn.textContent = '分享', 2000);
+        });
+      }
+    }
   </script>
 </body>
 </html>
