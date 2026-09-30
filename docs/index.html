@@ -494,6 +494,41 @@
       return all.sort((a, b) => (b.hot || 0) - (a.hot || 0)).slice(0, 20);
     }
 
+    function getDailyPicks() {
+      const topicMap = {};
+      for (const source of allData) {
+        for (const item of source.items) {
+          const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (normalized.length < 6) continue;
+          if (!topicMap[normalized]) {
+            topicMap[normalized] = {
+              title: item.title,
+              url: item.url,
+              sources: [],
+              totalHot: 0,
+              maxRank: 999,
+              descriptions: []
+            };
+          }
+          const topic = topicMap[normalized];
+          if (!topic.sources.includes(source.source)) {
+            topic.sources.push(source.source);
+            topic.totalHot += item.hot || 0;
+            if (item.description && topic.descriptions.length < 2) {
+              topic.descriptions.push(item.description);
+            }
+          }
+        }
+      }
+      return Object.values(topicMap)
+        .map(t => ({
+          ...t,
+          score: t.sources.length * 1000 + (t.totalHot || 0) / 10000
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+    }
+
     function renderContent() {
       const container = document.getElementById('content');
       const sources = activeSource === 'all'
@@ -502,6 +537,32 @@
 
       let html = '';
       if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+        const dailyPicks = getDailyPicks();
+        if (dailyPicks.length > 0) {
+          html += '<div class="source-section" style="border: 2px solid var(--accent);background:linear-gradient(135deg, rgba(72,219,251,0.05), rgba(255,107,107,0.05));">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#48dbfb,#ff6b6b)">★</div>';
+          html += '<span class="source-name">每日精选</span>';
+          html += '<span class="source-count">今日必看 TOP 10</span></div>';
+          html += '<ul class="item-list">';
+          dailyPicks.forEach((item, i) => {
+            const tags = item.sources.slice(0, 3).map(s => {
+              const src = allData.find(d => d.source === s);
+              return src ? `<span class="item-source-tag" style="background:${src.color};color:#fff">${src.icon}</span>` : '';
+            }).join(' ');
+            const moreTag = item.sources.length > 3 ? `<span style="font-size:0.7rem;color:var(--text-secondary)">+${item.sources.length - 3}</span>` : '';
+            html += `<li class="item" style="border-left: 3px solid ${i < 3 ? 'var(--accent-red)' : 'var(--accent)'};">
+              <span class="item-rank" style="background:${i < 3 ? 'linear-gradient(135deg,#ff6b6b,#feca57)' : 'var(--rank-bg)'};color:${i < 3 ? '#fff' : 'var(--rank-color)'}">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></div>
+                <div style="margin-top:0.3rem">${tags}${moreTag}</div>
+                ${item.descriptions[0] ? `<div class="item-desc">${escapeHtml(item.descriptions[0])}</div>` : ''}
+              </div>
+              <span class="item-hot">${item.sources.length} 平台</span>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+
         const topHot = getTopHotTopics();
         if (topHot.length > 0) {
           html += '<div class="source-section" style="border: 1px solid var(--accent-yellow);">';
