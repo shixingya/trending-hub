@@ -43,6 +43,23 @@
       border-bottom: 1px solid #333;
       flex-wrap: wrap;
     }
+    .tab-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .tab-group-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-right: 0.25rem;
+    }
+    .tab-divider {
+      width: 1px;
+      height: 20px;
+      background: #444;
+      margin: 0 0.5rem;
+    }
     .tab {
       padding: 0.5rem 1rem;
       border-radius: 20px;
@@ -182,6 +199,25 @@
   <script>
     let allData = [];
     let activeSource = 'all';
+    let activeCategory = 'all';
+
+    const categories = {
+      entertainment: { name: '娱乐', keywords: ['明星', '演员', '导演', '电影', '电视剧', '综艺', '娱乐', '八卦', '演唱会', '偶像', '粉丝', '热搜', '恋情', '离婚', '结婚', '出轨', '代言', '票房', '收视', '颁奖', '选秀', '网红', '直播', '抖音', '快手'] },
+      military: { name: '军事', keywords: ['军事', '军队', '武器', '战争', '国防', '导弹', '战斗机', '航母', '坦克', '军演', '阅兵', '部队', '军官', '士兵', '核武', '卫星', '火箭军', '海军', '空军', '陆军'] },
+      sports: { name: '体育', keywords: ['体育', '足球', '篮球', '奥运', '比赛', '冠军', '金牌', '世界杯', 'NBA', 'CBA', '中超', '联赛', '球队', '球员', '教练', '裁判', '进球', '得分', '马拉松', '游泳', '乒乓球'] },
+      tech: { name: '科技', keywords: ['科技', 'AI', '芯片', '手机', '电脑', '苹果', '华为', '小米', '人工智能', '5G', '互联网', '软件', '硬件', '算法', '数据', '云计算', '区块链', '比特币', '无人驾驶', '机器人'] },
+      society: { name: '社会', keywords: ['社会', '事件', '事故', '案件', '警方', '法院', '判决', '维权', '投诉', '曝光', '调查', '通报', '回应', '道歉', '争议', '热搜', '网友', '舆论'] },
+      region: { name: '地区', keywords: ['北京', '上海', '广州', '深圳', '杭州', '成都', '武汉', '南京', '重庆', '天津', '西安', '苏州', '长沙', '郑州', '东莞', '青岛', '沈阳', '宁波', '昆明'] }
+    };
+
+    function categorize(title) {
+      for (const [key, cat] of Object.entries(categories)) {
+        for (const kw of cat.keywords) {
+          if (title.includes(kw)) return key;
+        }
+      }
+      return 'other';
+    }
 
     async function loadTrending() {
       try {
@@ -197,19 +233,34 @@
 
     function renderTabs() {
       const tabs = document.getElementById('tabs');
-      let html = '<div class="tab active" data-key="all">全部</div>';
-      for (const source of allData) {
-        html += `<div class="tab" data-key="${source.key}">${source.icon} ${source.source}</div>`;
+      let html = '<div class="tab-group"><span class="tab-group-label">分类</span>';
+      html += '<div class="tab active" data-type="category" data-key="all">全部</div>';
+      for (const [key, cat] of Object.entries(categories)) {
+        html += `<div class="tab" data-type="category" data-key="${key}">${cat.name}</div>`;
       }
+      html += '</div><div class="tab-divider"></div><div class="tab-group"><span class="tab-group-label">平台</span>';
+      html += '<div class="tab active" data-type="source" data-key="all">全部</div>';
+      for (const source of allData) {
+        html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}</div>`;
+      }
+      html += '</div>';
       tabs.innerHTML = html;
       tabs.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
-          tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          const type = tab.dataset.type;
+          const key = tab.dataset.key;
+          tabs.querySelectorAll(`.tab[data-type="${type}"]`).forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
-          activeSource = tab.dataset.key;
+          if (type === 'category') activeCategory = key;
+          else activeSource = key;
           renderContent();
         });
       });
+    }
+
+    function filterItems(items) {
+      if (activeCategory === 'all') return items;
+      return items.filter(item => categorize(item.title) === activeCategory);
     }
 
     function renderContent() {
@@ -220,23 +271,27 @@
 
       let html = '';
       for (const source of sources) {
+        const items = filterItems(source.items);
+        if (items.length === 0 && activeCategory !== 'all') continue;
         html += `<div class="source-section">
           <div class="source-header">
             <div class="source-icon" style="background:${source.color}">${source.icon}</div>
             <span class="source-name">${source.source}</span>
-            <span class="source-count">${source.items.length} 条</span>
+            <span class="source-count">${items.length} 条</span>
             ${source.error ? `<span class="source-error">${source.error}</span>` : ''}
           </div>`;
-        if (source.items.length > 0) {
+        if (items.length > 0) {
           html += '<ul class="item-list">';
-          const maxItems = Math.min(source.items.length, 30);
+          const maxItems = Math.min(items.length, 30);
           for (let i = 0; i < maxItems; i++) {
-            const item = source.items[i];
+            const item = items[i];
+            const url = item.url || '#';
+            const title = item.title || '';
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a></div>
-                ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
             </li>`;
@@ -245,19 +300,13 @@
         }
         html += '</div>';
       }
-      container.innerHTML = html || '<div class="loading">暂无数据</div>';
+      container.innerHTML = html || '<div class="source-section"><div class="source-header"><span class="source-error">该分类暂无数据</span></div></div>';
 
       const latestFetch = allData.find(s => s.fetchedAt);
       if (latestFetch) {
         document.getElementById('refreshTime').textContent =
           `数据更新于 ${new Date(latestFetch.fetchedAt).toLocaleString('zh-CN')}`;
       }
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str || '';
-      return div.innerHTML;
     }
 
     function formatHot(num) {
