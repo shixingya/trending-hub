@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trending Hub - 全网热点聚合</title>
-  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等23大平台热点话题，实时更新">
-  <meta name="keywords" content="热点,热榜,trending,知乎,百度,微博,B站,抖音,头条,澎湃,IT之家,少数派,豆瓣,游戏,影视,汽车">
+  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
+  <meta name="keywords" content="热点,热榜,trending,知乎,百度,微博,B站,抖音,头条,澎湃,IT之家,少数派,豆瓣,游戏,影视,汽车,图书">
   <meta name="theme-color" content="#1a1a2e">
   <meta property="og:title" content="Trending Hub - 全网热点聚合">
-  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等23大平台热点话题，实时更新">
+  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shixingya.github.io/trending-hub/">
   <meta property="og:site_name" content="Trending Hub">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Trending Hub - 全网热点聚合">
-  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等23大平台热点话题，实时更新">
+  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif'>TH</text></svg>">
   <style>
@@ -280,6 +280,28 @@
     }
     .scroll-top:hover { transform: scale(1.1); }
     .scroll-top.visible { display: flex; }
+    .mobile-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg-card); border-top: 1px solid var(--border);
+      padding: 0.5rem 0; z-index: 999; box-shadow: 0 -2px 10px var(--shadow);
+    }
+    .mobile-nav-items {
+      display: flex; justify-content: space-around; align-items: center;
+    }
+    .mobile-nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      background: none; border: none; color: var(--text-secondary);
+      padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.7rem;
+      transition: color 0.2s; min-width: 50px;
+    }
+    .mobile-nav-item:active { color: var(--accent); }
+    .mobile-nav-item.active { color: var(--accent); }
+    .mobile-nav-item svg { width: 20px; height: 20px; }
+    @media (max-width: 768px) {
+      .mobile-nav { display: block; }
+      body { padding-bottom: 60px; }
+      .scroll-top { bottom: 70px; }
+    }
     .share-btn {
       background: rgba(255,255,255,0.15); border: none; color: #fff;
       padding: 0.3rem 0.7rem; border-radius: 12px; cursor: pointer;
@@ -343,7 +365,7 @@
 <body>
   <header>
     <h1>Trending Hub</h1>
-    <p>全网热点聚合 - 23大平台实时热点</p>
+    <p>全网热点聚合 - 24大平台实时热点</p>
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
@@ -374,7 +396,7 @@
 
   <footer>
     <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem">每2小时自动更新 · 23大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.3rem">每2小时自动更新 · 24大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
     <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
@@ -389,6 +411,59 @@
       <div id="modalBody"></div>
     </div>
   </div>
+
+  <nav class="mobile-nav">
+    <div class="mobile-nav-items">
+      <button class="mobile-nav-item active" onclick="mobileNavAction('home', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>首页</span>
+      </button>
+      <button class="mobile-nav-item" onclick="mobileNavAction('search', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        <span>搜索</span>
+      </button>
+      <button class="mobile-nav-item" onclick="mobileNavAction('brief', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>早报</span>
+      </button>
+      <button class="mobile-nav-item" onclick="mobileNavAction('random', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 3 21 3 21 8"></polyline>
+          <line x1="4" y1="20" x2="21" y2="3"></line>
+          <polyline points="21 16 21 21 16 21"></polyline>
+          <line x1="15" y1="15" x2="21" y2="21"></line>
+          <line x1="4" y1="4" x2="9" y2="9"></line>
+        </svg>
+        <span>随机</span>
+      </button>
+      <button class="mobile-nav-item" onclick="mobileNavAction('theme', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <span>主题</span>
+      </button>
+    </div>
+  </nav>
 
   <script>
     let allData = [];
@@ -1121,6 +1196,48 @@
         toggleFocusMode();
       }
     });
+
+    function mobileNavAction(action, btn) {
+      document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      switch(action) {
+        case 'home':
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          switchSource('all');
+          break;
+        case 'search':
+          document.getElementById('searchInput').focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        case 'brief':
+          showMorningBrief();
+          break;
+        case 'random':
+          randomTopic();
+          break;
+        case 'theme':
+          toggleTheme();
+          break;
+      }
+      
+      setTimeout(() => {
+        document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+        if (action === 'home') {
+          document.querySelector('.mobile-nav-item').classList.add('active');
+        }
+      }, 300);
+    }
+
+    function switchSource(key) {
+      activeSource = key;
+      activeCategory = 'all';
+      const tabs = document.getElementById('tabs');
+      tabs.querySelectorAll('.tab[data-type="source"]').forEach(t => t.classList.remove('active'));
+      const targetTab = tabs.querySelector(`.tab[data-type="source"][data-key="${key}"]`);
+      if (targetTab) targetTab.classList.add('active');
+      renderContent();
+    }
   </script>
 </body>
 </html>

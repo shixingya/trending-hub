@@ -14,6 +14,7 @@ export { ithome } from './ithome.js';
 export { sspai } from './sspai.js';
 export { weibo } from './weibo.js';
 export { doubanMovie } from './douban-movie.js';
+export { doubanBook } from './douban-book.js';
 export { githubTrending } from './github-trending.js';
 export { hupu } from './hupu.js';
 export { sinaNews } from './sina-news.js';
@@ -35,6 +36,7 @@ import { ithome } from './ithome.js';
 import { sspai } from './sspai.js';
 import { weibo } from './weibo.js';
 import { doubanMovie } from './douban-movie.js';
+import { doubanBook } from './douban-book.js';
 import { githubTrending } from './github-trending.js';
 import { hupu } from './hupu.js';
 import { sinaNews } from './sina-news.js';
@@ -61,6 +63,7 @@ export const allSources: TrendingSource[] = [
   baiduCar,
   baiduTravel,
   doubanMovie,
+  doubanBook,
   neteaseMusic,
   githubTrending,
   hupu,
