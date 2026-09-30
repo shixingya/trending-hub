@@ -343,6 +343,7 @@
       <a href="data/feed.xml" target="_blank">RSS</a>
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
+      <button class="share-btn" onclick="showMorningBrief()">早报</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
@@ -800,6 +801,84 @@
 
     function closeModal() {
       document.getElementById('topicModal').classList.remove('active');
+    }
+
+    function showMorningBrief() {
+      if (allData.length === 0) return;
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const dayStr = `星期${weekdays[now.getDay()]}`;
+
+      const picks = getDailyPicks();
+      const topBySource = allData.filter(s => s.items.length > 0).map(s => ({
+        source: s.source,
+        icon: s.icon,
+        color: s.color,
+        top3: s.items.slice(0, 3)
+      }));
+
+      let body = `<div style="text-align:center;margin-bottom:1rem">
+        <div style="font-size:1.2rem;font-weight:600">☀️ 早安·今日热点速览</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">${dateStr} ${dayStr}</div>
+      </div>`;
+
+      if (picks.length > 0) {
+        body += '<div class="modal-section"><div class="modal-section-title">🔥 全网必看</div>';
+        picks.slice(0, 5).forEach((item, i) => {
+          body += `<div style="padding:0.4rem 0;border-bottom:1px solid var(--border);font-size:0.9rem">
+            <span style="color:var(--accent-red);font-weight:600;margin-right:0.5rem">${i + 1}</span>
+            <a href="${item.url}" target="_blank" style="color:var(--text-primary);text-decoration:none">${escapeHtml(item.title)}</a>
+            <span style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">${item.sources.length}平台</span>
+          </div>`;
+        });
+        body += '</div>';
+      }
+
+      body += '<div class="modal-section"><div class="modal-section-title">📊 各平台 TOP 3</div>';
+      topBySource.forEach(s => {
+        body += `<div style="margin-bottom:0.6rem">
+          <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.2rem">
+            <span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:${s.color};color:#fff;text-align:center;line-height:18px;font-size:0.6rem;margin-right:0.3rem">${s.icon}</span>
+            ${s.source}
+          </div>
+          ${s.top3.map((item, i) => `<div style="font-size:0.75rem;color:var(--text-secondary);padding-left:1.5rem">${i + 1}. <a href="${item.url}" target="_blank" style="color:var(--text-secondary);text-decoration:none">${escapeHtml(item.title)}</a></div>`).join('')}
+        </div>`;
+      });
+      body += '</div>';
+
+      body += `<div style="text-align:center;margin-top:1rem">
+        <button class="share-btn" onclick="copyMorningBrief()" style="background:var(--accent);color:#fff;padding:0.4rem 1rem;border-radius:8px;border:none;cursor:pointer">📋 复制早报文本</button>
+      </div>`;
+
+      document.getElementById('modalTitle').textContent = '每日早报';
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('topicModal').classList.add('active');
+    }
+
+    function copyMorningBrief() {
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      const picks = getDailyPicks();
+      let text = `☀️ 早安·今日热点速览 (${dateStr})\n\n`;
+      text += '🔥 全网必看:\n';
+      picks.slice(0, 5).forEach((item, i) => {
+        text += `${i + 1}. ${item.title} (${item.sources.length}平台)\n`;
+      });
+      text += '\n📊 各平台 TOP 3:\n';
+      allData.filter(s => s.items.length > 0).forEach(s => {
+        text += `\n【${s.source}】\n`;
+        s.items.slice(0, 3).forEach((item, i) => {
+          text += `  ${i + 1}. ${item.title}\n`;
+        });
+      });
+      text += '\n查看更多: https://shixingya.github.io/trending-hub/';
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = '✓ 已复制';
+        setTimeout(() => btn.textContent = orig, 2000);
+      });
     }
 
     document.addEventListener('keydown', e => {
