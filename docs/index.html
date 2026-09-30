@@ -321,6 +321,17 @@
     .modal-platform-hot { font-size: 0.75rem; color: var(--accent-red); }
     .modal-platform-link { font-size: 0.75rem; color: var(--accent); text-decoration: none; }
     .modal-platform-link:hover { text-decoration: underline; }
+    body.focus-mode header, body.focus-mode footer, body.focus-mode .stats-bar, body.focus-mode .search-bar, body.focus-mode .tabs, body.focus-mode .refresh-time { display: none !important; }
+    body.focus-mode .container { max-width: 700px; }
+    body.focus-mode .source-section { display: none; }
+    body.focus-mode .source-section.focus-active { display: block; }
+    body.focus-mode .item { padding: 0.75rem 1.25rem; }
+    body.focus-mode .item-title a { font-size: 1rem; }
+    body.focus-mode::before {
+      content: '专注模式 (ESC 退出)'; position: fixed; top: 0; left: 0; right: 0;
+      background: var(--accent); color: #fff; text-align: center; padding: 0.3rem;
+      font-size: 0.75rem; z-index: 999; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -334,6 +345,7 @@
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
+      <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
   </header>
@@ -356,6 +368,7 @@
   <footer>
     <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem">每2小时自动更新 · 18大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -789,7 +802,12 @@
       document.getElementById('topicModal').classList.remove('active');
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (focusMode) { toggleFocusMode(); return; }
+        closeModal();
+      }
+    });
 
     function formatHot(num) {
       if (num >= 10000) return (num / 10000).toFixed(1) + '万';
@@ -987,6 +1005,26 @@
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
       if (e.key === 'Escape') { closeModal(); }
+    });
+
+    let focusMode = false;
+    function toggleFocusMode() {
+      focusMode = !focusMode;
+      document.body.classList.toggle('focus-mode', focusMode);
+      const btn = document.getElementById('focusBtn');
+      if (btn) btn.textContent = focusMode ? '退出' : '专注';
+      if (focusMode) {
+        const sections = document.querySelectorAll('.source-section');
+        sections.forEach(s => s.classList.remove('focus-active'));
+        const firstVisible = document.querySelector('.source-section');
+        if (firstVisible) firstVisible.classList.add('focus-active');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (focusMode && e.target.closest('body::before')) {
+        toggleFocusMode();
+      }
     });
   </script>
 </body>
