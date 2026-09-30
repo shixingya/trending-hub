@@ -61,3 +61,19 @@ export const baiduCar: TrendingSource = {
     })).filter((item: TrendingItem) => item.title);
   }
 };
+
+export const baiduTravel: TrendingSource = {
+  name: '百度旅游',
+  key: 'baidu-travel',
+  icon: '旅',
+  color: '#FF8C00',
+  async fetch(): Promise<TrendingItem[]> {
+    const items = await fetchBaiduBoard('travel');
+    return items.map((item) => ({
+      title: item.word || item.title || '',
+      url: item.url || item.rawUrl || `https://www.baidu.com/s?wd=${encodeURIComponent(item.query || item.word || '')}`,
+      description: item.desc || (item.show ? item.show.join(' ') : undefined),
+      hot: item.hotScore ? parseInt(item.hotScore) : undefined
+    })).filter((item: TrendingItem) => item.title);
+  }
+};

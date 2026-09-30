@@ -63,7 +63,7 @@ async function main() {
   <channel>
     <title>Trending Hub - 全网热点聚合</title>
     <link>https://shixingya.github.io/trending-hub/</link>
-    <description>全网热门话题聚合 - 知乎/百度/微博/B站/抖音/头条/澎湃/IT之家/少数派/豆瓣等17大平台</description>
+    <description>全网热门话题聚合 - 知乎/百度/微博/B站/抖音/头条/澎湃/IT之家/少数派/豆瓣等18大平台</description>
     <language>zh-CN</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${rssItems.join('\n')}
