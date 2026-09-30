@@ -193,6 +193,12 @@
     }
     .sort-toggle:hover { background: var(--accent); color: #fff; }
     .sort-toggle.active { background: var(--accent); color: #fff; }
+    .load-more-btn {
+      display: block; width: calc(100% - 2.5rem); margin: 0.5rem 1.25rem; padding: 0.5rem;
+      background: var(--bg-input); color: var(--text-secondary); border: 1px dashed var(--border);
+      border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.15s;
+    }
+    .load-more-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
     .source-error { color: var(--accent-red); font-size: 0.8rem; }
     .item-list { list-style: none; }
     .item {
@@ -391,6 +397,7 @@
     let activeCategory = 'all';
     let searchQuery = '';
     let sortedSources = new Set();
+    let expandedSources = new Set();
 
     const categories = {
       entertainment: { name: '娱乐', keywords: ['明星','演员','导演','电影','电视剧','综艺','娱乐','八卦','演唱会','偶像','粉丝','热搜','恋情','离婚','结婚','出轨','代言','票房','收视','颁奖','选秀','网红','直播','抖音','快手','金鹰','金鸡','百花','奥斯卡','歌手','演员'] },
@@ -713,7 +720,8 @@
           </div>`;
         if (items.length > 0) {
           html += '<ul class="item-list">';
-          const maxItems = Math.min(items.length, 50);
+          const isExpanded = expandedSources.has(source.key);
+          const maxItems = isExpanded ? items.length : Math.min(items.length, 50);
           for (let i = 0; i < maxItems; i++) {
             const item = items[i];
             const url = item.url || '#';
@@ -733,6 +741,9 @@
             </li>`;
           }
           html += '</ul>';
+          if (!isExpanded && items.length > 50) {
+            html += `<button class="load-more-btn" onclick="expandSource('${source.key}');event.stopPropagation()">加载更多 (${items.length - 50} 条)</button>`;
+          }
         } else {
           html += '<div class="empty-state">暂无匹配内容</div>';
         }
@@ -1076,6 +1087,11 @@
       renderContent();
       const btn = document.querySelector(`[data-source-key="${key}"] .sort-toggle`);
       if (btn) btn.classList.toggle('active', sortedSources.has(key));
+    }
+
+    function expandSource(key) {
+      expandedSources.add(key);
+      renderContent();
     }
 
     document.addEventListener('keydown', (e) => {
