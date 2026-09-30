@@ -204,13 +204,16 @@
       display: inline-block; vertical-align: middle;
     }
     .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
-    .loading::after {
-      content: ''; display: inline-block; width: 18px; height: 18px;
-      border: 2px solid var(--border-hover); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.8s linear infinite;
-      margin-left: 0.5rem; vertical-align: middle;
+    .skeleton { padding: 0.6rem 1.25rem; }
+    .skeleton-line {
+      height: 14px; border-radius: 4px; margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, var(--bg-input) 25%, var(--border) 50%, var(--bg-input) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .skeleton-line:nth-child(odd) { width: 80%; }
+    .skeleton-line:nth-child(even) { width: 60%; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .refresh-time { text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 0.75rem; }
     .stats-bar {
       display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
@@ -242,10 +245,14 @@
     [data-theme="light"] .share-btn:hover { background: rgba(0,0,0,0.15); }
     @media (max-width: 600px) {
       header h1 { font-size: 1.4rem; }
+      header p { font-size: 0.75rem; }
       .tabs { padding: 0.5rem 0.75rem; }
       .search-bar { padding: 0.5rem 0.75rem; }
       .item { padding: 0.5rem 0.75rem; }
       .source-header { padding: 0.6rem 0.75rem; }
+      .tab { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+      .container { margin: 0.75rem auto; }
+      .scroll-top { bottom: 1rem; right: 1rem; width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -262,14 +269,17 @@
   </header>
 
   <div class="search-bar">
-    <input type="text" class="search-input" id="searchInput" placeholder="搜索热点话题..." oninput="onSearch(this.value)">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索热点话题... (按 / 聚焦)" oninput="onSearch(this.value)">
   </div>
 
   <div class="tabs" id="tabs"></div>
   <div class="stats-bar" id="statsBar"></div>
 
   <div class="container" id="content">
-    <div class="loading">正在加载热点数据</div>
+    <div class="source-section">
+      <div class="skeleton"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
+      <div class="skeleton"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
+    </div>
   </div>
   <div class="refresh-time" id="refreshTime"></div>
 
@@ -359,7 +369,7 @@
       html += '</div><div class="tab-divider"></div><div class="tab-group"><span class="tab-group-label">平台</span>';
       html += '<div class="tab active" data-type="source" data-key="all">全部</div>';
       for (const source of allData) {
-        html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}</div>`;
+        html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${source.items.length}</span></div>`;
       }
       html += '</div>';
       tabs.innerHTML = html;
@@ -516,7 +526,7 @@
       const latestFetch = allData.find(s => s.fetchedAt);
       if (latestFetch) {
         document.getElementById('refreshTime').textContent =
-          `数据更新于 ${new Date(latestFetch.fetchedAt).toLocaleString('zh-CN')}`;
+          `数据更新于 ${relativeTime(latestFetch.fetchedAt)}`;
       }
     }
 
@@ -532,8 +542,37 @@
       return String(num);
     }
 
+    function relativeTime(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return '刚刚';
+      if (mins < 60) return `${mins} 分钟前`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} 小时前`;
+      return `${Math.floor(hours / 24)} 天前`;
+    }
+
+    function updateRefreshTime() {
+      const latestFetch = allData.find(s => s.fetchedAt);
+      if (latestFetch) {
+        document.getElementById('refreshTime').textContent =
+          `数据更新于 ${relativeTime(latestFetch.fetchedAt)}`;
+      }
+    }
+
     loadTrending();
     setInterval(() => loadTrending(), 10 * 60 * 1000);
+    setInterval(() => updateRefreshTime(), 60 * 1000);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('searchInput').blur();
+      }
+    });
 
     window.addEventListener('scroll', () => {
       document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
