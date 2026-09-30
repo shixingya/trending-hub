@@ -11,6 +11,7 @@ export { thepaper } from './thepaper.js';
 export { ithome } from './ithome.js';
 export { sspai } from './sspai.js';
 export { weibo } from './weibo.js';
+export { doubanMovie } from './douban-movie.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar } from './baidu-boards.js';
@@ -25,6 +26,7 @@ import { thepaper } from './thepaper.js';
 import { ithome } from './ithome.js';
 import { sspai } from './sspai.js';
 import { weibo } from './weibo.js';
+import { doubanMovie } from './douban-movie.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -42,5 +44,6 @@ export const allSources: TrendingSource[] = [
   sspai,
   baiduMovie,
   baiduGame,
-  baiduCar
+  baiduCar,
+  doubanMovie
 ];
