@@ -7,6 +7,14 @@
   <meta name="description" content="一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点话题">
   <meta name="keywords" content="热点,热榜,trending,知乎,百度,B站,抖音,头条,澎湃,IT之家,少数派">
   <meta name="theme-color" content="#1a1a2e">
+  <meta property="og:title" content="Trending Hub - 全网热点聚合">
+  <meta property="og:description" content="一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点话题">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://shixingya.github.io/trending-hub/">
+  <meta property="og:site_name" content="Trending Hub">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Trending Hub - 全网热点聚合">
+  <meta name="twitter:description" content="一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点话题">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif'>TH</text></svg>">
   <style>
@@ -277,6 +285,7 @@
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
+      <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
@@ -299,7 +308,7 @@
 
   <footer>
     <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem">每2小时自动更新 · 11大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a></p>
+    <p style="margin-top:0.3rem">每2小时自动更新 · 11大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -319,7 +328,10 @@
       society: { name: '社会', keywords: ['社会','事件','事故','案件','警方','法院','判决','维权','投诉','曝光','调查','通报','回应','道歉','争议','网友','舆论','诈骗','盗窃','杀人','死亡','去世'] },
       region: { name: '地区', keywords: ['北京','上海','广州','深圳','杭州','成都','武汉','南京','重庆','天津','西安','苏州','长沙','郑州','东莞','青岛','沈阳','宁波','昆明'] },
       finance: { name: '财经', keywords: ['股市','A股','基金','投资','理财','房价','楼市','经济','GDP','央行','降息','加息','汇率','通胀','消费','出口','进口','贸易','关税','企业','上市','融资','IPO'] },
-      edu: { name: '教育', keywords: ['高考','考研','大学','教育','学校','学生','老师','教师','考试','录取','志愿','分数','毕业','论文','留学','培训','幼儿园','小学','中学'] }
+      edu: { name: '教育', keywords: ['高考','考研','大学','教育','学校','学生','老师','教师','考试','录取','志愿','分数','毕业','论文','留学','培训','幼儿园','小学','中学'] },
+      gaming: { name: '游戏', keywords: ['游戏','原神','王者荣耀','英雄联盟','LOL','吃鸡','绝地求生','Steam','主机','PS5','Xbox','Switch','任天堂','暴雪','网易游戏','手游','网游','电竞','赛事','战队'] },
+      auto: { name: '汽车', keywords: ['汽车','车','新能源','电动车','特斯拉','比亚迪','蔚来','小鹏','理想','宝马','奔驰','奥迪','丰田','大众','驾照','4S店','油耗','续航','充电'] },
+      health: { name: '健康', keywords: ['健康','医疗','医院','医生','疫苗','病毒','疫情','养生','减肥','健身','睡眠','心理','抑郁','癌症','糖尿病','高血压','中药','西药','保健'] }
     };
 
     function categorize(title) {
@@ -624,6 +636,16 @@
       if (e.key === 'Escape') {
         document.getElementById('searchInput').blur();
       }
+      if ((e.key === 'j' || e.key === 'k') && document.activeElement.tagName !== 'INPUT') {
+        const links = Array.from(document.querySelectorAll('.item-title a'));
+        if (links.length === 0) return;
+        const current = document.activeElement.closest('.item');
+        let idx = current ? links.indexOf(current.querySelector('a')) : -1;
+        if (e.key === 'j') idx = Math.min(idx + 1, links.length - 1);
+        else idx = Math.max(idx - 1, 0);
+        links[idx].focus();
+        links[idx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
     });
 
     window.addEventListener('scroll', () => {
@@ -644,6 +666,14 @@
           setTimeout(() => btn.textContent = '分享', 2000);
         });
       }
+    }
+
+    function randomTopic() {
+      if (allData.length === 0) return;
+      const sources = allData.filter(s => s.items.length > 0);
+      const source = sources[Math.floor(Math.random() * sources.length)];
+      const item = source.items[Math.floor(Math.random() * source.items.length)];
+      if (item && item.url) window.open(item.url, '_blank');
     }
   </script>
 </body>
