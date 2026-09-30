@@ -1,4 +1,5 @@
 export { baidu } from './baidu.js';
+export { baiduMovie, baiduGame, baiduCar } from './baidu-boards.js';
 export { bilibili } from './bilibili.js';
 export { bilibiliRank } from './bilibili-rank.js';
 export { bilibiliHot } from './bilibili-hot.js';
@@ -9,8 +10,10 @@ export { zhihu } from './zhihu.js';
 export { thepaper } from './thepaper.js';
 export { ithome } from './ithome.js';
 export { sspai } from './sspai.js';
+export { weibo } from './weibo.js';
 
 import { baidu } from './baidu.js';
+import { baiduMovie, baiduGame, baiduCar } from './baidu-boards.js';
 import { bilibili } from './bilibili.js';
 import { bilibiliRank } from './bilibili-rank.js';
 import { bilibiliHot } from './bilibili-hot.js';
@@ -21,11 +24,13 @@ import { zhihu } from './zhihu.js';
 import { thepaper } from './thepaper.js';
 import { ithome } from './ithome.js';
 import { sspai } from './sspai.js';
+import { weibo } from './weibo.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
   zhihu,
   baidu,
+  weibo,
   bilibili,
   bilibiliRank,
   bilibiliHot,
@@ -34,5 +39,8 @@ export const allSources: TrendingSource[] = [
   toutiao,
   thepaper,
   ithome,
-  sspai
+  sspai,
+  baiduMovie,
+  baiduGame,
+  baiduCar
 ];

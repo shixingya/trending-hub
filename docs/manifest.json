@@ -1,7 +1,7 @@
 {
   "name": "Trending Hub - 全网热点聚合",
   "short_name": "TrendingHub",
-  "description": "一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点话题",
+  "description": "一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派等15大平台热点话题",
   "start_url": "/trending-hub/",
   "scope": "/trending-hub/",
   "display": "standalone",

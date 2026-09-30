@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
 [![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
 
-一站式发现知乎、百度、B站、抖音、头条、澎湃、IT之家、少数派等平台热点
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派等15大平台热点
 
 [在线体验](https://shixingya.github.io/trending-hub/) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
@@ -18,7 +18,7 @@
 
 ## 特性
 
-- 聚合 11 大平台热榜：知乎、百度、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派
+- 聚合 15 大平台热榜：知乎、百度、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车
 - 暗色/亮色主题切换，自动跟随系统
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
@@ -60,7 +60,7 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `baidu` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai`
+source 可选值：`zhihu` / `baidu` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car`
 
 ### CLI 抓取
 ```bash
@@ -80,6 +80,7 @@ src/
 └── sources/              # 各平台数据源
     ├── zhihu.ts            # 知乎热榜
     ├── baidu.ts            # 百度热搜
+    ├── weibo.ts            # 微博热搜
     ├── bilibili.ts         # B站热门
     ├── bilibili-rank.ts    # B站排行榜
     ├── bilibili-hot.ts     # B站热搜
@@ -88,7 +89,8 @@ src/
     ├── toutiao.ts          # 头条热榜
     ├── thepaper.ts         # 澎湃新闻
     ├── ithome.ts           # IT之家
-    └── sspai.ts            # 少数派
+    ├── sspai.ts            # 少数派
+    └── baidu-boards.ts     # 百度影视/游戏/汽车
 docs/
 ├── index.html          # GitHub Pages 前端
 ├── manifest.json       # PWA 配置
