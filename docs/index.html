@@ -539,6 +539,10 @@
       document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
     });
 
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
     function shareSite() {
       if (navigator.share) {
         navigator.share({ title: 'Trending Hub - 全网热点聚合', text: '发现全网最热话题', url: location.href });
