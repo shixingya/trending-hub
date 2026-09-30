@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
 [![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
 
-一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣等18大平台热点
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧等20大平台热点
 
 [在线体验](https://shixingya.github.io/trending-hub/) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
@@ -18,12 +18,19 @@
 
 ## 特性
 
-- 聚合 18 大平台热榜：知乎热榜/日报、百度、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影
+- 聚合 20 大平台热榜：知乎热榜/日报、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影、网易云热歌
 - 暗色/亮色主题切换，自动跟随系统
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
+- 每日精选 TOP 10：跨平台热度综合排名
 - 全网热搜榜中榜：跨平台热度 TOP 20
 - 跨平台对比，同一话题多平台同时上榜一目了然
+- 话题详情弹窗：点击查看同一话题在哪些平台同时上榜
+- 专注模式：隐藏干扰元素，沉浸式阅读
+- 话题收藏：收藏感兴趣的话题，随时查看
+- 数据导出：支持 Markdown 和 CSV 格式
+- 丰富分享：一键生成热点摘要分享到社交平台
+- 键盘快捷键：/ 搜索、T 切换主题、0 查看全部
 - RSS 订阅，在阅读器中追踪热点
 - PWA 支持，可添加到手机主屏幕
 - RESTful API，方便二次开发
@@ -60,7 +67,7 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie`
+source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `netease-music`
 
 ### CLI 抓取
 ```bash
@@ -81,6 +88,8 @@ src/
     ├── zhihu.ts            # 知乎热榜
     ├── zhihu-daily.ts      # 知乎日报
     ├── baidu.ts            # 百度热搜
+    ├── baidu-tieba.ts      # 百度贴吧
+    ├── baidu-boards.ts     # 百度影视/游戏/汽车/旅游
     ├── weibo.ts            # 微博热搜
     ├── bilibili.ts         # B站热门
     ├── bilibili-rank.ts    # B站排行榜
@@ -92,7 +101,7 @@ src/
     ├── ithome.ts           # IT之家
     ├── sspai.ts            # 少数派
     ├── douban-movie.ts     # 豆瓣电影
-    └── baidu-boards.ts     # 百度影视/游戏/汽车/旅游
+    └── netease-music.ts    # 网易云热歌榜
 docs/
 ├── index.html          # GitHub Pages 前端
 ├── manifest.json       # PWA 配置
