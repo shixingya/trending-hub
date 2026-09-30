@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
 [![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
 
-一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub等21大平台热点
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等23大平台热点
 
 [在线体验](https://shixingya.github.io/trending-hub/) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
@@ -18,7 +18,7 @@
 
 ## 特性
 
-- 聚合 21 大平台热榜：知乎热榜/日报、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影、网易云热歌、GitHub Trending
+- 聚合 23 大平台热榜：知乎热榜/日报、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影、网易云热歌、GitHub Trending、虎扑热帖、新浪新闻
 - 暗色/亮色主题切换，自动跟随系统
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
@@ -67,7 +67,7 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `netease-music` / `github-trending`
+source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `netease-music` / `github-trending` / `hupu` / `sina-news`
 
 ### CLI 抓取
 ```bash
@@ -102,7 +102,9 @@ src/
     ├── sspai.ts            # 少数派
     ├── douban-movie.ts     # 豆瓣电影
     ├── netease-music.ts    # 网易云热歌榜
-    └── github-trending.ts  # GitHub Trending
+    ├── github-trending.ts  # GitHub Trending
+    ├── hupu.ts             # 虎扑热帖
+    └── sina-news.ts        # 新浪新闻
 docs/
 ├── index.html          # GitHub Pages 前端
 ├── manifest.json       # PWA 配置

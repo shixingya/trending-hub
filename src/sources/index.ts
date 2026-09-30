@@ -15,6 +15,8 @@ export { sspai } from './sspai.js';
 export { weibo } from './weibo.js';
 export { doubanMovie } from './douban-movie.js';
 export { githubTrending } from './github-trending.js';
+export { hupu } from './hupu.js';
+export { sinaNews } from './sina-news.js';
 export { neteaseMusic } from './netease-music.js';
 
 import { baidu } from './baidu.js';
@@ -34,6 +36,8 @@ import { sspai } from './sspai.js';
 import { weibo } from './weibo.js';
 import { doubanMovie } from './douban-movie.js';
 import { githubTrending } from './github-trending.js';
+import { hupu } from './hupu.js';
+import { sinaNews } from './sina-news.js';
 import { neteaseMusic } from './netease-music.js';
 import type { TrendingSource } from '../types.js';
 
@@ -58,5 +62,7 @@ export const allSources: TrendingSource[] = [
   baiduTravel,
   doubanMovie,
   neteaseMusic,
-  githubTrending
+  githubTrending,
+  hupu,
+  sinaNews
 ];
