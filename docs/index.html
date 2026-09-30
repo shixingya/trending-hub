@@ -293,6 +293,34 @@
       .container { margin: 0.75rem auto; }
       .scroll-top { bottom: 1rem; right: 1rem; width: 36px; height: 36px; }
     }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(4px);
+      justify-content: center; align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--bg-card); border-radius: 16px; padding: 1.5rem;
+      max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4); border: 1px solid var(--border);
+      animation: modalIn 0.2s ease-out;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .modal-title { font-size: 1.1rem; font-weight: 600; line-height: 1.4; flex: 1; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 0.25rem; line-height: 1; }
+    .modal-close:hover { color: var(--text-primary); }
+    .modal-section { margin-top: 1rem; }
+    .modal-section-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600; }
+    .modal-platform-item {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
+      background: var(--bg-input); border-radius: 8px; margin-bottom: 0.4rem;
+    }
+    .modal-platform-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
+    .modal-platform-name { flex: 1; font-size: 0.85rem; }
+    .modal-platform-hot { font-size: 0.75rem; color: var(--accent-red); }
+    .modal-platform-link { font-size: 0.75rem; color: var(--accent); text-decoration: none; }
+    .modal-platform-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -331,6 +359,16 @@
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <div class="modal-overlay" id="topicModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
 
   <script>
     let allData = [];
@@ -673,6 +711,7 @@
                 ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
               </div>
               <div class="item-actions">
+                <button class="item-action-btn" onclick="showTopicDetail('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="跨平台详情">🔍</button>
                 <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(title).replace(/'/g, "\\'")}', '${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
                 <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
               </div>
@@ -702,6 +741,55 @@
       div.textContent = str || '';
       return div.innerHTML;
     }
+
+    function showTopicDetail(title) {
+      const normalized = title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+      const matches = [];
+      for (const source of allData) {
+        for (const item of source.items) {
+          const itemNorm = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (itemNorm === normalized || (normalized.length >= 6 && itemNorm.includes(normalized)) || (itemNorm.length >= 6 && normalized.includes(itemNorm))) {
+            matches.push({ source: source.source, key: source.key, icon: source.icon, color: source.color, title: item.title, url: item.url, hot: item.hot, description: item.description });
+          }
+        }
+      }
+      const modal = document.getElementById('topicModal');
+      document.getElementById('modalTitle').textContent = title;
+      let body = '';
+      if (matches.length <= 1) {
+        body = '<div class="modal-section"><div class="modal-section-title">仅在单个平台发现</div>';
+        if (matches.length === 1) {
+          const m = matches[0];
+          body += `<div class="modal-platform-item">
+            <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
+            <div class="modal-platform-name">${m.source}</div>
+            ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
+            <a class="modal-platform-link" href="${m.url}" target="_blank">查看</a>
+          </div>`;
+        }
+        body += '</div>';
+      } else {
+        body = `<div class="modal-section"><div class="modal-section-title">在 ${matches.length} 个平台同时上榜</div>`;
+        matches.sort((a, b) => (b.hot || 0) - (a.hot || 0));
+        for (const m of matches) {
+          body += `<div class="modal-platform-item">
+            <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
+            <div class="modal-platform-name">${m.source}${m.description ? ` <span style="color:var(--text-muted);font-size:0.75rem">${escapeHtml(m.description)}</span>` : ''}</div>
+            ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
+            <a class="modal-platform-link" href="${m.url}" target="_blank">查看</a>
+          </div>`;
+        }
+        body += '</div>';
+      }
+      document.getElementById('modalBody').innerHTML = body;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('topicModal').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     function formatHot(num) {
       if (num >= 10000) return (num / 10000).toFixed(1) + '万';
