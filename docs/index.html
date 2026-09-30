@@ -220,6 +220,15 @@
       font-size: 0.75rem; border-top: 1px solid var(--border);
     }
     footer a { color: var(--accent); text-decoration: none; }
+    .scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem; width: 40px; height: 40px;
+      border-radius: 50%; background: var(--accent); color: #fff; border: none;
+      cursor: pointer; font-size: 1.2rem; display: none; align-items: center;
+      justify-content: center; box-shadow: 0 2px 10px var(--shadow);
+      transition: opacity 0.2s, transform 0.2s; z-index: 100;
+    }
+    .scroll-top:hover { transform: scale(1.1); }
+    .scroll-top.visible { display: flex; }
     @media (max-width: 600px) {
       header h1 { font-size: 1.4rem; }
       .tabs { padding: 0.5rem 0.75rem; }
@@ -255,6 +264,8 @@
     <p>Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem">每2小时自动更新 | <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a></p>
   </footer>
+
+  <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   <script>
     let allData = [];
@@ -366,6 +377,26 @@
       return filtered;
     }
 
+    function findCrossPlatformTopics() {
+      const titleMap = {};
+      for (const source of allData) {
+        for (const item of source.items) {
+          const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (normalized.length < 6) continue;
+          if (!titleMap[normalized]) titleMap[normalized] = { title: item.title, sources: [], urls: {} };
+          if (!titleMap[normalized].sources.includes(source.source)) {
+            titleMap[normalized].sources.push(source.source);
+            titleMap[normalized].urls[source.key] = item.url;
+            if (item.hot && !titleMap[normalized].maxHot) titleMap[normalized].maxHot = item.hot;
+          }
+        }
+      }
+      return Object.values(titleMap)
+        .filter(t => t.sources.length >= 2)
+        .sort((a, b) => (b.maxHot || 0) - (a.maxHot || 0))
+        .slice(0, 10);
+    }
+
     function renderContent() {
       const container = document.getElementById('content');
       const sources = activeSource === 'all'
@@ -373,6 +404,32 @@
         : allData.filter(s => s.key === activeSource);
 
       let html = '';
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+        const crossTopics = findCrossPlatformTopics();
+        if (crossTopics.length > 0) {
+          html += '<div class="source-section" style="border: 1px solid var(--accent-red);">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#ff6b6b,#feca57)"></div>';
+          html += '<span class="source-name">跨平台热搜</span>';
+          html += `<span class="source-count">${crossTopics.length} 个话题在多个平台同时上榜</span></div>`;
+          html += '<ul class="item-list">';
+          crossTopics.forEach((topic, i) => {
+            const tags = topic.sources.map(s => {
+              const src = allData.find(d => d.source === s);
+              return `<span class="item-source-tag" style="background:${src ? src.color : '#555'};color:#fff">${src ? src.icon : s}</span>`;
+            }).join(' ');
+            const firstUrl = Object.values(topic.urls)[0] || '#';
+            html += `<li class="item">
+              <span class="item-rank">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${firstUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(topic.title)}</a> ${tags}</div>
+              </div>
+              <span class="item-hot">${topic.sources.length} 平台</span>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+      }
+
       let totalShown = 0;
       for (const source of sources) {
         const items = filterItems(source.items);
@@ -433,6 +490,10 @@
 
     loadTrending();
     setInterval(() => loadTrending(), 10 * 60 * 1000);
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+    });
   </script>
 </body>
 </html>
