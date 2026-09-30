@@ -426,7 +426,9 @@
 
     function renderTabs() {
       const tabs = document.getElementById('tabs');
+      const bookmarkCount = getBookmarks().length;
       let html = '<div class="tab-group"><span class="tab-group-label">分类</span>';
+      html += `<div class="tab" data-type="source" data-key="bookmarks">☆ 收藏${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
       html += '<div class="tab active" data-type="category" data-key="all">全部</div>';
       for (const [key, cat] of Object.entries(categories)) {
         html += `<div class="tab" data-type="category" data-key="${key}">${cat.name}</div>`;
@@ -444,8 +446,13 @@
           const key = tab.dataset.key;
           tabs.querySelectorAll(`.tab[data-type="${type}"]`).forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
-          if (type === 'category') activeCategory = key;
-          else activeSource = key;
+          if (type === 'category') {
+            activeCategory = key;
+            activeSource = 'all';
+          } else {
+            activeSource = key;
+            activeCategory = 'all';
+          }
           renderContent();
         });
       });
@@ -532,6 +539,33 @@
 
     function renderContent() {
       const container = document.getElementById('content');
+
+      if (activeSource === 'bookmarks') {
+        const bookmarks = getBookmarks();
+        let html = '';
+        if (bookmarks.length === 0) {
+          html = '<div class="source-section"><div class="empty-state">暂无收藏，点击话题旁的 ☆ 添加收藏</div></div>';
+        } else {
+          html += '<div class="source-section">';
+          html += '<div class="source-header"><div class="source-icon" style="background:var(--accent-yellow)">★</div>';
+          html += `<span class="source-name">我的收藏</span><span class="source-count">${bookmarks.length} 条</span></div>`;
+          html += '<ul class="item-list">';
+          bookmarks.forEach((item, i) => {
+            html += `<li class="item">
+              <span class="item-rank">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></div>
+                <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.2rem">${new Date(item.time).toLocaleString('zh-CN')}</div>
+              </div>
+              <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(item.title).replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}');renderContent()" title="取消收藏" style="color:var(--accent-yellow)">★</button>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+        container.innerHTML = html;
+        return;
+      }
+
       const sources = activeSource === 'all'
         ? allData
         : allData.filter(s => s.key === activeSource);
@@ -638,6 +672,7 @@
                 ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
               </div>
               <div class="item-actions">
+                <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(title).replace(/'/g, "\\'")}', '${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
                 <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
@@ -800,6 +835,28 @@
         btn.textContent = '✓';
         setTimeout(() => btn.textContent = orig, 1500);
       });
+    }
+
+    function getBookmarks() {
+      try {
+        return JSON.parse(localStorage.getItem('trending-bookmarks') || '[]');
+      } catch { return []; }
+    }
+
+    function toggleBookmark(title, url) {
+      const bookmarks = getBookmarks();
+      const idx = bookmarks.findIndex(b => b.title === title);
+      const btn = event.target;
+      if (idx >= 0) {
+        bookmarks.splice(idx, 1);
+        btn.textContent = '☆';
+        btn.style.color = '';
+      } else {
+        bookmarks.push({ title, url, time: Date.now() });
+        btn.textContent = '★';
+        btn.style.color = 'var(--accent-yellow)';
+      }
+      localStorage.setItem('trending-bookmarks', JSON.stringify(bookmarks));
     }
 
     function sortSource(key) {
