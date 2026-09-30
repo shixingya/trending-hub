@@ -186,6 +186,13 @@
     }
     .source-name { font-weight: 600; font-size: 0.9rem; }
     .source-count { color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
+    .sort-toggle {
+      font-size: 0.7rem; color: var(--text-muted); background: var(--bg-input);
+      padding: 0.15rem 0.5rem; border-radius: 8px; cursor: pointer;
+      border: none; transition: all 0.15s; margin-left: 0.3rem;
+    }
+    .sort-toggle:hover { background: var(--accent); color: #fff; }
+    .sort-toggle.active { background: var(--accent); color: #fff; }
     .source-error { color: var(--accent-red); font-size: 0.8rem; }
     .item-list { list-style: none; }
     .item {
@@ -329,6 +336,7 @@
     let activeSource = 'all';
     let activeCategory = 'all';
     let searchQuery = '';
+    let sortedSources = new Set();
 
     const categories = {
       entertainment: { name: '娱乐', keywords: ['明星','演员','导演','电影','电视剧','综艺','娱乐','八卦','演唱会','偶像','粉丝','热搜','恋情','离婚','结婚','出轨','代言','票房','收视','颁奖','选秀','网红','直播','抖音','快手','金鹰','金鸡','百花','奥斯卡','歌手','演员'] },
@@ -545,12 +553,13 @@
         const items = filterItems(source.items);
         if (items.length === 0 && (activeCategory !== 'all' || searchQuery)) continue;
         totalShown += items.length;
-        html += `<div class="source-section">
+        html += `<div class="source-section" data-source-key="${source.key}">
           <div class="source-header" onclick="this.parentElement.classList.toggle('collapsed')">
             <div class="source-icon" style="background:${source.color}">${source.icon}</div>
             <span class="source-name">${source.source}</span>
             <span class="source-count">${items.length} 条</span>
             ${source.error ? `<span class="source-error">${source.error}</span>` : ''}
+            <button class="sort-toggle" onclick="sortSource('${source.key}');event.stopPropagation()" title="按热度排序">热度</button>
             <span class="collapse-icon">▼</span>
           </div>`;
         if (items.length > 0) {
@@ -696,6 +705,20 @@
         btn.textContent = '✓';
         setTimeout(() => btn.textContent = orig, 1500);
       });
+    }
+
+    function sortSource(key) {
+      const source = allData.find(s => s.key === key);
+      if (!source) return;
+      if (sortedSources.has(key)) {
+        sortedSources.delete(key);
+      } else {
+        sortedSources.add(key);
+        source.items.sort((a, b) => (b.hot || 0) - (a.hot || 0));
+      }
+      renderContent();
+      const btn = document.querySelector(`[data-source-key="${key}"] .sort-toggle`);
+      if (btn) btn.classList.toggle('active', sortedSources.has(key));
     }
   </script>
 </body>
