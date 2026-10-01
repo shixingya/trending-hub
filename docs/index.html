@@ -522,6 +522,158 @@
     }
     .stats-status-dot.success { background: #1dd1a1; }
     .stats-status-dot.error { background: #ff6b6b; }
+    .wordcloud-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1500; overflow-y: auto;
+      animation: fadeIn 0.3s ease;
+    }
+    .wordcloud-overlay.active { display: block; }
+    .wordcloud-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .wordcloud-title {
+      font-size: 1.2rem; font-weight: 600;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .wordcloud-close {
+      background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text); padding: 0.4rem 1rem; border-radius: 8px;
+      cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
+    }
+    .wordcloud-close:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .wordcloud-controls {
+      display: flex; gap: 0.5rem; align-items: center;
+    }
+    .wordcloud-filter {
+      background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text); padding: 0.3rem 0.7rem; border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+    }
+    .wordcloud-filter.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .wordcloud-container {
+      position: relative; width: 100%; max-width: 1000px;
+      margin: 2rem auto; min-height: 500px; padding: 1rem;
+    }
+    .wordcloud-word {
+      position: absolute; cursor: pointer; font-weight: 600;
+      transition: transform 0.2s, opacity 0.2s; white-space: nowrap;
+      opacity: 0.85; line-height: 1;
+    }
+    .wordcloud-word:hover {
+      transform: scale(1.15); opacity: 1; z-index: 10;
+      text-shadow: 0 0 10px currentColor;
+    }
+    .wordcloud-empty {
+      text-align: center; color: var(--text-muted);
+      padding: 4rem 1rem; font-size: 1rem;
+    }
+    .compare-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1500; overflow-y: auto;
+      animation: fadeIn 0.3s ease;
+    }
+    .compare-overlay.active { display: block; }
+    .compare-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+      background: var(--bg-card); flex-wrap: wrap; gap: 0.5rem;
+    }
+    .compare-title {
+      font-size: 1.2rem; font-weight: 600;
+      background: linear-gradient(90deg, #48dbfb, #1dd1a1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .compare-selector {
+      display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;
+    }
+    .compare-chip {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.25rem 0.6rem; border-radius: 14px;
+      border: 1px solid var(--border); background: var(--bg-input);
+      color: var(--text-secondary); font-size: 0.75rem;
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .compare-chip.active {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .compare-chip:hover { border-color: var(--accent); }
+    .compare-grid {
+      display: grid; gap: 1rem; padding: 1.5rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .compare-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .compare-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .compare-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 768px) {
+      .compare-grid.cols-2, .compare-grid.cols-3, .compare-grid.cols-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .compare-column {
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .compare-column-header {
+      padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem;
+    }
+    .compare-column-icon {
+      width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: bold; font-size: 0.75rem; flex-shrink: 0;
+    }
+    .compare-item {
+      padding: 0.5rem 1rem; border-bottom: 1px solid var(--border);
+      font-size: 0.8rem; display: flex; align-items: flex-start; gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .compare-item:last-child { border-bottom: none; }
+    .compare-item:hover { background: var(--hover-bg); }
+    .compare-item.overlap {
+      background: rgba(72, 219, 251, 0.08);
+      border-left: 3px solid var(--accent);
+    }
+    .compare-item-rank {
+      min-width: 18px; height: 18px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 600;
+      background: var(--rank-bg); color: var(--rank-color); flex-shrink: 0;
+    }
+    .compare-item-title {
+      flex: 1; line-height: 1.3; word-break: break-word;
+    }
+    .compare-item-title a { color: var(--text); text-decoration: none; }
+    .compare-item-title a:hover { color: var(--accent); }
+    .compare-overlap-badge {
+      font-size: 0.6rem; background: var(--accent); color: #fff;
+      padding: 0.1rem 0.3rem; border-radius: 6px; white-space: nowrap;
+    }
+    .compare-summary {
+      max-width: 1200px; margin: 0 auto 1rem;
+      padding: 0 1.5rem;
+    }
+    .compare-summary-card {
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border); padding: 1rem 1.25rem;
+      display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    }
+    .compare-stat {
+      text-align: center;
+    }
+    .compare-stat-value {
+      font-size: 1.5rem; font-weight: 700; color: var(--accent);
+    }
+    .compare-stat-label {
+      font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;
+    }
+    @media (max-width: 600px) {
+      .wordcloud-header, .compare-header { padding: 0.75rem 1rem; }
+      .wordcloud-container { min-height: 350px; }
+      .compare-grid { padding: 0.75rem; }
+    }
   </style>
 </head>
 <body>
@@ -539,6 +691,8 @@
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" onclick="showStats()">统计</button>
+      <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
+      <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
@@ -562,7 +716,7 @@
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 27大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
-    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -593,6 +747,31 @@
       </div>
       <div id="shortcutsContent"></div>
     </div>
+  </div>
+
+  <div class="wordcloud-overlay" id="wordcloudOverlay">
+    <div class="wordcloud-header">
+      <div class="wordcloud-title" id="wordcloudTitle">热点词云</div>
+      <div class="wordcloud-controls">
+        <button class="wordcloud-filter active" data-filter="all" onclick="filterWordCloud('all', this)">全部</button>
+        <button class="wordcloud-filter" data-filter="tech" onclick="filterWordCloud('tech', this)">科技</button>
+        <button class="wordcloud-filter" data-filter="entertainment" onclick="filterWordCloud('entertainment', this)">娱乐</button>
+        <button class="wordcloud-filter" data-filter="society" onclick="filterWordCloud('society', this)">社会</button>
+        <button class="wordcloud-filter" data-filter="sports" onclick="filterWordCloud('sports', this)">体育</button>
+        <button class="wordcloud-close" onclick="toggleWordCloud()">✕ 关闭</button>
+      </div>
+    </div>
+    <div class="wordcloud-container" id="wordcloudContainer"></div>
+  </div>
+
+  <div class="compare-overlay" id="compareOverlay">
+    <div class="compare-header">
+      <div class="compare-title" id="compareTitle">平台对比</div>
+      <div class="compare-selector" id="compareSelector"></div>
+      <button class="wordcloud-close" onclick="toggleCompareMode()">✕ 关闭</button>
+    </div>
+    <div class="compare-summary" id="compareSummary"></div>
+    <div class="compare-grid" id="compareGrid"></div>
   </div>
 
   <nav class="mobile-nav">
@@ -769,7 +948,14 @@
         shortcutFocusMode: '切换专注模式',
         shortcutShowHelp: '显示快捷键帮助',
         shortcutRandomTopic: '随机话题',
-        shortcutBookmarks: '查看收藏'
+        shortcutBookmarks: '查看收藏',
+        wordCloud: '词云',
+        wordCloudTitle: '热点词云',
+        compare: '对比',
+        compareTitle: '平台对比',
+        comparePlatforms: '对比平台',
+        compareOverlapping: '重叠话题',
+        compareUnique: '独有'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -881,7 +1067,14 @@
         shortcutFocusMode: 'Toggle focus mode',
         shortcutShowHelp: 'Show shortcuts help',
         shortcutRandomTopic: 'Random topic',
-        shortcutBookmarks: 'View bookmarks'
+        shortcutBookmarks: 'View bookmarks',
+        wordCloud: 'Cloud',
+        wordCloudTitle: 'Topic Word Cloud',
+        compare: 'Compare',
+        compareTitle: 'Platform Comparison',
+        comparePlatforms: 'Platforms',
+        compareOverlapping: 'Overlapping',
+        compareUnique: 'unique'
       }
     };
 
@@ -918,7 +1111,9 @@
       if (buttons[5]) buttons[5].textContent = t('share');
       if (buttons[6]) buttons[6].textContent = focusMode ? t('focus') : t('focus');
       if (buttons[7]) buttons[7].textContent = t('stats');
-      if (buttons[8]) buttons[8].textContent = currentLang === 'zh' ? 'EN' : '中文';
+      if (buttons[8]) buttons[8].textContent = wordCloudActive ? '✕' : t('wordCloud');
+      if (buttons[9]) buttons[9].textContent = compareActive ? '✕' : t('compare');
+      if (buttons[10]) buttons[10].textContent = currentLang === 'zh' ? 'EN' : '中文';
       
       const themeBtn = document.getElementById('themeToggle');
       if (themeBtn) {
@@ -1726,6 +1921,8 @@
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        if (wordCloudActive) { toggleWordCloud(); return; }
+        if (compareActive) { toggleCompareMode(); return; }
         if (focusMode) { toggleFocusMode(); return; }
         closeModal();
       }
@@ -1989,11 +2186,13 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
       if (e.key === 'b' || e.key === 'B') { switchSource('bookmarks'); }
+      if (e.key === 'w' || e.key === 'W') { toggleWordCloud(); }
+      if (e.key === 'c' || e.key === 'C') { toggleCompareMode(); }
     });
 
     let focusMode = false;
@@ -2526,6 +2725,8 @@
         actions: [
           { keys: ['R'], desc: t('shortcutRandomTopic') },
           { keys: ['B'], desc: t('shortcutBookmarks') },
+          { keys: ['W'], desc: t('wordCloud') },
+          { keys: ['C'], desc: t('compare') },
         ]
       };
 
@@ -2558,6 +2759,297 @@
 
     function closeShortcuts() {
       document.getElementById('shortcutsOverlay').classList.remove('active');
+    }
+
+    let wordCloudActive = false;
+    let wordCloudFilter = 'all';
+
+    function toggleWordCloud() {
+      wordCloudActive = !wordCloudActive;
+      const overlay = document.getElementById('wordcloudOverlay');
+      const btn = document.getElementById('wordCloudBtn');
+      overlay.classList.toggle('active', wordCloudActive);
+      if (btn) {
+        btn.textContent = wordCloudActive ? '✕' : (currentLang === 'zh' ? '词云' : 'Cloud');
+        btn.style.background = wordCloudActive ? 'var(--accent)' : '';
+      }
+      if (wordCloudActive) {
+        renderWordCloud();
+      }
+    }
+
+    function filterWordCloud(filter, btn) {
+      wordCloudFilter = filter;
+      document.querySelectorAll('.wordcloud-filter').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderWordCloud();
+    }
+
+    function renderWordCloud() {
+      const container = document.getElementById('wordcloudContainer');
+      if (!container || allData.length === 0) return;
+
+      const topicMap = new Map();
+      for (const source of allData) {
+        for (const item of source.items) {
+          const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (normalized.length < 4) continue;
+          if (wordCloudFilter !== 'all' && categorize(item.title) !== wordCloudFilter) continue;
+
+          if (topicMap.has(normalized)) {
+            const entry = topicMap.get(normalized);
+            entry.totalHot += item.hot || 0;
+            entry.count++;
+            if (!entry.sources.includes(source.source)) {
+              entry.sources.push(source.source);
+              entry.colors.push(source.color);
+            }
+          } else {
+            topicMap.set(normalized, {
+              title: item.title,
+              url: item.url,
+              totalHot: item.hot || 0,
+              count: 1,
+              sources: [source.source],
+              colors: [source.color]
+            });
+          }
+        }
+      }
+
+      const topics = Array.from(topicMap.values())
+        .sort((a, b) => b.totalHot - a.totalHot)
+        .slice(0, 80);
+
+      if (topics.length === 0) {
+        container.innerHTML = `<div class="wordcloud-empty">${currentLang === 'zh' ? '暂无数据' : 'No data'}</div>`;
+        return;
+      }
+
+      const maxHot = topics[0].totalHot;
+      const minHot = topics[topics.length - 1].totalHot;
+      const range = maxHot - minHot || 1;
+
+      const containerRect = container.getBoundingClientRect();
+      const cW = Math.max(containerRect.width || 900, 600);
+      const cH = Math.max(500, window.innerHeight - 150);
+      container.style.height = cH + 'px';
+
+      const placed = [];
+
+      function collides(box) {
+        for (const p of placed) {
+          if (box.x < p.x + p.w && box.x + box.w > p.x &&
+              box.y < p.y + p.h && box.y + box.h > p.y) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      const frag = document.createDocumentFragment();
+
+      topics.forEach((topic, idx) => {
+        const ratio = (topic.totalHot - minHot) / range;
+        const fontSize = Math.round(14 + ratio * 36);
+        const color = topic.colors[0] || '#48dbfb';
+
+        const el = document.createElement('span');
+        el.className = 'wordcloud-word';
+        el.textContent = topic.title.length > 18 ? topic.title.substring(0, 18) + '…' : topic.title;
+        el.style.fontSize = fontSize + 'px';
+        el.style.color = color;
+        el.title = `${topic.title}\n${topic.totalHot.toLocaleString()} 热度 · ${topic.sources.length} 个平台`;
+        el.onclick = () => {
+          toggleWordCloud();
+          if (topic.sources.length > 1) {
+            showTopicDetail(topic.title);
+          } else {
+            window.open(topic.url, '_blank');
+          }
+        };
+
+        container.appendChild(el);
+        const elW = el.offsetWidth;
+        const elH = el.offsetHeight;
+        container.removeChild(el);
+
+        const centerX = cW / 2;
+        const centerY = cH / 2;
+        let angle = Math.random() * Math.PI * 2;
+        const step = 0.3;
+        const radiusStep = 1.2;
+        let radius = 0;
+        let placedBox = null;
+
+        for (let i = 0; i < 600; i++) {
+          radius += radiusStep * 0.05;
+          angle += step * 0.1;
+          const x = centerX + radius * Math.cos(angle) - elW / 2;
+          const y = centerY + radius * Math.sin(angle) - elH / 2;
+
+          if (x < 5 || y < 5 || x + elW > cW - 5 || y + elH > cH - 5) continue;
+
+          const box = { x, y, w: elW, h: elH };
+          if (!collides(box)) {
+            placedBox = box;
+            break;
+          }
+        }
+
+        if (!placedBox) {
+          for (let tryX = 10; tryX < cW - elW - 10; tryX += 15) {
+            for (let tryY = 10; tryY < cH - elH - 10; tryY += 15) {
+              const box = { x: tryX, y: tryY, w: elW, h: elH };
+              if (!collides(box)) {
+                placedBox = box;
+                break;
+              }
+            }
+            if (placedBox) break;
+          }
+        }
+
+        if (placedBox) {
+          placed.push(placedBox);
+          el.style.left = placedBox.x + 'px';
+          el.style.top = placedBox.y + 'px';
+          el.style.opacity = '0';
+          frag.appendChild(el);
+          setTimeout(() => { el.style.opacity = '0.85'; }, idx * 15);
+        }
+      });
+
+      container.innerHTML = '';
+      container.appendChild(frag);
+    }
+
+    let compareActive = false;
+    let comparePlatforms = new Set();
+
+    function toggleCompareMode() {
+      compareActive = !compareActive;
+      const overlay = document.getElementById('compareOverlay');
+      const btn = document.getElementById('compareBtn');
+      overlay.classList.toggle('active', compareActive);
+      if (btn) {
+        btn.textContent = compareActive ? '✕' : (currentLang === 'zh' ? '对比' : 'Compare');
+        btn.style.background = compareActive ? 'var(--accent)' : '';
+      }
+      if (compareActive) {
+        if (comparePlatforms.size === 0) {
+          const defaults = allData.filter(s => s.items.length > 0).slice(0, 3);
+          defaults.forEach(s => comparePlatforms.add(s.key));
+        }
+        renderCompareSelector();
+        renderCompareGrid();
+      }
+    }
+
+    function toggleComparePlatform(key) {
+      if (comparePlatforms.has(key)) {
+        if (comparePlatforms.size > 1) comparePlatforms.delete(key);
+      } else {
+        if (comparePlatforms.size >= 4) return;
+        comparePlatforms.add(key);
+      }
+      renderCompareSelector();
+      renderCompareGrid();
+    }
+
+    function renderCompareSelector() {
+      const selector = document.getElementById('compareSelector');
+      if (!selector) return;
+      let html = '';
+      for (const source of allData) {
+        if (source.items.length === 0) continue;
+        const active = comparePlatforms.has(source.key);
+        html += `<div class="compare-chip${active ? ' active' : ''}" onclick="toggleComparePlatform('${source.key}')" style="${active ? `background:${source.color};border-color:${source.color}` : ''}">
+          <span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${source.color};color:#fff;text-align:center;line-height:16px;font-size:0.55rem">${source.icon}</span>
+          ${source.source}
+        </div>`;
+      }
+      selector.innerHTML = html;
+    }
+
+    function renderCompareGrid() {
+      const grid = document.getElementById('compareGrid');
+      const summary = document.getElementById('compareSummary');
+      if (!grid) return;
+
+      const selected = allData.filter(s => comparePlatforms.has(s.key));
+      const cols = Math.min(selected.length, 4);
+      grid.className = `compare-grid cols-${cols}`;
+
+      const allTitles = new Map();
+      selected.forEach(source => {
+        source.items.slice(0, 15).forEach(item => {
+          const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (normalized.length < 4) return;
+          if (!allTitles.has(normalized)) {
+            allTitles.set(normalized, { title: item.title, sources: new Set() });
+          }
+          allTitles.get(normalized).sources.add(source.key);
+        });
+      });
+
+      const overlapCount = Array.from(allTitles.values()).filter(t => t.sources.size > 1).length;
+      const uniqueCounts = selected.map(s => {
+        let count = 0;
+        for (const [, data] of allTitles) {
+          if (data.sources.has(s.key) && data.sources.size === 1) count++;
+        }
+        return count;
+      });
+
+      if (summary) {
+        summary.innerHTML = `<div class="compare-summary-card">
+          <div class="compare-stat">
+            <div class="compare-stat-value">${selected.length}</div>
+            <div class="compare-stat-label">${currentLang === 'zh' ? '对比平台' : 'Platforms'}</div>
+          </div>
+          <div class="compare-stat">
+            <div class="compare-stat-value">${overlapCount}</div>
+            <div class="compare-stat-label">${currentLang === 'zh' ? '重叠话题' : 'Overlapping'}</div>
+          </div>
+          ${selected.map((s, i) => `<div class="compare-stat">
+            <div class="compare-stat-value" style="color:${s.color}">${uniqueCounts[i]}</div>
+            <div class="compare-stat-label">${s.source}${currentLang === 'zh' ? '独有' : ' unique'}</div>
+          </div>`).join('')}
+        </div>`;
+      }
+
+      let html = '';
+      selected.forEach(source => {
+        const overlapSet = new Set();
+        for (const [normalized, data] of allTitles) {
+          if (data.sources.size > 1 && data.sources.has(source.key)) {
+            overlapSet.add(normalized);
+          }
+        }
+
+        html += `<div class="compare-column">
+          <div class="compare-column-header">
+            <div class="compare-column-icon" style="background:${source.color}">${source.icon}</div>
+            ${source.source}
+            <span style="margin-left:auto;font-size:0.7rem;color:var(--text-muted)">${source.items.length} ${currentLang === 'zh' ? '条' : 'items'}</span>
+          </div>`;
+
+        source.items.slice(0, 15).forEach((item, i) => {
+          const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          const isOverlap = overlapSet.has(normalized);
+          const overlapSources = isOverlap ? allTitles.get(normalized)?.sources.size || 0 : 0;
+          html += `<div class="compare-item${isOverlap ? ' overlap' : ''}">
+            <span class="compare-item-rank">${i + 1}</span>
+            <div class="compare-item-title"><a href="${item.url || '#'}" target="_blank">${escapeHtml(item.title)}</a></div>
+            ${isOverlap ? `<span class="compare-overlap-badge">${overlapSources}${currentLang === 'zh' ? '平台' : 'plat'}</span>` : ''}
+          </div>`;
+        });
+
+        html += '</div>';
+      });
+
+      grid.innerHTML = html;
     }
   </script>
 </body>
