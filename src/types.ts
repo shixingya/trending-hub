@@ -4,6 +4,7 @@ export interface TrendingItem {
   hot?: number;
   description?: string;
   author?: string;
+  comments?: number;
 }
 
 export interface TrendingSource {

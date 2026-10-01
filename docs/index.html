@@ -228,6 +228,7 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .item-hot { font-size: 0.7rem; color: var(--accent-red); white-space: nowrap; flex-shrink: 0; }
+    .item-comments { font-size: 0.7rem; color: var(--accent); white-space: nowrap; flex-shrink: 0; margin-left: 0.3rem; }
     .item-actions {
       display: none; gap: 0.3rem; margin-left: 0.5rem;
     }
@@ -1278,6 +1279,7 @@
                 <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
+              ${item.comments ? `<span class="item-comments">💬 ${formatComments(item.comments)}</span>` : ''}
             </li>`;
           }
           html += '</ul>';
@@ -1314,7 +1316,7 @@
         for (const item of source.items) {
           const itemNorm = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
           if (itemNorm === normalized || (normalized.length >= 6 && itemNorm.includes(normalized)) || (itemNorm.length >= 6 && normalized.includes(itemNorm))) {
-            matches.push({ source: source.source, key: source.key, icon: source.icon, color: source.color, title: item.title, url: item.url, hot: item.hot, description: item.description });
+            matches.push({ source: source.source, key: source.key, icon: source.icon, color: source.color, title: item.title, url: item.url, hot: item.hot, description: item.description, comments: item.comments });
           }
         }
       }
@@ -1329,6 +1331,7 @@
             <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
             <div class="modal-platform-name">${m.source}</div>
             ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
+            ${m.comments ? `<div style="font-size:0.75rem;color:var(--accent);margin-left:0.5rem">💬 ${formatComments(m.comments)}</div>` : ''}
             <a class="modal-platform-link" href="${m.url}" target="_blank">${t('view')}</a>
           </div>`;
         }
@@ -1341,6 +1344,7 @@
             <div class="modal-platform-icon" style="background:${m.color}">${m.icon}</div>
             <div class="modal-platform-name">${m.source}${m.description ? ` <span style="color:var(--text-muted);font-size:0.75rem">${escapeHtml(m.description)}</span>` : ''}</div>
             ${m.hot ? `<div class="modal-platform-hot">${formatHot(m.hot)}</div>` : ''}
+            ${m.comments ? `<div style="font-size:0.75rem;color:var(--accent);margin-left:0.5rem">💬 ${formatComments(m.comments)}</div>` : ''}
             <a class="modal-platform-link" href="${m.url}" target="_blank">${t('view')}</a>
           </div>`;
         }
@@ -1472,6 +1476,12 @@
     });
 
     function formatHot(num) {
+      if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+      return String(num);
+    }
+
+    function formatComments(num) {
       if (num >= 10000) return (num / 10000).toFixed(1) + '万';
       if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
       return String(num);

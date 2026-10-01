@@ -18,7 +18,8 @@ export const bilibili: TrendingSource = {
       url: item.short_link_v2 || item.short_link || `https://www.bilibili.com/video/${item.bvid}`,
       hot: item.stat.view,
       description: item.desc,
-      author: item.owner?.name
+      author: item.owner?.name,
+      comments: item.stat.reply
     }));
   }
 };

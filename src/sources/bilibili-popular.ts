@@ -20,7 +20,8 @@ export const bilibiliPopular: TrendingSource = {
       url: `https://www.bilibili.com/video/${item.bvid}`,
       description: item.desc ? item.desc.slice(0, 100) : undefined,
       author: item.owner?.name,
-      hot: item.stat?.view || undefined
+      hot: item.stat?.view || undefined,
+      comments: item.stat?.reply || undefined
     })).filter((item: TrendingItem) => item.title);
   }
 };
