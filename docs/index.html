@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trending Hub - 全网热点聚合</title>
-  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
-  <meta name="keywords" content="热点,热榜,trending,知乎,百度,微博,B站,抖音,头条,澎湃,IT之家,少数派,豆瓣,游戏,影视,汽车,图书">
+  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书等25大平台热点话题，实时更新">
+  <meta name="keywords" content="热点,热榜,trending,知乎,百度,微博,B站,抖音,头条,澎湃,IT之家,少数派,豆瓣,游戏,影视,汽车,图书,微信读书">
   <meta name="theme-color" content="#1a1a2e">
   <meta property="og:title" content="Trending Hub - 全网热点聚合">
-  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
+  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书等25大平台热点话题，实时更新">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shixingya.github.io/trending-hub/">
   <meta property="og:site_name" content="Trending Hub">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Trending Hub - 全网热点聚合">
-  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪等24大平台热点话题，实时更新">
+  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书等25大平台热点话题，实时更新">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif'>TH</text></svg>">
   <style>
@@ -394,12 +394,36 @@
       text-align: center; padding: 1rem 0;
     }
     .stats-label { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+    .trend-chart-container {
+      background: var(--bg-input); border-radius: 12px; padding: 1rem;
+      margin-top: 1rem; border: 1px solid var(--border);
+    }
+    .trend-chart-title {
+      font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem;
+      color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem;
+    }
+    .trend-chart { width: 100%; height: 180px; }
+    .trend-legend {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;
+      justify-content: center;
+    }
+    .trend-legend-item {
+      display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .trend-legend-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .trend-no-data {
+      text-align: center; color: var(--text-muted); font-size: 0.8rem;
+      padding: 2rem 0;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Trending Hub</h1>
-    <p>全网热点聚合 - 24大平台实时热点</p>
+    <p>全网热点聚合 - 25大平台实时热点</p>
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
@@ -433,7 +457,7 @@
 
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 24大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 25大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
     <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
@@ -523,7 +547,7 @@
     const translations = {
       zh: {
         title: 'Trending Hub - 全网热点聚合',
-        subtitle: '全网热点聚合 - 24大平台实时热点',
+        subtitle: '全网热点聚合 - 25大平台实时热点',
         searchPlaceholder: '搜索热点话题... (按 / 聚焦)',
         exportMD: '导出MD',
         exportCSV: '导出CSV',
@@ -571,7 +595,7 @@
         updated: '数据更新于',
         footer: 'Trending Hub - 仅供学习研究，数据版权归原作者原平台所有',
         footerUpdate: '每2小时自动更新',
-        footerPlatforms: '24大平台',
+        footerPlatforms: '25大平台',
         starOnGitHub: 'Star on GitHub',
         suggestSource: '建议新数据源',
         shortcuts: '快捷键',
@@ -603,11 +627,14 @@
         shareImageClose: '关闭',
         shareImageScan: '扫码查看更多热点 →',
         focusModeHint: '专注模式 (ESC 退出)',
-        loadFailed: '加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。'
+        loadFailed: '加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。',
+        trendTitle: '热度趋势',
+        trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
+        trendNoMatch: '未找到该话题的历史趋势'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
-        subtitle: 'Trending Hub - 24 Platforms Real-time Hot Topics',
+        subtitle: 'Trending Hub - 25 Platforms Real-time Hot Topics',
         searchPlaceholder: 'Search topics... (Press / to focus)',
         exportMD: 'Export MD',
         exportCSV: 'Export CSV',
@@ -655,7 +682,7 @@
         updated: 'Updated',
         footer: 'Trending Hub - For learning only. All rights belong to original owners.',
         footerUpdate: 'Auto-update every 2 hours',
-        footerPlatforms: '24 platforms',
+        footerPlatforms: '25 platforms',
         starOnGitHub: 'Star on GitHub',
         suggestSource: 'Suggest new source',
         shortcuts: 'Shortcuts',
@@ -687,7 +714,10 @@
         shareImageClose: 'Close',
         shareImageScan: 'Scan for more topics →',
         focusModeHint: 'Focus Mode (ESC to exit)',
-        loadFailed: 'Load failed. Data may not be generated yet. GitHub Actions updates every 2 hours.'
+        loadFailed: 'Load failed. Data may not be generated yet. GitHub Actions updates every 2 hours.',
+        trendTitle: 'Heat Trend',
+        trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
+        trendNoMatch: 'No historical trend found for this topic'
       }
     };
 
@@ -1144,8 +1174,21 @@
         }
         body += '</div>';
       }
+
+      // Add trend chart section
+      body += `<div class="trend-chart-container" id="trendChartContainer">
+        <div class="trend-chart-title">📈 ${t('trendTitle') || '热度趋势'}</div>
+        <canvas id="trendChart" class="trend-chart"></canvas>
+        <div class="trend-legend" id="trendLegend"></div>
+      </div>`;
+
       document.getElementById('modalBody').innerHTML = body;
       modal.classList.add('active');
+
+      // Load and draw trend chart
+      loadTrendHistory().then(() => {
+        drawTopicTrendChart(title);
+      });
     }
 
     function closeModal() {
@@ -1833,6 +1876,152 @@
 
         legendY += 35;
       });
+    }
+
+    let trendHistoryData = null;
+
+    async function loadTrendHistory() {
+      if (trendHistoryData) return;
+      try {
+        const resp = await fetch('data/trending-history.json');
+        if (resp.ok) {
+          trendHistoryData = await resp.json();
+        }
+      } catch (e) {
+        console.warn('Failed to load trend history:', e);
+      }
+    }
+
+    function drawTopicTrendChart(topicTitle) {
+      const canvas = document.getElementById('trendChart');
+      const container = document.getElementById('trendChartContainer');
+      const legendEl = document.getElementById('trendLegend');
+      if (!canvas || !trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) {
+        if (container) {
+          container.innerHTML = `<div class="trend-chart-title">📈 ${t('trendTitle') || '热度趋势'}</div><div class="trend-no-data">${t('trendNoData') || '暂无历史趋势数据，数据将在多次更新后显示'}</div>`;
+        }
+        return;
+      }
+
+      const normalized = topicTitle.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+      const snapshots = trendHistoryData.snapshots;
+      const sourceColors = {};
+      allData.forEach(s => { sourceColors[s.key] = s.color; });
+
+      const seriesMap = {};
+      snapshots.forEach(snap => {
+        snap.topics.forEach(topic => {
+          const topicNorm = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          const isMatch = topicNorm === normalized ||
+            (normalized.length >= 6 && topicNorm.includes(normalized)) ||
+            (topicNorm.length >= 6 && normalized.includes(topicNorm));
+          if (isMatch) {
+            const key = topic.source;
+            if (!seriesMap[key]) seriesMap[key] = [];
+            seriesMap[key].push({ date: snap.date, hot: topic.hot });
+          }
+        });
+      });
+
+      const series = Object.entries(seriesMap).map(([source, data]) => ({
+        source,
+        color: sourceColors[source] || '#888',
+        data: data.sort((a, b) => a.date.localeCompare(b.date))
+      })).filter(s => s.data.length >= 2);
+
+      if (series.length === 0) {
+        if (container) {
+          container.innerHTML = `<div class="trend-chart-title">📈 ${t('trendTitle') || '热度趋势'}</div><div class="trend-no-data">${t('trendNoMatch') || '未找到该话题的历史趋势'}</div>`;
+        }
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth * 2;
+      const height = canvas.height = 360;
+      canvas.style.height = '180px';
+
+      const padding = { top: 30, right: 30, bottom: 50, left: 60 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+
+      const allDates = [...new Set(series.flatMap(s => s.data.map(d => d.date)))].sort();
+      const allHots = series.flatMap(s => s.data.map(d => d.hot));
+      const maxHot = Math.max(...allHots, 1);
+      const minHot = 0;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#888';
+      const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#2a2a2a';
+
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (chartH / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        const val = maxHot - (maxHot / 4) * i;
+        ctx.fillStyle = textColor;
+        ctx.font = '18px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(val >= 10000 ? (val / 10000).toFixed(1) + 'w' : Math.round(val).toString(), padding.left - 10, y + 6);
+      }
+
+      ctx.fillStyle = textColor;
+      ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      const dateStep = Math.max(1, Math.floor(allDates.length / 6));
+      allDates.forEach((date, i) => {
+        if (i % dateStep === 0 || i === allDates.length - 1) {
+          const x = padding.left + (i / Math.max(allDates.length - 1, 1)) * chartW;
+          ctx.fillText(date.substring(5), x, height - padding.bottom + 25);
+        }
+      });
+
+      series.forEach(s => {
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+
+        s.data.forEach((point, i) => {
+          const dateIdx = allDates.indexOf(point.date);
+          const x = padding.left + (dateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+          const y = padding.top + chartH - ((point.hot - minHot) / (maxHot - minHot || 1)) * chartH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        s.data.forEach((point, i) => {
+          const dateIdx = allDates.indexOf(point.date);
+          const x = padding.left + (dateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+          const y = padding.top + chartH - ((point.hot - minHot) / (maxHot - minHot || 1)) * chartH;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+      });
+
+      if (legendEl) {
+        const sourceNames = {};
+        allData.forEach(s => { sourceNames[s.key] = s.source; });
+        legendEl.innerHTML = series.map(s =>
+          `<div class="trend-legend-item">
+            <span class="trend-legend-dot" style="background:${s.color}"></span>
+            ${sourceNames[s.source] || s.source}
+          </div>`
+        ).join('');
+      }
     }
   </script>
 </body>

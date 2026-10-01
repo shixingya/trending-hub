@@ -19,6 +19,7 @@ export { githubTrending } from './github-trending.js';
 export { hupu } from './hupu.js';
 export { sinaNews } from './sina-news.js';
 export { neteaseMusic } from './netease-music.js';
+export { weread } from './weread.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -41,6 +42,7 @@ import { githubTrending } from './github-trending.js';
 import { hupu } from './hupu.js';
 import { sinaNews } from './sina-news.js';
 import { neteaseMusic } from './netease-music.js';
+import { weread } from './weread.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -67,5 +69,6 @@ export const allSources: TrendingSource[] = [
   neteaseMusic,
   githubTrending,
   hupu,
-  sinaNews
+  sinaNews,
+  weread
 ];
