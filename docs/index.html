@@ -752,6 +752,7 @@
         risingFast: '飙升榜',
         risingFastDesc: '新晋上榜或热度飙升',
         newEntry: '新上榜',
+        sourceHealthTitle: '各平台数据状态',
         shortcutsTitle: '⌨️ 键盘快捷键',
         shortcutsNav: '🧭 导航',
         shortcutsSearch: '🔍 搜索',
@@ -863,6 +864,7 @@
         risingFast: 'Rising Fast',
         risingFastDesc: 'New or rapidly gaining topics',
         newEntry: 'NEW',
+        sourceHealthTitle: 'Platform Data Status',
         shortcutsTitle: '⌨️ Keyboard Shortcuts',
         shortcutsNav: '🧭 Navigation',
         shortcutsSearch: '🔍 Search',
@@ -2229,7 +2231,30 @@
           <div class="stats-card-title">🏷️ ${t('statsCategoryChart')}</div>
           <canvas id="categoryChart" class="stats-chart"></canvas>
         </div>
+
+        <div class="stats-card" style="margin-top:1rem">
+          <div class="stats-card-title">🔍 ${t('sourceHealthTitle')}</div>
+          <div style="max-height:400px;overflow-y:auto">
       `;
+
+      const sorted = [...allData].sort((a, b) => b.items.length - a.items.length);
+      sorted.forEach(s => {
+        const statusClass = s.items.length > 0 ? 'success' : 'error';
+        const statusText = s.items.length > 0 ? `${s.items.length} 条` : '异常';
+        const statusColor = s.items.length > 0 ? '#1dd1a1' : '#ff6b6b';
+        body += `<div style="display:flex;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+          <div class="source-icon" style="background:${s.color};width:32px;height:32px;font-size:0.8rem;flex-shrink:0">${s.icon}</div>
+          <div style="flex:1;margin-left:0.8rem;min-width:0">
+            <div style="font-size:0.9rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.source}</div>
+            <div style="font-size:0.7rem;color:var(--text-muted)">${s.key}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;margin-left:0.5rem">
+            <div style="font-size:0.9rem;font-weight:600;color:${statusColor}">${statusText}</div>
+            <div class="source-status ${statusClass}" style="display:inline-block;margin-top:0.2rem"></div>
+          </div>
+        </div>`;
+      });
+      body += '</div></div>';
 
       document.getElementById('modalTitle').textContent = t('statsTitle');
       document.getElementById('modalBody').innerHTML = body;
