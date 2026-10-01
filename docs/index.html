@@ -459,6 +459,54 @@
     .related-topic-item a:hover {
       color: var(--accent);
     }
+    .shortcuts-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 2000; backdrop-filter: blur(6px);
+      justify-content: center; align-items: center;
+    }
+    .shortcuts-overlay.active { display: flex; }
+    .shortcuts-modal {
+      background: var(--bg-card); border-radius: 16px; padding: 2rem;
+      max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border);
+      animation: modalIn 0.2s ease-out;
+    }
+    .shortcuts-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+    }
+    .shortcuts-title {
+      font-size: 1.3rem; font-weight: 600;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .shortcuts-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.8rem; cursor: pointer; padding: 0 0.3rem; line-height: 1;
+    }
+    .shortcuts-close:hover { color: var(--text); }
+    .shortcuts-group { margin-bottom: 1.5rem; }
+    .shortcuts-group-title {
+      font-size: 0.9rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .shortcut-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+    }
+    .shortcut-item:last-child { border-bottom: none; }
+    .shortcut-desc { font-size: 0.85rem; color: var(--text); }
+    .shortcut-keys { display: flex; gap: 0.3rem; }
+    .shortcut-key {
+      background: var(--bg-input); color: var(--text);
+      padding: 0.25rem 0.6rem; border-radius: 6px;
+      font-size: 0.8rem; font-family: monospace;
+      border: 1px solid var(--border); font-weight: 600;
+      min-width: 28px; text-align: center;
+    }
+    .shortcut-key.special {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -499,7 +547,7 @@
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 25大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
-    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -519,6 +567,16 @@
     <div class="share-image-actions">
       <button onclick="downloadShareImage()">下载图片</button>
       <button class="secondary" onclick="closeShareImage()">关闭</button>
+    </div>
+  </div>
+
+  <div class="shortcuts-overlay" id="shortcutsOverlay" onclick="if(event.target===this)closeShortcuts()">
+    <div class="shortcuts-modal">
+      <div class="shortcuts-header">
+        <div class="shortcuts-title">⌨️ 键盘快捷键</div>
+        <button class="shortcuts-close" onclick="closeShortcuts()">&times;</button>
+      </div>
+      <div id="shortcutsContent"></div>
     </div>
   </div>
 
@@ -672,7 +730,24 @@
         trendTitle: '热度趋势',
         trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
         trendNoMatch: '未找到该话题的历史趋势',
-        relatedTopics: '相关推荐'
+        relatedTopics: '相关推荐',
+        shortcutsTitle: '⌨️ 键盘快捷键',
+        shortcutsNav: '🧭 导航',
+        shortcutsSearch: '🔍 搜索',
+        shortcutsView: '👁️ 视图',
+        shortcutsActions: '⚡ 操作',
+        shortcutShowAll: '显示全部平台',
+        shortcutMoveDown: '向下移动',
+        shortcutMoveUp: '向上移动',
+        shortcutPrevPlatform: '上一个平台',
+        shortcutNextPlatform: '下一个平台',
+        shortcutFocusSearch: '聚焦搜索框',
+        shortcutClose: '关闭/退出',
+        shortcutToggleTheme: '切换主题',
+        shortcutFocusMode: '切换专注模式',
+        shortcutShowHelp: '显示快捷键帮助',
+        shortcutRandomTopic: '随机话题',
+        shortcutBookmarks: '查看收藏'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -760,7 +835,24 @@
         trendTitle: 'Heat Trend',
         trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
         trendNoMatch: 'No historical trend found for this topic',
-        relatedTopics: 'Related Topics'
+        relatedTopics: 'Related Topics',
+        shortcutsTitle: '⌨️ Keyboard Shortcuts',
+        shortcutsNav: '🧭 Navigation',
+        shortcutsSearch: '🔍 Search',
+        shortcutsView: '👁️ View',
+        shortcutsActions: '⚡ Actions',
+        shortcutShowAll: 'Show all platforms',
+        shortcutMoveDown: 'Move down',
+        shortcutMoveUp: 'Move up',
+        shortcutPrevPlatform: 'Previous platform',
+        shortcutNextPlatform: 'Next platform',
+        shortcutFocusSearch: 'Focus search',
+        shortcutClose: 'Close/Exit',
+        shortcutToggleTheme: 'Toggle theme',
+        shortcutFocusMode: 'Toggle focus mode',
+        shortcutShowHelp: 'Show shortcuts help',
+        shortcutRandomTopic: 'Random topic',
+        shortcutBookmarks: 'View bookmarks'
       }
     };
 
@@ -1630,7 +1722,11 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); }
+      if (e.key === '?') { showShortcuts(); }
+      if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
+      if (e.key === 'r' || e.key === 'R') { randomTopic(); }
+      if (e.key === 'b' || e.key === 'B') { switchSource('bookmarks'); }
     });
 
     let focusMode = false;
@@ -2117,6 +2213,61 @@
           </div>`
         ).join('');
       }
+    }
+
+    function showShortcuts() {
+      const shortcuts = {
+        navigation: [
+          { keys: ['0'], desc: t('shortcutShowAll') },
+          { keys: ['j'], desc: t('shortcutMoveDown') },
+          { keys: ['k'], desc: t('shortcutMoveUp') },
+          { keys: ['←'], desc: t('shortcutPrevPlatform') },
+          { keys: ['→'], desc: t('shortcutNextPlatform') },
+        ],
+        search: [
+          { keys: ['/'], desc: t('shortcutFocusSearch') },
+          { keys: ['Esc'], desc: t('shortcutClose'), special: true },
+        ],
+        view: [
+          { keys: ['T'], desc: t('shortcutToggleTheme') },
+          { keys: ['F'], desc: t('shortcutFocusMode') },
+          { keys: ['?'], desc: t('shortcutShowHelp'), special: true },
+        ],
+        actions: [
+          { keys: ['R'], desc: t('shortcutRandomTopic') },
+          { keys: ['B'], desc: t('shortcutBookmarks') },
+        ]
+      };
+
+      const groupLabels = {
+        navigation: t('shortcutsNav'),
+        search: t('shortcutsSearch'),
+        view: t('shortcutsView'),
+        actions: t('shortcutsActions')
+      };
+
+      let html = '';
+      for (const [group, items] of Object.entries(shortcuts)) {
+        html += `<div class="shortcuts-group">
+          <div class="shortcuts-group-title">${groupLabels[group]}</div>`;
+        for (const item of items) {
+          html += `<div class="shortcut-item">
+            <div class="shortcut-desc">${item.desc}</div>
+            <div class="shortcut-keys">`;
+          for (const key of item.keys) {
+            html += `<span class="shortcut-key${item.special ? ' special' : ''}">${key}</span>`;
+          }
+          html += `</div></div>`;
+        }
+        html += `</div>`;
+      }
+
+      document.getElementById('shortcutsContent').innerHTML = html;
+      document.getElementById('shortcutsOverlay').classList.add('active');
+    }
+
+    function closeShortcuts() {
+      document.getElementById('shortcutsOverlay').classList.remove('active');
     }
   </script>
 </body>
