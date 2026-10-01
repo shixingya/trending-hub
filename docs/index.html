@@ -508,6 +508,20 @@
     .shortcut-key.special {
       background: var(--accent); color: #fff; border-color: var(--accent);
     }
+    .source-status {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      margin-left: 0.3rem; vertical-align: middle;
+    }
+    .source-status.success { background: #1dd1a1; box-shadow: 0 0 4px #1dd1a1; }
+    .source-status.error { background: #ff6b6b; box-shadow: 0 0 4px #ff6b6b; }
+    .stats-status {
+      display: flex; gap: 0.5rem; align-items: center;
+    }
+    .stats-status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .stats-status-dot.success { background: #1dd1a1; }
+    .stats-status-dot.error { background: #ff6b6b; }
   </style>
 </head>
 <body>
@@ -973,6 +987,8 @@
 
     function renderStats() {
       const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const successCount = allData.filter(s => !s.error && s.items.length > 0).length;
+      const errorCount = allData.filter(s => s.error || s.items.length === 0).length;
       let newCount = 0;
       if (prevData.length > 0) {
         const ps = buildPrevTitleSet();
@@ -983,7 +999,17 @@
         }
       }
       const bar = document.getElementById('statsBar');
-      let html = `<span>${t('platformsCount')} ${allData.length}</span><span>${total} ${t('hotTopics')}</span>`;
+      let html = `<span class="stats-status">
+        <span class="stats-status-dot success"></span>
+        <span>${successCount} 正常</span>
+      </span>`;
+      if (errorCount > 0) {
+        html += `<span class="stats-status">
+          <span class="stats-status-dot error"></span>
+          <span>${errorCount} 异常</span>
+        </span>`;
+      }
+      html += `<span>${t('platformsCount')} ${allData.length}</span><span>${total} ${t('hotTopics')}</span>`;
       if (newCount > 0) html += `<span style="color:var(--accent-red)">${newCount} ${t('newItems')}</span>`;
       bar.innerHTML = html;
     }
@@ -1000,7 +1026,9 @@
       html += `</div><div class="tab-divider"></div><div class="tab-group"><span class="tab-group-label">${t('platforms')}</span>`;
       html += `<div class="tab active" data-type="source" data-key="all">${t('all')}</div>`;
       for (const source of allData) {
-        html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${source.items.length}</span></div>`;
+        const hasError = source.error || source.items.length === 0;
+        const statusClass = hasError ? 'error' : 'success';
+        html += `<div class="tab" data-type="source" data-key="${source.key}">${source.icon} ${source.source}<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${source.items.length}</span><span class="source-status ${statusClass}"></span></div>`;
       }
       html += '</div>';
       tabs.innerHTML = html;
