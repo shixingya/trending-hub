@@ -746,6 +746,9 @@
         trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
         trendNoMatch: '未找到该话题的历史趋势',
         relatedTopics: '相关推荐',
+        weeklyHottest: '本周最热',
+        weeklyHottestDesc: '连续多天上榜的持久热点',
+        daysOnList: '天在榜',
         shortcutsTitle: '⌨️ 键盘快捷键',
         shortcutsNav: '🧭 导航',
         shortcutsSearch: '🔍 搜索',
@@ -851,6 +854,9 @@
         trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
         trendNoMatch: 'No historical trend found for this topic',
         relatedTopics: 'Related Topics',
+        weeklyHottest: 'Weekly Hottest',
+        weeklyHottestDesc: 'Consistently trending over multiple days',
+        daysOnList: 'days on list',
         shortcutsTitle: '⌨️ Keyboard Shortcuts',
         shortcutsNav: '🧭 Navigation',
         shortcutsSearch: '🔍 Search',
@@ -1262,6 +1268,38 @@
         .slice(0, 10);
     }
 
+    function getWeeklyHottest() {
+      if (!trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) return [];
+
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const weekSnapshots = trendHistoryData.snapshots.filter(s => new Date(s.date) >= weekAgo);
+      if (weekSnapshots.length < 2) return [];
+
+      const topicDays = new Map();
+      for (const snap of weekSnapshots) {
+        const seenToday = new Set();
+        for (const topic of snap.topics) {
+          const normalized = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (normalized.length < 6 || seenToday.has(normalized)) continue;
+          seenToday.add(normalized);
+
+          if (!topicDays.has(normalized)) {
+            topicDays.set(normalized, { title: topic.title, days: 0, maxHot: 0, sources: new Set() });
+          }
+          const entry = topicDays.get(normalized);
+          entry.days++;
+          entry.maxHot = Math.max(entry.maxHot, topic.hot || 0);
+          entry.sources.add(topic.source);
+        }
+      }
+
+      return Array.from(topicDays.values())
+        .filter(t => t.days >= 2)
+        .sort((a, b) => (b.days * 1000 + b.maxHot) - (a.days * 1000 + a.maxHot))
+        .slice(0, 15);
+    }
+
     function renderContent() {
       const container = document.getElementById('content');
 
@@ -1363,6 +1401,31 @@
                 <div class="item-title"><a href="${firstUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(topic.title)}</a> ${tags}</div>
               </div>
               <span class="item-hot">${topic.sources.length} ${t('platformsUnit')}</span>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+      }
+
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+        const weeklyHottest = getWeeklyHottest();
+        if (weeklyHottest.length > 0) {
+          html += '<div class="source-section" style="border: 1px solid var(--accent);">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#48dbfb,#1dd1a1)">W</div>';
+          html += `<span class="source-name">${t('weeklyHottest')}</span>`;
+          html += `<span class="source-count">${t('weeklyHottestDesc')}</span></div>`;
+          html += '<ul class="item-list">';
+          weeklyHottest.forEach((item, i) => {
+            const sourceTags = Array.from(item.sources).slice(0, 3).map(s => {
+              const src = allData.find(d => d.key === s);
+              return src ? `<span class="item-source-tag" style="background:${src.color};color:#fff">${src.icon}</span>` : '';
+            }).join(' ');
+            html += `<li class="item">
+              <span class="item-rank" style="background:${i < 3 ? 'linear-gradient(135deg,#48dbfb,#1dd1a1)' : 'var(--rank-bg)'};color:${i < 3 ? '#fff' : 'var(--rank-color)'}">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title">${escapeHtml(item.title)} ${sourceTags}</div>
+              </div>
+              <span class="item-hot" style="color:var(--accent)">${item.days} ${t('daysOnList')}</span>
             </li>`;
           });
           html += '</ul></div>';
@@ -1649,6 +1712,7 @@
     }
 
     loadTrending();
+    loadTrendHistory();
     setInterval(() => loadTrending(), 10 * 60 * 1000);
     setInterval(() => updateRefreshTime(), 60 * 1000);
 
