@@ -1101,12 +1101,55 @@
 
     function findCrossPlatformTopics() {
       const titleMap = {};
+      const normalizedMap = {};
+      
       for (const source of allData) {
         for (const item of source.items) {
           const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
           if (normalized.length < 6) continue;
-          if (!titleMap[normalized]) titleMap[normalized] = { title: item.title, sources: [], urls: {}, maxHot: 0 };
-          if (!titleMap[normalized].sources.includes(source.source)) {
+          
+          let matched = false;
+          
+          for (const key of Object.keys(titleMap)) {
+            const existing = titleMap[key];
+            const existingNorm = key;
+            
+            if (existingNorm === normalized) {
+              if (!existing.sources.includes(source.source)) {
+                existing.sources.push(source.source);
+                existing.urls[source.key] = item.url;
+                if (item.hot > (existing.maxHot || 0)) existing.maxHot = item.hot;
+              }
+              matched = true;
+              break;
+            }
+            
+            if (existingNorm.length >= 8 && normalized.length >= 8) {
+              if (existingNorm.includes(normalized) || normalized.includes(existingNorm)) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.urls[source.key] = item.url;
+                  if (item.hot > (existing.maxHot || 0)) existing.maxHot = item.hot;
+                }
+                matched = true;
+                break;
+              }
+              
+              const overlap = calculateOverlap(existingNorm, normalized);
+              if (overlap > 0.7) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.urls[source.key] = item.url;
+                  if (item.hot > (existing.maxHot || 0)) existing.maxHot = item.hot;
+                }
+                matched = true;
+                break;
+              }
+            }
+          }
+          
+          if (!matched) {
+            titleMap[normalized] = { title: item.title, sources: [], urls: {}, maxHot: 0 };
             titleMap[normalized].sources.push(source.source);
             titleMap[normalized].urls[source.key] = item.url;
             if (item.hot > (titleMap[normalized].maxHot || 0)) titleMap[normalized].maxHot = item.hot;
@@ -1117,6 +1160,17 @@
         .filter(t => t.sources.length >= 2)
         .sort((a, b) => (b.maxHot || 0) - (a.maxHot || 0))
         .slice(0, 10);
+    }
+    
+    function calculateOverlap(str1, str2) {
+      const words1 = new Set(str1.match(/[\u4e00-\u9fff]{2,}|[a-z0-9]+/gi) || []);
+      const words2 = new Set(str2.match(/[\u4e00-\u9fff]{2,}|[a-z0-9]+/gi) || []);
+      if (words1.size === 0 || words2.size === 0) return 0;
+      let common = 0;
+      for (const w of words1) {
+        if (words2.has(w)) common++;
+      }
+      return (common * 2) / (words1.size + words2.size);
     }
 
     function getTopHotTopics() {
@@ -1131,11 +1185,58 @@
 
     function getDailyPicks() {
       const topicMap = {};
+      
       for (const source of allData) {
         for (const item of source.items) {
           const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
           if (normalized.length < 6) continue;
-          if (!topicMap[normalized]) {
+          
+          let matched = false;
+          
+          for (const key of Object.keys(topicMap)) {
+            const existing = topicMap[key];
+            
+            if (key === normalized) {
+              if (!existing.sources.includes(source.source)) {
+                existing.sources.push(source.source);
+                existing.totalHot += item.hot || 0;
+                if (item.description && existing.descriptions.length < 2) {
+                  existing.descriptions.push(item.description);
+                }
+              }
+              matched = true;
+              break;
+            }
+            
+            if (key.length >= 8 && normalized.length >= 8) {
+              if (key.includes(normalized) || normalized.includes(key)) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.totalHot += item.hot || 0;
+                  if (item.description && existing.descriptions.length < 2) {
+                    existing.descriptions.push(item.description);
+                  }
+                }
+                matched = true;
+                break;
+              }
+              
+              const overlap = calculateOverlap(key, normalized);
+              if (overlap > 0.7) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.totalHot += item.hot || 0;
+                  if (item.description && existing.descriptions.length < 2) {
+                    existing.descriptions.push(item.description);
+                  }
+                }
+                matched = true;
+                break;
+              }
+            }
+          }
+          
+          if (!matched) {
             topicMap[normalized] = {
               title: item.title,
               url: item.url,
@@ -1144,13 +1245,10 @@
               maxRank: 999,
               descriptions: []
             };
-          }
-          const topic = topicMap[normalized];
-          if (!topic.sources.includes(source.source)) {
-            topic.sources.push(source.source);
-            topic.totalHot += item.hot || 0;
-            if (item.description && topic.descriptions.length < 2) {
-              topic.descriptions.push(item.description);
+            topicMap[normalized].sources.push(source.source);
+            topicMap[normalized].totalHot += item.hot || 0;
+            if (item.description && topicMap[normalized].descriptions.length < 2) {
+              topicMap[normalized].descriptions.push(item.description);
             }
           }
         }
