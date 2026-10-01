@@ -418,6 +418,47 @@
       text-align: center; color: var(--text-muted); font-size: 0.8rem;
       padding: 2rem 0;
     }
+    .search-highlight {
+      background: linear-gradient(135deg, #feca57, #ff6b6b);
+      color: #000;
+      padding: 0.1rem 0.2rem;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    [data-theme="light"] .search-highlight {
+      color: #fff;
+    }
+    .related-topics {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .related-topics-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    .related-topic-item {
+      display: flex;
+      align-items: center;
+      padding: 0.4rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+      margin-bottom: 0.3rem;
+    }
+    .related-topic-item:hover {
+      background: var(--hover-bg);
+    }
+    .related-topic-item a {
+      flex: 1;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    .related-topic-item a:hover {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -630,7 +671,8 @@
         loadFailed: '加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。',
         trendTitle: '热度趋势',
         trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
-        trendNoMatch: '未找到该话题的历史趋势'
+        trendNoMatch: '未找到该话题的历史趋势',
+        relatedTopics: '相关推荐'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -717,7 +759,8 @@
         loadFailed: 'Load failed. Data may not be generated yet. GitHub Actions updates every 2 hours.',
         trendTitle: 'Heat Trend',
         trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
-        trendNoMatch: 'No historical trend found for this topic'
+        trendNoMatch: 'No historical trend found for this topic',
+        relatedTopics: 'Related Topics'
       }
     };
 
@@ -884,6 +927,41 @@
           renderContent();
         });
       });
+    }
+
+    function highlightText(text, query) {
+      if (!query || !text) return escapeHtml(text);
+      const escaped = escapeHtml(text);
+      const queryEscaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${queryEscaped})`, 'gi');
+      return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function findRelatedTopics(title, limit = 8) {
+      const words = title.toLowerCase().split(/[\s,，。！？、]+/).filter(w => w.length >= 2);
+      if (words.length === 0) return [];
+
+      const scores = new Map();
+      for (const source of allData) {
+        for (const item of source.items) {
+          const itemTitle = item.title.toLowerCase();
+          let score = 0;
+          for (const word of words) {
+            if (itemTitle.includes(word)) score += word.length;
+          }
+          if (score > 0) {
+            const normalized = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+            const titleNorm = title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+            if (normalized === titleNorm) continue;
+            scores.set(item, { score, source });
+          }
+        }
+      }
+
+      return Array.from(scores.entries())
+        .sort((a, b) => b[1].score - a[1].score)
+        .slice(0, limit)
+        .map(([item, data]) => ({ ...item, sourceName: data.source.source, sourceIcon: data.source.icon, sourceColor: data.source.color, relevanceScore: data.score }));
     }
 
     function filterItems(items) {
@@ -1094,11 +1172,13 @@
             const item = items[i];
             const url = item.url || '#';
             const title = item.title || '';
+            const displayTitle = searchQuery ? highlightText(title, searchQuery) : escapeHtml(title);
+            const displayDesc = item.description && searchQuery ? highlightText(item.description, searchQuery) : (item.description ? escapeHtml(item.description) : '');
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
-                ${item.description ? `<div class="item-desc">${escapeHtml(item.description)}</div>` : ''}
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
+                ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
               </div>
               <div class="item-actions">
                 <button class="item-action-btn" onclick="showTopicDetail('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="跨平台详情">🔍</button>
@@ -1181,6 +1261,21 @@
         <canvas id="trendChart" class="trend-chart"></canvas>
         <div class="trend-legend" id="trendLegend"></div>
       </div>`;
+
+      // Add related topics section
+      const related = findRelatedTopics(title);
+      if (related.length > 0) {
+        body += `<div class="related-topics">
+          <div class="related-topics-title">🔗 ${t('relatedTopics') || '相关推荐'}</div>`;
+        related.forEach(item => {
+          body += `<div class="related-topic-item">
+            <span class="item-source-tag" style="background:${item.sourceColor};color:#fff;font-size:0.6rem">${item.sourceIcon}</span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+            ${item.hot ? `<span style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">${formatHot(item.hot)}</span>` : ''}
+          </div>`;
+        });
+        body += `</div>`;
+      }
 
       document.getElementById('modalBody').innerHTML = body;
       modal.classList.add('active');
