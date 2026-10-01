@@ -1288,7 +1288,7 @@
         if (items.length > 0) {
           html += '<ul class="item-list">';
           const isExpanded = expandedSources.has(source.key);
-          const maxItems = isExpanded ? items.length : Math.min(items.length, 50);
+          const maxItems = isExpanded ? items.length : Math.min(items.length, 20);
           for (let i = 0; i < maxItems; i++) {
             const item = items[i];
             const url = item.url || '#';
@@ -1311,8 +1311,8 @@
             </li>`;
           }
           html += '</ul>';
-          if (!isExpanded && items.length > 50) {
-            html += `<button class="load-more-btn" onclick="expandSource('${source.key}');event.stopPropagation()">${t('loadMore')} (${items.length - 50} ${t('items')})</button>`;
+          if (!isExpanded && items.length > 20) {
+            html += `<button class="load-more-btn" onclick="expandSource('${source.key}');event.stopPropagation()">${t('loadMore')} (${items.length - 20} ${t('items')})</button>`;
           }
         } else {
           html += `<div class="empty-state">${t('noMatch')}</div>`;
