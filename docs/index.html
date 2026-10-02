@@ -249,6 +249,11 @@
       padding: 0.05rem 0.35rem; border-radius: 6px; margin-left: 0.3rem;
       display: inline-block; vertical-align: middle; font-weight: 600;
     }
+    .item-streak-badge {
+      font-size: 0.6rem; color: #fff; background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+      padding: 0.05rem 0.4rem; border-radius: 6px; margin-left: 0.3rem;
+      display: inline-block; vertical-align: middle; font-weight: 600;
+    }
     .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
     .skeleton { padding: 0.6rem 1.25rem; }
     .skeleton-line {
@@ -943,6 +948,7 @@
     let sortedSources = new Set();
     let expandedSources = new Set();
     let currentLang = localStorage.getItem('lang') || 'zh';
+    let trendHistoryData = null;
 
     const translations = {
       zh: {
@@ -1056,6 +1062,7 @@
         shortcutShowHelp: '显示快捷键帮助',
         shortcutRandomTopic: '随机话题',
         shortcutBookmarks: '查看收藏',
+        shortcutDevMode: '开发者模式',
         wordCloud: '词云',
         wordCloudTitle: '热点词云',
         compare: '对比',
@@ -1072,7 +1079,10 @@
         timelineNoData: '暂无历史数据，数据将在多次更新后显示',
         timelineAppearances: '次上榜',
         timelinePeak: '最高热度',
-        timelineStable: '稳定'
+        timelineStable: '稳定',
+        devMode: '开发者',
+        devModeDesc: '开发者专属：GitHub/掘金/IT之家/少数派',
+        streak: '次上榜'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1185,6 +1195,7 @@
         shortcutShowHelp: 'Show shortcuts help',
         shortcutRandomTopic: 'Random topic',
         shortcutBookmarks: 'View bookmarks',
+        shortcutDevMode: 'Dev mode',
         wordCloud: 'Cloud',
         wordCloudTitle: 'Topic Word Cloud',
         compare: 'Compare',
@@ -1201,7 +1212,10 @@
         timelineNoData: 'No historical data yet. Data will appear after multiple updates.',
         timelineAppearances: 'appearances',
         timelinePeak: 'Peak',
-        timelineStable: 'Stable'
+        timelineStable: 'Stable',
+        devMode: 'Dev',
+        devModeDesc: 'Dev Focus: GitHub/Juejin/ITHome/Sspai',
+        streak: 'appearances'
       }
     };
 
@@ -1313,10 +1327,15 @@
         const res = await fetch('data/trending.json?t=' + Date.now());
         allData = await res.json();
         prevTitleSet = null;
+        streakMap = null;
         try {
           const prevRes = await fetch('data/trending-prev.json?t=' + Date.now());
           prevData = await prevRes.json();
         } catch { prevData = []; }
+        try {
+          const histRes = await fetch('data/trending-history.json?t=' + Date.now());
+          trendHistoryData = await histRes.json();
+        } catch { trendHistoryData = null; }
         renderTabs();
         renderStats();
         renderTagFilterBar();
@@ -1361,6 +1380,7 @@
       const bookmarkCount = getBookmarks().length;
       let html = `<div class="tab-group"><span class="tab-group-label">${t('categories')}</span>`;
       html += `<div class="tab" data-type="source" data-key="bookmarks">☆ ${t('bookmarks')}${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
+      html += `<div class="tab" data-type="source" data-key="dev" title="${t('devModeDesc')}">💻 ${t('devMode')}</div>`;
       html += `<div class="tab active" data-type="category" data-key="all">${t('all')}</div>`;
       for (const [key, cat] of Object.entries(categories)) {
         html += `<div class="tab" data-type="category" data-key="${key}">${t(cat.nameKey)}</div>`;
@@ -1702,11 +1722,20 @@
         return;
       }
 
+      const devSourceKeys = ['github-trending', 'juejin', 'ithome', 'sspai'];
       const sources = activeSource === 'all'
         ? allData
+        : activeSource === 'dev'
+        ? allData.filter(s => devSourceKeys.includes(s.key))
         : allData.filter(s => s.key === activeSource);
 
       let html = '';
+      if (activeSource === 'dev') {
+        html += '<div class="source-section" style="border: 1px solid var(--accent);">';
+        html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#24292F,#007acc)">💻</div>';
+        html += `<span class="source-name">${t('devMode')}</span>`;
+        html += `<span class="source-count">${t('devModeDesc')}</span></div></div>`;
+      }
       if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
         const dailyPicks = getDailyPicks();
         if (dailyPicks.length > 0) {
@@ -1859,7 +1888,7 @@
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
@@ -2094,6 +2123,31 @@
       if (!prevTitleSet && prevData.length > 0) prevTitleSet = buildPrevTitleSet();
       if (!prevTitleSet) return false;
       return !prevTitleSet.has(title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase());
+    }
+
+    let streakMap = null;
+    function getStreakMap() {
+      if (streakMap) return streakMap;
+      if (!trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) return {};
+      const map = new Map();
+      for (const snap of trendHistoryData.snapshots) {
+        const seen = new Set();
+        for (const topic of (snap.topics || [])) {
+          const norm = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (norm.length < 4 || seen.has(norm)) continue;
+          seen.add(norm);
+          map.set(norm, (map.get(norm) || 0) + 1);
+        }
+      }
+      streakMap = map;
+      return map;
+    }
+
+    function getStreakCount(title) {
+      const map = getStreakMap();
+      if (!map || map.size === 0) return 0;
+      const norm = title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+      return map.get(norm) || 0;
     }
 
     function relativeTime(dateStr) {
@@ -2333,6 +2387,7 @@
       if (e.key === 'w' || e.key === 'W') { toggleWordCloud(); }
       if (e.key === 'c' || e.key === 'C') { toggleCompareMode(); }
       if (e.key === 'l' || e.key === 'L') { toggleTimeline(); }
+      if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
     });
 
     let focusMode = false;
@@ -2698,8 +2753,6 @@
       });
     }
 
-    let trendHistoryData = null;
-
     async function loadTrendHistory() {
       if (trendHistoryData) return;
       try {
@@ -2865,6 +2918,7 @@
         actions: [
           { keys: ['R'], desc: t('shortcutRandomTopic') },
           { keys: ['B'], desc: t('shortcutBookmarks') },
+          { keys: ['D'], desc: t('shortcutDevMode') },
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
         ]

@@ -21,11 +21,13 @@ export const githubTrending: TrendingSource = {
     while ((articleMatch = articleRegex.exec(html)) !== null) {
       const articleContent = articleMatch[1];
 
-      const repoLinkMatch = articleContent.match(/href="\/([^\/"]+\/[^\/"]+)"/);
-      if (!repoLinkMatch) continue;
-      const repoPath = repoLinkMatch[1];
-
-      if (repoPath.startsWith('sponsors/') || repoPath.includes('/sponsors')) continue;
+      const h2LinkMatch = articleContent.match(/<h2[^>]*>[\s\S]*?href="\/([^"]+)"[\s\S]*?<\/h2>/);
+      if (!h2LinkMatch) continue;
+      const repoPath = h2LinkMatch[1].trim().replace(/\s/g, '');
+      if (!repoPath || repoPath.includes('/')) {
+        const parts = repoPath.split('/');
+        if (parts.length !== 2 || !parts[0] || !parts[1]) continue;
+      }
 
       const descMatch = articleContent.match(/<p class="col-9[^"]*"[^>]*>([\s\S]*?)<\/p>/);
       const description = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim() : undefined;
