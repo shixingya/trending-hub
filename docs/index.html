@@ -767,6 +767,60 @@
       border-bottom: 1px solid var(--border); background: var(--bg-card);
     }
     .tag-filter-bar:empty { display: none; }
+    .graph-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1000; display: none;
+      flex-direction: column; overflow: hidden;
+    }
+    .graph-overlay.active { display: flex; }
+    .graph-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .graph-title { font-size: 1.1rem; font-weight: 600; }
+    .graph-controls { display: flex; gap: 0.5rem; align-items: center; }
+    .graph-filter {
+      padding: 0.3rem 0.75rem; border-radius: 12px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); font-size: 0.75rem; cursor: pointer;
+    }
+    .graph-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .graph-close {
+      background: none; border: none; color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem 0.5rem;
+    }
+    .graph-close:hover { color: var(--text); }
+    .graph-container {
+      flex: 1; position: relative; overflow: hidden;
+    }
+    .graph-canvas {
+      width: 100%; height: 100%; display: block;
+    }
+    .graph-legend {
+      position: absolute; bottom: 1rem; left: 1rem; right: 1rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem 1rem;
+      display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;
+      font-size: 0.7rem; max-height: 120px; overflow-y: auto;
+    }
+    .graph-legend-item {
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .graph-legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .graph-tooltip {
+      position: absolute; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem;
+      pointer-events: none; opacity: 0; transition: opacity 0.2s;
+      box-shadow: 0 4px 12px var(--shadow); max-width: 300px; z-index: 10;
+    }
+    .graph-tooltip.visible { opacity: 1; }
+    .graph-tooltip-title { font-weight: 600; margin-bottom: 0.25rem; }
+    .graph-tooltip-meta { color: var(--text-muted); font-size: 0.7rem; }
+    @media (max-width: 600px) {
+      .graph-header { padding: 0.75rem 1rem; }
+      .graph-legend { bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -787,6 +841,7 @@
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
+      <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
@@ -810,7 +865,7 @@
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 27大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
-    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -881,6 +936,25 @@
     </div>
     <div class="timeline-container" id="timelineContainer">
       <div class="timeline-empty">加载中...</div>
+    </div>
+  </div>
+
+  <div class="graph-overlay" id="graphOverlay">
+    <div class="graph-header">
+      <div class="graph-title" id="graphTitle">话题关系图</div>
+      <div class="graph-controls">
+        <button class="graph-filter active" data-filter="all" onclick="filterGraph('all', this)">全部</button>
+        <button class="graph-filter" data-filter="cross" onclick="filterGraph('cross', this)">跨平台</button>
+        <button class="graph-close" onclick="toggleGraph()">✕</button>
+      </div>
+    </div>
+    <div class="graph-container" id="graphContainer">
+      <canvas id="graphCanvas" class="graph-canvas"></canvas>
+      <div class="graph-tooltip" id="graphTooltip">
+        <div class="graph-tooltip-title" id="tooltipTitle"></div>
+        <div class="graph-tooltip-meta" id="tooltipMeta"></div>
+      </div>
+      <div class="graph-legend" id="graphLegend"></div>
     </div>
   </div>
 
@@ -1071,6 +1145,7 @@
         compareOverlapping: '重叠话题',
         compareUnique: '独有',
         timeline: '时间线',
+        graph: '关系图',
         timelineTitle: '热点时间线',
         timelineAll: '全部',
         timelineRising: '上升',
@@ -1080,6 +1155,9 @@
         timelineAppearances: '次上榜',
         timelinePeak: '最高热度',
         timelineStable: '稳定',
+        graphTitle: '话题关系图',
+        graphAll: '全部',
+        graphCross: '跨平台',
         devMode: '开发者',
         devModeDesc: '开发者专属：GitHub/掘金/IT之家/少数派',
         streak: '次上榜'
@@ -1204,6 +1282,7 @@
         compareOverlapping: 'Overlapping',
         compareUnique: 'unique',
         timeline: 'Timeline',
+        graph: 'Graph',
         timelineTitle: 'Topic Timeline',
         timelineAll: 'All',
         timelineRising: 'Rising',
@@ -1213,6 +1292,9 @@
         timelineAppearances: 'appearances',
         timelinePeak: 'Peak',
         timelineStable: 'Stable',
+        graphTitle: 'Topic Relationship Graph',
+        graphAll: 'All',
+        graphCross: 'Cross-platform',
         devMode: 'Dev',
         devModeDesc: 'Dev Focus: GitHub/Juejin/ITHome/Sspai',
         streak: 'appearances'
@@ -1255,7 +1337,8 @@
       if (buttons[8]) buttons[8].textContent = wordCloudActive ? '✕' : t('wordCloud');
       if (buttons[9]) buttons[9].textContent = compareActive ? '✕' : t('compare');
       if (buttons[10]) buttons[10].textContent = t('timeline');
-      if (buttons[11]) buttons[11].textContent = currentLang === 'zh' ? 'EN' : '中文';
+      if (buttons[11]) buttons[11].textContent = graphActive ? '✕' : t('graph');
+      if (buttons[12]) buttons[12].textContent = currentLang === 'zh' ? 'EN' : '中文';
       
       const themeBtn = document.getElementById('themeToggle');
       if (themeBtn) {
@@ -2379,7 +2462,7 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
@@ -2387,6 +2470,7 @@
       if (e.key === 'w' || e.key === 'W') { toggleWordCloud(); }
       if (e.key === 'c' || e.key === 'C') { toggleCompareMode(); }
       if (e.key === 'l' || e.key === 'L') { toggleTimeline(); }
+      if (e.key === 'g' || e.key === 'G') { toggleGraph(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
     });
 
@@ -3376,6 +3460,228 @@
       if (hot >= 1000) return (hot / 1000).toFixed(1) + 'K';
       return hot.toString();
     }
+
+    // Topic relationship graph
+    let graphActive = false;
+    let graphFilter = 'all';
+    let graphNodes = [];
+    let graphEdges = [];
+    let graphHoverNode = null;
+
+    function toggleGraph() {
+      const overlay = document.getElementById('graphOverlay');
+      overlay.classList.toggle('active');
+      graphActive = overlay.classList.contains('active');
+      if (graphActive) {
+        renderGraph();
+      }
+    }
+
+    function filterGraph(filter, btn) {
+      graphFilter = filter;
+      document.querySelectorAll('.graph-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGraph();
+    }
+
+    function renderGraph() {
+      if (allData.length === 0) return;
+
+      const canvas = document.getElementById('graphCanvas');
+      const container = document.getElementById('graphContainer');
+      if (!canvas || !container) return;
+
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const topicMap = new Map();
+      allData.forEach(source => {
+        source.items.forEach((item, idx) => {
+          if (idx >= 15) return;
+          const key = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase().slice(0, 50);
+          if (!topicMap.has(key)) {
+            topicMap.set(key, {
+              title: item.title,
+              url: item.url,
+              sources: [],
+              totalHot: 0
+            });
+          }
+          const topic = topicMap.get(key);
+          topic.sources.push({
+            key: source.key,
+            name: source.source,
+            icon: source.icon,
+            color: source.color,
+            hot: item.hot || 0,
+            rank: idx + 1
+          });
+          topic.totalHot += (item.hot || 0);
+        });
+      });
+
+      let topics = Array.from(topicMap.values());
+      if (graphFilter === 'cross') {
+        topics = topics.filter(t => t.sources.length > 1);
+      }
+      topics = topics.slice(0, 60);
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.35;
+
+      graphNodes = topics.map((topic, i) => {
+        const angle = (i / topics.length) * Math.PI * 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        const size = Math.max(8, Math.min(20, topic.sources.length * 4));
+        return {
+          x, y, size,
+          topic,
+          color: topic.sources[0].color
+        };
+      });
+
+      graphEdges = [];
+      for (let i = 0; i < graphNodes.length; i++) {
+        for (let j = i + 1; j < graphNodes.length; j++) {
+          const nodeA = graphNodes[i];
+          const nodeB = graphNodes[j];
+          const sharedSources = nodeA.topic.sources.filter(sA =>
+            nodeB.topic.sources.some(sB => sB.key === sA.key)
+          );
+          if (sharedSources.length > 0) {
+            graphEdges.push({
+              from: i, to: j,
+              strength: sharedSources.length,
+              color: sharedSources[0].color
+            });
+          }
+        }
+      }
+
+      graphEdges.forEach(edge => {
+        const from = graphNodes[edge.from];
+        const to = graphNodes[edge.to];
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.strokeStyle = edge.color + '40';
+        ctx.lineWidth = Math.max(1, edge.strength * 1.5);
+        ctx.stroke();
+      });
+
+      graphNodes.forEach((node, i) => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+        ctx.fillStyle = node.color;
+        ctx.fill();
+        ctx.strokeStyle = graphHoverNode === i ? '#fff' : 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = graphHoverNode === i ? 3 : 1;
+        ctx.stroke();
+
+        if (node.topic.sources.length > 1) {
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(node.topic.sources.length, node.x, node.y);
+        }
+      });
+
+      const legend = document.getElementById('graphLegend');
+      if (legend) {
+        const sourceCounts = new Map();
+        topics.forEach(topic => {
+          topic.sources.forEach(s => {
+            sourceCounts.set(s.key, { name: s.name, icon: s.icon, color: s.color, count: (sourceCounts.get(s.key)?.count || 0) + 1 });
+          });
+        });
+        legend.innerHTML = Array.from(sourceCounts.values()).map(s =>
+          `<div class="graph-legend-item">
+            <div class="graph-legend-dot" style="background:${s.color}"></div>
+            <span>${s.icon} ${s.name} (${s.count})</span>
+          </div>`
+        ).join('');
+      }
+    }
+
+    function handleGraphMouseMove(e) {
+      if (!graphActive) return;
+      const canvas = document.getElementById('graphCanvas');
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      let found = -1;
+      graphNodes.forEach((node, i) => {
+        const dist = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+        if (dist <= node.size) found = i;
+      });
+
+      const tooltip = document.getElementById('graphTooltip');
+      if (found >= 0) {
+        graphHoverNode = found;
+        const node = graphNodes[found];
+        const titleEl = document.getElementById('tooltipTitle');
+        const metaEl = document.getElementById('tooltipMeta');
+        if (titleEl) titleEl.textContent = node.topic.title;
+        if (metaEl) {
+          const sources = node.topic.sources.map(s => `${s.icon} ${s.name}`).join(', ');
+          metaEl.textContent = `${node.topic.sources.length}个平台: ${sources}`;
+        }
+        if (tooltip) {
+          tooltip.style.left = (x + 15) + 'px';
+          tooltip.style.top = (y + 15) + 'px';
+          tooltip.classList.add('visible');
+        }
+        canvas.style.cursor = 'pointer';
+        renderGraph();
+      } else {
+        graphHoverNode = null;
+        if (tooltip) tooltip.classList.remove('visible');
+        canvas.style.cursor = 'default';
+        if (found !== graphHoverNode) renderGraph();
+      }
+    }
+
+    function handleGraphClick(e) {
+      if (!graphActive || graphHoverNode === null) return;
+      const node = graphNodes[graphHoverNode];
+      if (node && node.topic.url) {
+        window.open(node.topic.url, '_blank');
+      }
+    }
+
+    const graphCanvas = document.getElementById('graphCanvas');
+    if (graphCanvas) {
+      graphCanvas.addEventListener('mousemove', handleGraphMouseMove);
+      graphCanvas.addEventListener('click', handleGraphClick);
+      graphCanvas.addEventListener('mouseleave', () => {
+        graphHoverNode = null;
+        const tooltip = document.getElementById('graphTooltip');
+        if (tooltip) tooltip.classList.remove('visible');
+        renderGraph();
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      if (graphActive) renderGraph();
+    });
 
     // Tag system
     const tagKeywords = {
