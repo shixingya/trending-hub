@@ -161,7 +161,24 @@
       overflow: hidden;
       box-shadow: 0 2px 8px var(--shadow);
       animation: fadeIn 0.3s ease;
+      content-visibility: auto;
+      contain-intrinsic-size: auto 400px;
     }
+    .toast-container {
+      position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex;
+      flex-direction: column; gap: 0.5rem; pointer-events: none;
+    }
+    .toast {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+      padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem;
+      box-shadow: 0 4px 16px var(--shadow); pointer-events: auto;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    }
+    .toast.success { border-left: 3px solid #1dd1a1; }
+    .toast.error { border-left: 3px solid var(--accent-red); }
+    .toast.info { border-left: 3px solid var(--accent); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(20px); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .source-header {
       padding: 0.8rem 1.25rem;
@@ -1160,7 +1177,15 @@
         graphCross: '跨平台',
         devMode: '开发者',
         devModeDesc: '开发者专属：GitHub/掘金/IT之家/少数派',
-        streak: '次上榜'
+        streak: '次上榜',
+        toastLoaded: '已加载 {platforms} 个平台 {total} 条热点',
+        toastLoadFailed: '数据加载失败',
+        toastLinkCopied: '链接已复制',
+        toastCopyFailed: '复制失败，请手动复制',
+        toastShared: '分享内容已复制到剪贴板',
+        toastExported: '已导出 {filename}',
+        toastBookmarked: '已收藏',
+        toastUnbookmarked: '已取消收藏'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1297,7 +1322,15 @@
         graphCross: 'Cross-platform',
         devMode: 'Dev',
         devModeDesc: 'Dev Focus: GitHub/Juejin/ITHome/Sspai',
-        streak: 'appearances'
+        streak: 'appearances',
+        toastLoaded: 'Loaded {total} topics from {platforms} platforms',
+        toastLoadFailed: 'Failed to load data',
+        toastLinkCopied: 'Link copied',
+        toastCopyFailed: 'Copy failed, please copy manually',
+        toastShared: 'Share content copied to clipboard',
+        toastExported: 'Exported {filename}',
+        toastBookmarked: 'Bookmarked',
+        toastUnbookmarked: 'Bookmark removed'
       }
     };
 
@@ -1448,9 +1481,13 @@
         renderStats();
         renderTagFilterBar();
         renderContent();
+        const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+        const successCount = allData.filter(s => !s.error && s.items.length > 0).length;
+        showToast(t('toastLoaded', { platforms: String(successCount), total: String(total) }), 'success');
       } catch (err) {
         document.getElementById('content').innerHTML =
           '<div class="source-section"><div class="source-header"><span class="source-error">加载失败，数据可能尚未生成。GitHub Actions 每2小时自动更新一次。</span></div></div>';
+        showToast(t('toastLoadFailed'), 'error');
       }
     }
 
@@ -2371,9 +2408,9 @@
         navigator.share({ title: 'Trending Hub - 全网热点聚合', text, url: location.href });
       } else {
         navigator.clipboard.writeText(text).then(() => {
-          const btns = document.querySelectorAll('.share-btn');
-          const btn = btns[btns.length - 1];
-          if (btn) { const orig = btn.textContent; btn.textContent = '✓ 已复制'; setTimeout(() => btn.textContent = orig, 2000); }
+          showToast(t('toastShared'), 'success');
+        }).catch(() => {
+          showToast(t('toastCopyFailed'), 'error');
         });
       }
     }
@@ -2430,14 +2467,14 @@
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+      showToast(t('toastExported', { filename }), 'success');
     }
 
     function copyLink(url) {
       navigator.clipboard.writeText(url).then(() => {
-        const btn = event.target;
-        const orig = btn.textContent;
-        btn.textContent = '✓';
-        setTimeout(() => btn.textContent = orig, 1500);
+        showToast(t('toastLinkCopied'), 'success');
+      }).catch(() => {
+        showToast(t('toastCopyFailed'), 'error');
       });
     }
 
@@ -2455,10 +2492,12 @@
         bookmarks.splice(idx, 1);
         btn.textContent = '☆';
         btn.style.color = '';
+        showToast(t('toastUnbookmarked'), 'info');
       } else {
         bookmarks.push({ title, url, time: Date.now() });
         btn.textContent = '★';
         btn.style.color = 'var(--accent-yellow)';
+        showToast(t('toastBookmarked'), 'success');
       }
       localStorage.setItem('trending-bookmarks', JSON.stringify(bookmarks));
     }
@@ -3780,6 +3819,17 @@
       const tags = extractTags(title);
       return tags.includes(activeTagFilter);
     }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
+    }
   </script>
+  <div class="toast-container" id="toastContainer"></div>
 </body>
 </html>
