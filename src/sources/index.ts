@@ -22,6 +22,7 @@ export { neteaseMusic } from './netease-music.js';
 export { weread } from './weread.js';
 export { juejin } from './juejin.js';
 export { dongqiudi } from './dongqiudi.js';
+export { kuaishou } from './kuaishou.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -47,6 +48,7 @@ import { neteaseMusic } from './netease-music.js';
 import { weread } from './weread.js';
 import { juejin } from './juejin.js';
 import { dongqiudi } from './dongqiudi.js';
+import { kuaishou } from './kuaishou.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -76,5 +78,6 @@ export const allSources: TrendingSource[] = [
   sinaNews,
   weread,
   juejin,
-  dongqiudi
+  dongqiudi,
+  kuaishou
 ];
