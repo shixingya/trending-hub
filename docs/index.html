@@ -271,6 +271,21 @@
       padding: 0.05rem 0.4rem; border-radius: 6px; margin-left: 0.3rem;
       display: inline-block; vertical-align: middle; font-weight: 600;
     }
+    .item-alert-badge {
+      font-size: 0.7rem; margin-left: 0.3rem;
+      display: inline-block; vertical-align: middle;
+      animation: ring 2s ease-in-out infinite;
+    }
+    .item-alerted {
+      border-left: 3px solid var(--accent-red) !important;
+      background: linear-gradient(90deg, rgba(255,107,107,0.05) 0%, transparent 100%);
+    }
+    @keyframes ring {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30% { transform: rotate(-10deg); }
+      20%, 40% { transform: rotate(10deg); }
+      50% { transform: rotate(0deg); }
+    }
     .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
     .skeleton { padding: 0.6rem 1.25rem; }
     .skeleton-line {
@@ -877,6 +892,7 @@
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" onclick="showStats()">统计</button>
+      <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
@@ -1210,7 +1226,18 @@
         toastCopied: '已复制 {count} 个话题',
         toastNoTopics: '没有可复制的话题',
         toastBookmarked: '已收藏',
-        toastUnbookmarked: '已取消收藏'
+        toastUnbookmarked: '已取消收藏',
+        alerts: '提醒',
+        alertsTitle: '话题提醒',
+        alertsDesc: '设置关键词，当相关话题上榜时高亮显示',
+        alertsAdd: '添加关键词',
+        alertsPlaceholder: '输入关键词，如：AI、比特币、华为',
+        alertsEmpty: '暂无提醒，点击上方按钮添加',
+        alertsCount: '{count} 个提醒',
+        alertsMatched: '{count} 条匹配',
+        alertDelete: '删除',
+        alertAdded: '已添加提醒',
+        alertRemoved: '已移除提醒'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1358,7 +1385,18 @@
         toastCopied: 'Copied {count} topics',
         toastNoTopics: 'No topics to copy',
         toastBookmarked: 'Bookmarked',
-        toastUnbookmarked: 'Bookmark removed'
+        toastUnbookmarked: 'Bookmark removed',
+        alerts: 'Alerts',
+        alertsTitle: 'Topic Alerts',
+        alertsDesc: 'Set keywords to highlight related topics when they trend',
+        alertsAdd: 'Add Keyword',
+        alertsPlaceholder: 'Enter keyword, e.g.: AI, Bitcoin, Tesla',
+        alertsEmpty: 'No alerts yet, click button above to add',
+        alertsCount: '{count} alerts',
+        alertsMatched: '{count} matched',
+        alertDelete: 'Delete',
+        alertAdded: 'Alert added',
+        alertRemoved: 'Alert removed'
       }
     };
 
@@ -1414,6 +1452,7 @@
       renderTagFilterBar();
       renderContent();
       updateRefreshTime();
+      updateAlertsButton();
     }
 
     const categories = {
@@ -1507,6 +1546,7 @@
         } catch { trendHistoryData = null; }
         renderTabs();
         renderStats();
+        updateAlertsButton();
         renderTagFilterBar();
         renderContent();
         const total = allData.reduce((sum, s) => sum + s.items.length, 0);
@@ -2075,10 +2115,13 @@
             const displayDesc = item.description && searchQuery ? highlightText(item.description, searchQuery) : (item.description ? escapeHtml(item.description) : '');
             const itemTags = extractTags(title);
             const tagsHtml = itemTags.length > 0 ? `<div class="tag-pills">${itemTags.map(tag => `<span class="tag-pill" onclick="toggleTagFilter('${tag}');event.stopPropagation()">${tag}</span>`).join('')}</div>` : '';
-            html += `<li class="item">
+            const isAlerted = checkAlerts(title);
+            const alertBadge = isAlerted ? '<span class="item-alert-badge" title="匹配提醒">🔔</span>' : '';
+            const itemClass = isAlerted ? 'item item-alerted' : 'item';
+            html += `<li class="${itemClass}">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${alertBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
@@ -2583,6 +2626,109 @@
         showToast(t('toastBookmarked'), 'success');
       }
       localStorage.setItem('trending-bookmarks', JSON.stringify(bookmarks));
+    }
+
+    function getAlerts() {
+      try {
+        return JSON.parse(localStorage.getItem('trending-alerts') || '[]');
+      } catch { return []; }
+    }
+
+    function addAlert(keyword) {
+      const alerts = getAlerts();
+      keyword = keyword.trim();
+      if (!keyword || alerts.includes(keyword)) return;
+      alerts.push(keyword);
+      localStorage.setItem('trending-alerts', JSON.stringify(alerts));
+      showToast(t('alertAdded'), 'success');
+      showAlerts();
+      updateAlertsButton();
+      renderContent();
+    }
+
+    function removeAlert(keyword) {
+      let alerts = getAlerts();
+      alerts = alerts.filter(a => a !== keyword);
+      localStorage.setItem('trending-alerts', JSON.stringify(alerts));
+      showToast(t('alertRemoved'), 'info');
+      showAlerts();
+      updateAlertsButton();
+      renderContent();
+    }
+
+    function showAlerts() {
+      const alerts = getAlerts();
+      let body = `<div style="margin-bottom:1rem;color:var(--text-secondary);font-size:0.9rem">${t('alertsDesc')}</div>`;
+      
+      body += `<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem">
+        <input type="text" id="newAlertInput" placeholder="${t('alertsPlaceholder')}" 
+          style="flex:1;padding:0.6rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.9rem;outline:none"
+          onkeypress="if(event.key==='Enter'){addAlert(this.value);this.value=''}">
+        <button onclick="const input=document.getElementById('newAlertInput');addAlert(input.value);input.value=''" 
+          style="padding:0.6rem 1.2rem;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;font-size:0.9rem">
+          ${t('alertsAdd')}
+        </button>
+      </div>`;
+      
+      if (alerts.length === 0) {
+        body += `<div style="text-align:center;padding:2rem;color:var(--text-muted)">${t('alertsEmpty')}</div>`;
+      } else {
+        body += '<div style="display:flex;flex-direction:column;gap:0.5rem">';
+        alerts.forEach(keyword => {
+          const matchCount = getAlertMatchCount(keyword);
+          body += `<div style="display:flex;align-items:center;padding:0.8rem 1rem;background:var(--bg-input);border-radius:8px;border:1px solid var(--border)">
+            <div style="flex:1;font-size:0.95rem;font-weight:500">${escapeHtml(keyword)}</div>
+            ${matchCount > 0 ? `<div style="margin-right:1rem;font-size:0.8rem;color:var(--accent);font-weight:600">${t('alertsMatched', {count: matchCount})}</div>` : ''}
+            <button onclick="removeAlert('${keyword.replace(/'/g, "\\'")}')" 
+              style="padding:0.4rem 0.8rem;border-radius:6px;border:none;background:var(--accent-red);color:#fff;cursor:pointer;font-size:0.8rem;font-weight:600">
+              ${t('alertDelete')}
+            </button>
+          </div>`;
+        });
+        body += '</div>';
+      }
+      
+      document.getElementById('modalTitle').textContent = t('alertsTitle');
+      document.getElementById('modalBody').innerHTML = body;
+      document.getElementById('topicModal').classList.add('active');
+    }
+
+    function checkAlerts(title) {
+      const alerts = getAlerts();
+      if (alerts.length === 0) return false;
+      const titleLower = title.toLowerCase();
+      return alerts.some(keyword => titleLower.includes(keyword.toLowerCase()));
+    }
+
+    function getAlertMatchCount(keyword) {
+      if (!keyword) return 0;
+      const keywordLower = keyword.toLowerCase();
+      let count = 0;
+      for (const source of allData) {
+        for (const item of source.items) {
+          if (item.title.toLowerCase().includes(keywordLower)) {
+            count++;
+          }
+        }
+      }
+      return count;
+    }
+
+    function updateAlertsButton() {
+      const btn = document.getElementById('alertsBtn');
+      if (!btn) return;
+      const alerts = getAlerts();
+      const totalMatches = alerts.reduce((sum, keyword) => sum + getAlertMatchCount(keyword), 0);
+      
+      if (alerts.length > 0) {
+        btn.textContent = totalMatches > 0 ? `${t('alerts')} (${totalMatches})` : t('alerts');
+        btn.style.background = totalMatches > 0 ? 'var(--accent-red)' : '';
+        btn.style.color = totalMatches > 0 ? '#fff' : '';
+      } else {
+        btn.textContent = t('alerts');
+        btn.style.background = '';
+        btn.style.color = '';
+      }
     }
 
     function sortSource(key) {
