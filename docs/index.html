@@ -674,6 +674,94 @@
       .wordcloud-container { min-height: 350px; }
       .compare-grid { padding: 0.75rem; }
     }
+    .timeline-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1000; display: none;
+      flex-direction: column; overflow: hidden;
+    }
+    .timeline-overlay.active { display: flex; }
+    .timeline-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .timeline-title { font-size: 1.1rem; font-weight: 600; }
+    .timeline-controls { display: flex; gap: 0.5rem; align-items: center; }
+    .timeline-filter {
+      padding: 0.3rem 0.75rem; border-radius: 12px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); font-size: 0.75rem; cursor: pointer;
+    }
+    .timeline-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .timeline-close {
+      background: none; border: none; color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem 0.5rem;
+    }
+    .timeline-close:hover { color: var(--text); }
+    .timeline-container {
+      flex: 1; overflow-y: auto; padding: 1.5rem;
+    }
+    .timeline-chart {
+      display: flex; gap: 2px; align-items: flex-end; height: 120px;
+      margin-bottom: 1.5rem; padding: 0.5rem; background: var(--bg-card);
+      border-radius: 8px; border: 1px solid var(--border);
+    }
+    .timeline-bar {
+      flex: 1; min-width: 20px; background: var(--accent); border-radius: 3px 3px 0 0;
+      position: relative; cursor: pointer; transition: opacity 0.2s;
+    }
+    .timeline-bar:hover { opacity: 0.8; }
+    .timeline-bar-label {
+      position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+      font-size: 0.6rem; color: var(--text-muted); white-space: nowrap;
+    }
+    .timeline-bar-count {
+      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;
+    }
+    .timeline-topics { display: flex; flex-direction: column; gap: 0.75rem; }
+    .timeline-topic {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .timeline-topic-spark {
+      display: flex; gap: 1px; align-items: flex-end; height: 30px; min-width: 80px;
+    }
+    .timeline-spark-bar {
+      flex: 1; background: var(--accent); border-radius: 1px; min-height: 2px;
+    }
+    .timeline-topic-info { flex: 1; min-width: 0; }
+    .timeline-topic-title {
+      font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .timeline-topic-meta {
+      font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;
+    }
+    .timeline-topic-badge {
+      padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.65rem;
+      font-weight: 600; white-space: nowrap;
+    }
+    .timeline-topic-badge.rising { background: #10b981; color: #fff; }
+    .timeline-topic-badge.falling { background: #ef4444; color: #fff; }
+    .timeline-topic-badge.stable { background: var(--text-muted); color: #fff; }
+    .timeline-topic-badge.new { background: var(--accent-yellow); color: #000; }
+    .timeline-empty {
+      text-align: center; padding: 3rem; color: var(--text-muted);
+    }
+    .tag-pills {
+      display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem;
+    }
+    .tag-pill {
+      padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.65rem;
+      background: var(--bg-input); color: var(--text-secondary); cursor: pointer;
+      border: 1px solid transparent; transition: all 0.2s;
+    }
+    .tag-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .tag-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tag-filter-bar {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border); background: var(--bg-card);
+    }
+    .tag-filter-bar:empty { display: none; }
   </style>
 </head>
 <body>
@@ -693,6 +781,7 @@
       <button class="share-btn" onclick="showStats()">统计</button>
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
+      <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
@@ -773,6 +862,24 @@
     <div class="compare-summary" id="compareSummary"></div>
     <div class="compare-grid" id="compareGrid"></div>
   </div>
+
+  <div class="timeline-overlay" id="timelineOverlay">
+    <div class="timeline-header">
+      <div class="timeline-title" id="timelineTitle">热点时间线</div>
+      <div class="timeline-controls">
+        <button class="timeline-filter active" data-filter="all" onclick="filterTimeline('all', this)">全部</button>
+        <button class="timeline-filter" data-filter="rising" onclick="filterTimeline('rising', this)">上升</button>
+        <button class="timeline-filter" data-filter="falling" onclick="filterTimeline('falling', this)">下降</button>
+        <button class="timeline-filter" data-filter="new" onclick="filterTimeline('new', this)">新上榜</button>
+        <button class="timeline-close" onclick="toggleTimeline()">✕</button>
+      </div>
+    </div>
+    <div class="timeline-container" id="timelineContainer">
+      <div class="timeline-empty">加载中...</div>
+    </div>
+  </div>
+
+  <div class="tag-filter-bar" id="tagFilterBar"></div>
 
   <nav class="mobile-nav">
     <div class="mobile-nav-items">
@@ -955,7 +1062,17 @@
         compareTitle: '平台对比',
         comparePlatforms: '对比平台',
         compareOverlapping: '重叠话题',
-        compareUnique: '独有'
+        compareUnique: '独有',
+        timeline: '时间线',
+        timelineTitle: '热点时间线',
+        timelineAll: '全部',
+        timelineRising: '上升',
+        timelineFalling: '下降',
+        timelineNew: '新上榜',
+        timelineNoData: '暂无历史数据，数据将在多次更新后显示',
+        timelineAppearances: '次上榜',
+        timelinePeak: '最高热度',
+        timelineStable: '稳定'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1074,7 +1191,17 @@
         compareTitle: 'Platform Comparison',
         comparePlatforms: 'Platforms',
         compareOverlapping: 'Overlapping',
-        compareUnique: 'unique'
+        compareUnique: 'unique',
+        timeline: 'Timeline',
+        timelineTitle: 'Topic Timeline',
+        timelineAll: 'All',
+        timelineRising: 'Rising',
+        timelineFalling: 'Falling',
+        timelineNew: 'New',
+        timelineNoData: 'No historical data yet. Data will appear after multiple updates.',
+        timelineAppearances: 'appearances',
+        timelinePeak: 'Peak',
+        timelineStable: 'Stable'
       }
     };
 
@@ -1113,15 +1240,20 @@
       if (buttons[7]) buttons[7].textContent = t('stats');
       if (buttons[8]) buttons[8].textContent = wordCloudActive ? '✕' : t('wordCloud');
       if (buttons[9]) buttons[9].textContent = compareActive ? '✕' : t('compare');
-      if (buttons[10]) buttons[10].textContent = currentLang === 'zh' ? 'EN' : '中文';
+      if (buttons[10]) buttons[10].textContent = t('timeline');
+      if (buttons[11]) buttons[11].textContent = currentLang === 'zh' ? 'EN' : '中文';
       
       const themeBtn = document.getElementById('themeToggle');
       if (themeBtn) {
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
         themeBtn.textContent = isLight ? t('dark') : t('light');
       }
+
+      const timelineTitle = document.getElementById('timelineTitle');
+      if (timelineTitle) timelineTitle.textContent = t('timelineTitle');
       
       renderTabs();
+      renderTagFilterBar();
       renderContent();
       updateRefreshTime();
     }
@@ -1187,6 +1319,7 @@
         } catch { prevData = []; }
         renderTabs();
         renderStats();
+        renderTagFilterBar();
         renderContent();
       } catch (err) {
         document.getElementById('content').innerHTML =
@@ -1304,6 +1437,9 @@
           item.title.toLowerCase().includes(searchQuery) ||
           (item.description && item.description.toLowerCase().includes(searchQuery))
         );
+      }
+      if (activeTagFilter) {
+        filtered = filtered.filter(item => filterByTags(item.title));
       }
       return filtered;
     }
@@ -1718,11 +1854,14 @@
             const title = item.title || '';
             const displayTitle = searchQuery ? highlightText(title, searchQuery) : escapeHtml(title);
             const displayDesc = item.description && searchQuery ? highlightText(item.description, searchQuery) : (item.description ? escapeHtml(item.description) : '');
+            const itemTags = extractTags(title);
+            const tagsHtml = itemTags.length > 0 ? `<div class="tag-pills">${itemTags.map(tag => `<span class="tag-pill" onclick="toggleTagFilter('${tag}');event.stopPropagation()">${tag}</span>`).join('')}</div>` : '';
             html += `<li class="item">
               <span class="item-rank">${i + 1}</span>
               <div class="item-content">
                 <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
+                ${tagsHtml}
               </div>
               <div class="item-actions">
                 <button class="item-action-btn" onclick="showTopicDetail('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="跨平台详情">🔍</button>
@@ -2186,13 +2325,14 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
       if (e.key === 'b' || e.key === 'B') { switchSource('bookmarks'); }
       if (e.key === 'w' || e.key === 'W') { toggleWordCloud(); }
       if (e.key === 'c' || e.key === 'C') { toggleCompareMode(); }
+      if (e.key === 'l' || e.key === 'L') { toggleTimeline(); }
     });
 
     let focusMode = false;
@@ -3050,6 +3190,210 @@
       });
 
       grid.innerHTML = html;
+    }
+
+    // Timeline feature
+    let timelineFilter = 'all';
+
+    function toggleTimeline() {
+      const overlay = document.getElementById('timelineOverlay');
+      overlay.classList.toggle('active');
+      if (overlay.classList.contains('active')) {
+        renderTimeline();
+      }
+    }
+
+    function filterTimeline(filter, btn) {
+      timelineFilter = filter;
+      document.querySelectorAll('.timeline-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTimeline();
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('timelineContainer');
+      if (!container) return;
+
+      if (!trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) {
+        container.innerHTML = `<div class="timeline-empty">${t('timelineNoData')}</div>`;
+        return;
+      }
+
+      const snapshots = trendHistoryData.snapshots;
+      const topicHistory = new Map();
+
+      snapshots.forEach((snap, idx) => {
+        const date = snap.date;
+        snap.topics.forEach(topic => {
+          const key = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase().slice(0, 50);
+          if (!topicHistory.has(key)) {
+            topicHistory.set(key, { title: topic.title, source: topic.source, appearances: [], firstSeen: idx, lastSeen: idx, maxHot: topic.hot });
+          }
+          const entry = topicHistory.get(key);
+          entry.appearances.push({ date, hot: topic.hot, idx });
+          entry.lastSeen = idx;
+          entry.maxHot = Math.max(entry.maxHot, topic.hot);
+        });
+      });
+
+      const topics = Array.from(topicHistory.values());
+      const totalSnapshots = snapshots.length;
+
+      let filteredTopics = topics;
+      if (timelineFilter === 'rising') {
+        filteredTopics = topics.filter(topic => {
+          if (topic.appearances.length < 2) return false;
+          const first = topic.appearances[0].hot;
+          const last = topic.appearances[topic.appearances.length - 1].hot;
+          return last > first * 1.2;
+        });
+      } else if (timelineFilter === 'falling') {
+        filteredTopics = topics.filter(topic => {
+          if (topic.appearances.length < 2) return false;
+          const first = topic.appearances[0].hot;
+          const last = topic.appearances[topic.appearances.length - 1].hot;
+          return last < first * 0.8;
+        });
+      } else if (timelineFilter === 'new') {
+        filteredTopics = topics.filter(topic => topic.firstSeen >= totalSnapshots - 1);
+      }
+
+      filteredTopics.sort((a, b) => b.maxHot - a.maxHot);
+      filteredTopics = filteredTopics.slice(0, 50);
+
+      const maxHot = Math.max(...filteredTopics.map(topic => topic.maxHot), 1);
+
+      let html = '<div class="timeline-chart">';
+      snapshots.forEach((snap, idx) => {
+        const count = snap.topics.length;
+        const height = Math.max(5, (count / 100) * 100);
+        const date = new Date(snap.date);
+        const label = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:00`;
+        html += `<div class="timeline-bar" style="height:${height}%" title="${label}: ${count} topics">
+          <span class="timeline-bar-count">${count}</span>
+          <span class="timeline-bar-label">${date.getHours()}:00</span>
+        </div>`;
+      });
+      html += '</div>';
+
+      html += '<div class="timeline-topics">';
+      filteredTopics.forEach(topic => {
+        const sparkBars = topic.appearances.map(a => {
+          const h = Math.max(5, (a.hot / maxHot) * 100);
+          return `<div class="timeline-spark-bar" style="height:${h}%" title="${a.date}: ${formatHot(a.hot)}"></div>`;
+        }).join('');
+
+        let badge = '';
+        let badgeClass = 'stable';
+        if (topic.appearances.length >= 2) {
+          const first = topic.appearances[0].hot;
+          const last = topic.appearances[topic.appearances.length - 1].hot;
+          if (last > first * 1.2) { badge = t('timelineRising'); badgeClass = 'rising'; }
+          else if (last < first * 0.8) { badge = t('timelineFalling'); badgeClass = 'falling'; }
+          else { badge = t('timelineStable'); }
+        } else if (topic.firstSeen >= totalSnapshots - 1) {
+          badge = t('timelineNew'); badgeClass = 'new';
+        }
+
+        const sourceInfo = allData.find(s => s.key === topic.source);
+        const sourceIcon = sourceInfo ? sourceInfo.icon : '?';
+        const sourceColor = sourceInfo ? sourceInfo.color : '#888';
+
+        html += `<div class="timeline-topic">
+          <div class="timeline-topic-spark">${sparkBars}</div>
+          <div class="timeline-topic-info">
+            <div class="timeline-topic-title">${escapeHtml(topic.title)}</div>
+            <div class="timeline-topic-meta">
+              <span style="color:${sourceColor}">${sourceIcon}</span>
+              ${topic.appearances.length} ${t('timelineAppearances')} · ${t('timelinePeak')}: ${formatHot(topic.maxHot)}
+            </div>
+          </div>
+          ${badge ? `<span class="timeline-topic-badge ${badgeClass}">${badge}</span>` : ''}
+        </div>`;
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    function formatHot(hot) {
+      if (hot >= 10000000) return (hot / 10000000).toFixed(1) + (currentLang === 'zh' ? '千万' : '0M');
+      if (hot >= 10000) return (hot / 10000).toFixed(1) + (currentLang === 'zh' ? '万' : 'K');
+      if (hot >= 1000) return (hot / 1000).toFixed(1) + 'K';
+      return hot.toString();
+    }
+
+    // Tag system
+    const tagKeywords = {
+      'AI': ['AI', '人工智能', 'GPT', '大模型', 'OpenAI', 'Claude', '机器学习', '深度学习', '算法'],
+      '科技': ['华为', '苹果', '小米', '手机', '芯片', '5G', '互联网', '软件', '硬件'],
+      '汽车': ['比亚迪', '特斯拉', '蔚来', '小鹏', '理想', '新能源', '电动车', '汽车'],
+      '娱乐': ['明星', '演员', '电影', '电视剧', '综艺', '八卦', '演唱会', '偶像'],
+      '体育': ['足球', '篮球', 'NBA', 'CBA', '比赛', '冠军', '联赛', '球员'],
+      '财经': ['股市', 'A股', '基金', '投资', '房价', '经济', 'GDP', '上市'],
+      '社会': ['事件', '事故', '案件', '警方', '法院', '判决', '维权', '投诉'],
+      '游戏': ['原神', '王者荣耀', '英雄联盟', 'LOL', 'Steam', '主机', 'PS5', 'Switch'],
+      '健康': ['医疗', '医院', '医生', '疫苗', '病毒', '减肥', '健身', '心理'],
+      '国际': ['美国', '日本', '俄罗斯', '欧洲', '韩国', '印度', '英国', '法国']
+    };
+
+    function extractTags(title) {
+      const tags = [];
+      for (const [tag, keywords] of Object.entries(tagKeywords)) {
+        for (const kw of keywords) {
+          if (title.toLowerCase().includes(kw.toLowerCase())) {
+            tags.push(tag);
+            break;
+          }
+        }
+      }
+      return tags.slice(0, 3);
+    }
+
+    let activeTagFilter = null;
+
+    function toggleTagFilter(tag) {
+      if (activeTagFilter === tag) {
+        activeTagFilter = null;
+      } else {
+        activeTagFilter = tag;
+      }
+      renderTagFilterBar();
+      renderContent();
+    }
+
+    function renderTagFilterBar() {
+      const bar = document.getElementById('tagFilterBar');
+      if (!bar) return;
+
+      const allTags = new Map();
+      allData.forEach(source => {
+        source.items.forEach(item => {
+          const tags = extractTags(item.title);
+          tags.forEach(tag => {
+            allTags.set(tag, (allTags.get(tag) || 0) + 1);
+          });
+        });
+      });
+
+      if (allTags.size === 0) {
+        bar.innerHTML = '';
+        return;
+      }
+
+      const sortedTags = Array.from(allTags.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15);
+      let html = '';
+      sortedTags.forEach(([tag, count]) => {
+        const active = activeTagFilter === tag;
+        html += `<span class="tag-pill${active ? ' active' : ''}" onclick="toggleTagFilter('${tag}')">${tag} (${count})</span>`;
+      });
+      bar.innerHTML = html;
+    }
+
+    function filterByTags(title) {
+      if (!activeTagFilter) return true;
+      const tags = extractTags(title);
+      return tags.includes(activeTagFilter);
     }
   </script>
 </body>
