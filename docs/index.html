@@ -864,12 +864,13 @@
 <body>
   <header>
     <h1>Trending Hub</h1>
-    <p>全网热点聚合 - 27大平台实时热点</p>
+    <p>全网热点聚合 - 28大平台实时热点</p>
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
+      <button class="share-btn" onclick="copyAllTopics()">复制全部</button>
       <button class="share-btn" onclick="showMorningBrief()">早报</button>
       <button class="share-btn" onclick="generateShareImage()">生成图片</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
@@ -902,7 +903,7 @@
 
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 27大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 28大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
     <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
@@ -1065,10 +1066,11 @@
     const translations = {
       zh: {
         title: 'Trending Hub - 全网热点聚合',
-        subtitle: '全网热点聚合 - 27大平台实时热点',
+        subtitle: '全网热点聚合 - 28大平台实时热点',
         searchPlaceholder: '搜索热点话题... (按 / 聚焦)',
         exportMD: '导出MD',
         exportCSV: '导出CSV',
+        copyAll: '复制全部',
         morningBrief: '早报',
         generateImage: '生成图片',
         random: '随机',
@@ -1113,7 +1115,7 @@
         updated: '数据更新于',
         footer: 'Trending Hub - 仅供学习研究，数据版权归原作者原平台所有',
         footerUpdate: '每2小时自动更新',
-        footerPlatforms: '27大平台',
+        footerPlatforms: '28大平台',
         starOnGitHub: 'Star on GitHub',
         suggestSource: '建议新数据源',
         shortcuts: '快捷键',
@@ -1205,15 +1207,18 @@
         toastCopyFailed: '复制失败，请手动复制',
         toastShared: '分享内容已复制到剪贴板',
         toastExported: '已导出 {filename}',
+        toastCopied: '已复制 {count} 个话题',
+        toastNoTopics: '没有可复制的话题',
         toastBookmarked: '已收藏',
         toastUnbookmarked: '已取消收藏'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
-        subtitle: 'Trending Hub - 27 Platforms Real-time Hot Topics',
+        subtitle: 'Trending Hub - 28 Platforms Real-time Hot Topics',
         searchPlaceholder: 'Search topics... (Press / to focus)',
         exportMD: 'Export MD',
         exportCSV: 'Export CSV',
+        copyAll: 'Copy All',
         morningBrief: 'Brief',
         generateImage: 'Image',
         random: 'Random',
@@ -1258,7 +1263,7 @@
         updated: 'Updated',
         footer: 'Trending Hub - For learning only. All rights belong to original owners.',
         footerUpdate: 'Auto-update every 2 hours',
-        footerPlatforms: '27 platforms',
+        footerPlatforms: '28 platforms',
         starOnGitHub: 'Star on GitHub',
         suggestSource: 'Suggest new source',
         shortcuts: 'Shortcuts',
@@ -1350,6 +1355,8 @@
         toastCopyFailed: 'Copy failed, please copy manually',
         toastShared: 'Share content copied to clipboard',
         toastExported: 'Exported {filename}',
+        toastCopied: 'Copied {count} topics',
+        toastNoTopics: 'No topics to copy',
         toastBookmarked: 'Bookmarked',
         toastUnbookmarked: 'Bookmark removed'
       }
@@ -2506,6 +2513,44 @@
       a.click();
       URL.revokeObjectURL(url);
       showToast(t('toastExported', { filename }), 'success');
+    }
+
+    function copyAllTopics() {
+      if (allData.length === 0) return;
+
+      const visibleSources = allData.filter(s => {
+        if (activeSource !== 'all' && s.key !== activeSource) return false;
+        if (activeCategory !== 'all') {
+          const hasMatchingItem = s.items.some(item => {
+            const cat = categorize(item.title);
+            return cat === activeCategory;
+          });
+          if (!hasMatchingItem) return false;
+        }
+        return s.items.length > 0;
+      });
+
+      if (visibleSources.length === 0) {
+        showToast(t('toastNoTopics') || '没有可复制的话题', 'error');
+        return;
+      }
+
+      let text = `全网热点 - ${new Date().toLocaleDateString('zh-CN')}\n\n`;
+      for (const source of visibleSources) {
+        text += `【${source.source}】\n`;
+        const items = filterItems(source.items);
+        items.slice(0, 10).forEach((item, i) => {
+          text += `${i + 1}. ${item.title}\n`;
+        });
+        text += '\n';
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        const count = visibleSources.reduce((sum, s) => sum + Math.min(filterItems(s.items).length, 10), 0);
+        showToast(t('toastCopied', { count }) || `已复制 ${count} 个话题`, 'success');
+      }).catch(() => {
+        showToast(t('toastCopyFailed'), 'error');
+      });
     }
 
     function copyLink(url) {
