@@ -838,6 +838,27 @@
       .graph-header { padding: 0.75rem 1rem; }
       .graph-legend { bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.5rem; }
     }
+    @media print {
+      header, .search-bar, .tabs, .stats-bar, .refresh-time, footer,
+      .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
+      .item-action-btn, .load-more-btn, .bottom-nav, .tag-filter-bar,
+      #shortcutsOverlay, #wordcloudOverlay, #compareOverlay, #timelineOverlay,
+      #graphOverlay, #topicModal, #shareImagePreview, #morningBriefOverlay,
+      #statsOverlay { display: none !important; }
+      body { background: #fff; color: #000; font-size: 10pt; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .source-section {
+        break-inside: avoid; page-break-inside: avoid;
+        border: 1px solid #ccc; box-shadow: none; margin-bottom: 0.5cm;
+        content-visibility: visible !important;
+      }
+      .source-header { padding: 0.4rem 0.6rem; }
+      .item { padding: 0.2rem 0.6rem; }
+      .item-title a { color: #000; text-decoration: none; }
+      .item-title a::after { content: " (" attr(href) ")"; font-size: 0.7em; color: #666; }
+      .item-hot, .item-comments { color: #666; }
+      .source-icon { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
   </style>
 </head>
 <body>
@@ -1515,9 +1536,26 @@
           <span>${errorCount} 异常</span>
         </span>`;
       }
-      html += `<span>${t('platformsCount')} ${allData.length}</span><span>${total} ${t('hotTopics')}</span>`;
-      if (newCount > 0) html += `<span style="color:var(--accent-red)">${newCount} ${t('newItems')}</span>`;
+      html += `<span>${t('platformsCount')} <span class="counter" data-target="${allData.length}">0</span></span><span><span class="counter" data-target="${total}">0</span> ${t('hotTopics')}</span>`;
+      if (newCount > 0) html += `<span style="color:var(--accent-red)"><span class="counter" data-target="${newCount}">0</span> ${t('newItems')}</span>`;
       bar.innerHTML = html;
+      animateCounters();
+    }
+
+    function animateCounters() {
+      document.querySelectorAll('.counter').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        if (isNaN(target) || target === 0) { el.textContent = '0'; return; }
+        const duration = 800;
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = String(Math.round(target * eased));
+          if (progress >= 1) clearInterval(timer);
+        }, 16);
+      });
     }
 
     function renderTabs() {
