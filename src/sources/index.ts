@@ -23,6 +23,9 @@ export { weread } from './weread.js';
 export { juejin } from './juejin.js';
 export { dongqiudi } from './dongqiudi.js';
 export { kuaishou } from './kuaishou.js';
+export { devto } from './dev-to.js';
+export { githubNewRepos } from './github-newrepos.js';
+export { oschina } from './oschina.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -49,6 +52,9 @@ import { weread } from './weread.js';
 import { juejin } from './juejin.js';
 import { dongqiudi } from './dongqiudi.js';
 import { kuaishou } from './kuaishou.js';
+import { devto } from './dev-to.js';
+import { githubNewRepos } from './github-newrepos.js';
+import { oschina } from './oschina.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -79,5 +85,8 @@ export const allSources: TrendingSource[] = [
   weread,
   juejin,
   dongqiudi,
-  kuaishou
+  kuaishou,
+  devto,
+  githubNewRepos,
+  oschina
 ];
