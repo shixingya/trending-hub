@@ -1401,6 +1401,21 @@
     }
     .palette-item-label { flex: 1; }
     .palette-item-hint { font-size: 0.7rem; color: var(--text-muted); }
+    .chart-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chart-container {
+      background: var(--bg-card); border-radius: 16px; padding: 1.5rem;
+      width: 860px; max-width: 95vw; box-shadow: 0 8px 32px var(--shadow);
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .chart-title { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .chart-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+    .chart-close:hover { color: var(--accent); }
+    #platformChartCanvas { width: 100%; height: auto; }
+
     .quiz-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7); z-index: 2000;
@@ -1651,6 +1666,7 @@
       <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
       <button class="share-btn" id="collectionsBtn" onclick="toggleCollections()">收藏集</button>
       <button class="share-btn" id="embedBtn" onclick="showEmbedWidget()">嵌入</button>
+      <button class="share-btn" id="chartBtn" onclick="togglePlatformChart()">图表</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="share-btn" id="installBtn" onclick="installApp()" style="display:none">📲 <span data-t="installApp">安装</span></button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
@@ -1905,6 +1921,16 @@
       <div class="quiz-options" id="quizOptions"></div>
       <div class="quiz-result" id="quizResult" style="display:none"></div>
       <div class="quiz-actions" id="quizActions"></div>
+    </div>
+  </div>
+
+  <div class="chart-overlay" id="chartOverlay" style="display:none" onclick="if(event.target===this)togglePlatformChart()">
+    <div class="chart-container">
+      <div class="chart-header">
+        <span class="chart-title">📊 <span data-t="platformChart">平台数据概览</span></span>
+        <button class="chart-close" onclick="togglePlatformChart()">✕</button>
+      </div>
+      <canvas id="platformChartCanvas" width="800" height="500"></canvas>
     </div>
   </div>
 
@@ -2234,7 +2260,8 @@
         digestTopCat: '热门分类',
         digestTotal: '总计',
         digestItems: '条',
-        installApp: '安装'
+        installApp: '安装',
+        platformChart: '平台数据概览'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2482,7 +2509,8 @@
         digestTopCat: 'Top Category',
         digestTotal: 'Total',
         digestItems: 'items',
-        installApp: 'Install'
+        installApp: 'Install',
+        platformChart: 'Platform Overview'
       }
     };
 
@@ -4612,7 +4640,7 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); if (document.getElementById('heatmapOverlay')?.classList.contains('active')) toggleHeatmap(); if (document.getElementById('collectionsOverlay')?.classList.contains('active')) toggleCollections(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); if (document.getElementById('heatmapOverlay')?.classList.contains('active')) toggleHeatmap(); if (document.getElementById('collectionsOverlay')?.classList.contains('active')) toggleCollections(); if (document.getElementById('chartOverlay')?.style.display !== 'none') togglePlatformChart(); if (document.getElementById('quizOverlay')?.style.display !== 'none') toggleQuiz(); if (document.getElementById('pkOverlay')?.style.display !== 'none') toggleHotPK(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
@@ -4630,6 +4658,7 @@
       if (e.key === 'm' || e.key === 'M') { toggleCompactMode(); }
       if (e.key === 'k' || e.key === 'K') { openPalette(); }
       if (e.key === 'q' || e.key === 'Q') { toggleQuiz(); }
+      if (e.key === 'v' || e.key === 'V') { togglePlatformChart(); }
     });
 
     let focusMode = false;
@@ -5381,6 +5410,7 @@
           { keys: ['O'], desc: t('collections') },
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
+          { keys: ['V'], desc: t('platformChart') },
         ]
       };
 
@@ -6773,6 +6803,7 @@
         { label: '对比模式', hint: '快捷键 C', icon: '🔍', color: '#a29bfe', action: () => toggleCompareMode() },
         { label: '热点PK', hint: '快捷键 P', icon: '🔥', color: '#ff6b6b', action: () => toggleHotPK() },
         { label: '热点猜谜', hint: '快捷键 Q', icon: '🧠', color: '#e056fd', action: () => toggleQuiz() },
+        { label: '平台图表', hint: '快捷键 V', icon: '📊', color: '#3498db', action: () => togglePlatformChart() },
         { label: '关系图谱', hint: '快捷键 G', icon: '🕸️', color: '#55a3f0', action: () => toggleGraph() },
         { label: '活动热力图', hint: '快捷键 H', icon: '📅', color: '#2ecc71', action: () => toggleHeatmap() },
         { label: '话题收藏集', hint: '快捷键 O', icon: '📁', color: '#e67e22', action: () => toggleCollections() },
@@ -6847,6 +6878,74 @@
         closePalette();
       }
     });
+
+    function togglePlatformChart() {
+      const overlay = document.getElementById('chartOverlay');
+      if (overlay.style.display === 'none') {
+        overlay.style.display = 'flex';
+        drawPlatformChart();
+      } else {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function drawPlatformChart() {
+      const canvas = document.getElementById('platformChartCanvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = 800 * dpr;
+      canvas.height = 500 * dpr;
+      ctx.scale(dpr, dpr);
+
+      const isDark = document.body.classList.contains('dark-mode');
+      const textColor = isDark ? '#e0e0e0' : '#333';
+      const bgColor = isDark ? '#1e1e2e' : '#ffffff';
+      const gridColor = isDark ? '#333' : '#eee';
+
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, 800, 500);
+
+      const sorted = allData.filter(s => !s.error && s.items.length > 0).sort((a, b) => b.items.length - a.items.length);
+      if (sorted.length === 0) return;
+
+      const maxCount = sorted[0].items.length;
+      const barHeight = Math.min(14, (460 - 30) / sorted.length - 2);
+      const leftMargin = 100;
+      const rightMargin = 50;
+      const topMargin = 30;
+      const chartWidth = 800 - leftMargin - rightMargin;
+
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.fillText(t('platformChart') || '平台数据概览', 400, 18);
+
+      for (let i = 0; i < sorted.length; i++) {
+        const y = topMargin + i * (barHeight + 2);
+        const barWidth = (sorted[i].items.length / maxCount) * chartWidth;
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'right';
+        ctx.font = '10px system-ui, sans-serif';
+        ctx.fillText(sorted[i].source.slice(0, 10), leftMargin - 6, y + barHeight - 2);
+
+        ctx.fillStyle = sorted[i].color;
+        ctx.beginPath();
+        ctx.roundRect(leftMargin, y, barWidth, barHeight, 3);
+        ctx.fill();
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'left';
+        ctx.font = '9px system-ui, sans-serif';
+        ctx.fillText(String(sorted[i].items.length), leftMargin + barWidth + 4, y + barHeight - 2);
+      }
+
+      const totalItems = sorted.reduce((s, d) => s + d.items.length, 0);
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'left';
+      ctx.font = '10px system-ui, sans-serif';
+      ctx.fillText(`${sorted.length} ${t('digestItems') || '条'} · ${totalItems} ${t('platformsUnit') || '平台'}`, leftMargin, 500 - 5);
+    }
 
     let quizScore = 0, quizTotal = 0, quizAnswered = false;
 
