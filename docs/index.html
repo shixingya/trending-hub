@@ -1087,6 +1087,14 @@
     }
     .collection-new-btn:hover { border-color: var(--accent); color: var(--accent); }
     .collection-topics { display: flex; flex-direction: column; gap: 0.5rem; }
+    .collection-search-wrap { margin-bottom: 0.75rem; }
+    .collection-search {
+      width: 100%; padding: 0.5rem 0.8rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+      font-size: 0.85rem; outline: none; box-sizing: border-box;
+    }
+    .collection-search:focus { border-color: var(--accent); }
+    .collection-search::placeholder { color: var(--text-muted); }
     .collection-topic-item {
       display: flex; align-items: center; gap: 0.75rem;
       padding: 0.6rem 0.8rem; background: var(--bg-card); border: 1px solid var(--border);
@@ -1756,6 +1764,9 @@
     </div>
     <div class="collections-body" id="collectionsBody">
       <div class="collection-tabs" id="collectionTabs"></div>
+      <div class="collection-search-wrap" id="collectionSearchWrap" style="display:none">
+        <input class="collection-search" id="collectionSearch" type="text" placeholder="搜索收藏话题..." oninput="onCollectionSearch(this.value)">
+      </div>
       <div class="collection-topics" id="collectionTopics"></div>
     </div>
   </div>
@@ -5893,6 +5904,7 @@
     // Topic Collections
     let topicCollections = JSON.parse(localStorage.getItem('trendingHubCollections') || '[]');
     let activeCollectionId = null;
+    let collectionSearchQuery = '';
 
     function saveCollections() {
       localStorage.setItem('trendingHubCollections', JSON.stringify(topicCollections));
@@ -5932,14 +5944,31 @@
       `).join('') + `<button class="collection-new-btn" onclick="createCollection()">${t('collectionsNew')}</button>`;
 
       const collection = topicCollections.find(c => c.id === activeCollectionId);
+      const searchWrap = document.getElementById('collectionSearchWrap');
+      const searchInput = document.getElementById('collectionSearch');
+
       if (!collection || collection.topics.length === 0) {
+        if (searchWrap) searchWrap.style.display = 'none';
         topicsEl.innerHTML = `<div class="collection-empty">${t('collectionsEmpty')}</div>`;
         return;
       }
 
-      topicsEl.innerHTML = collection.topics.map((topic, i) => `
+      if (searchWrap) searchWrap.style.display = '';
+      if (searchInput && searchInput.value !== collectionSearchQuery) searchInput.value = collectionSearchQuery;
+
+      const q = collectionSearchQuery.toLowerCase();
+      const filtered = q
+        ? collection.topics.map((t, i) => ({ topic: t, origIndex: i })).filter(({ topic }) => topic.title.toLowerCase().includes(q) || (topic.sourceName || '').toLowerCase().includes(q))
+        : collection.topics.map((t, i) => ({ topic: t, origIndex: i }));
+
+      if (filtered.length === 0) {
+        topicsEl.innerHTML = `<div class="collection-empty">无匹配话题</div>`;
+        return;
+      }
+
+      topicsEl.innerHTML = filtered.map(({ topic, origIndex }) => `
         <div class="collection-topic-item">
-          <div class="collection-topic-rank">${i + 1}</div>
+          <div class="collection-topic-rank">${origIndex + 1}</div>
           <div class="collection-topic-info">
             <div class="collection-topic-title">
               <a href="${topic.url}" target="_blank" rel="noopener">${topic.title}</a>
@@ -5949,13 +5978,19 @@
               ${topic.hot ? `<span>${formatHot(topic.hot)}</span>` : ''}
             </div>
           </div>
-          <button class="collection-topic-remove" onclick="removeFromCollection('${activeCollectionId}', ${i})" title="移除">✕</button>
+          <button class="collection-topic-remove" onclick="removeFromCollection('${activeCollectionId}', ${origIndex})" title="移除">✕</button>
         </div>
       `).join('');
     }
 
     function switchCollection(id) {
       activeCollectionId = id;
+      collectionSearchQuery = '';
+      renderCollections();
+    }
+
+    function onCollectionSearch(value) {
+      collectionSearchQuery = value;
       renderCollections();
     }
 
