@@ -1012,6 +1012,108 @@
       .heatmap-dates { padding-left: 68px; }
       .heatmap-dates span { width: 10px; }
     }
+    .collections-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1000; display: none;
+      flex-direction: column; overflow: hidden;
+    }
+    .collections-overlay.active { display: flex; }
+    .collections-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .collections-title { font-size: 1.1rem; font-weight: 600; }
+    .collections-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .collections-close {
+      background: none; border: none; color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem 0.5rem;
+    }
+    .collections-close:hover { color: var(--text); }
+    .collections-body { flex: 1; overflow: auto; padding: 1.5rem; }
+    .collection-tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .collection-tab {
+      padding: 0.4rem 0.8rem; border-radius: 16px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); font-size: 0.8rem; cursor: pointer;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .collection-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .collection-tab .tab-count {
+      background: rgba(255,255,255,0.2); border-radius: 8px; padding: 0 0.3rem;
+      font-size: 0.65rem;
+    }
+    .collection-tab:not(.active) .tab-count { background: var(--border); }
+    .collection-tab .tab-delete {
+      background: none; border: none; color: inherit; cursor: pointer;
+      font-size: 0.7rem; opacity: 0.6; padding: 0 0.1rem;
+    }
+    .collection-tab .tab-delete:hover { opacity: 1; }
+    .collection-new-btn {
+      padding: 0.4rem 0.8rem; border-radius: 16px; border: 1px dashed var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.8rem; cursor: pointer;
+    }
+    .collection-new-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .collection-topics { display: flex; flex-direction: column; gap: 0.5rem; }
+    .collection-topic-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0.8rem; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; transition: border-color 0.2s;
+    }
+    .collection-topic-item:hover { border-color: var(--accent); }
+    .collection-topic-rank {
+      width: 24px; height: 24px; border-radius: 50%; background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    }
+    .collection-topic-info { flex: 1; min-width: 0; }
+    .collection-topic-title {
+      font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .collection-topic-title a { color: var(--text); text-decoration: none; }
+    .collection-topic-title a:hover { color: var(--accent); }
+    .collection-topic-meta {
+      font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;
+      display: flex; gap: 0.5rem;
+    }
+    .collection-topic-source {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.65rem;
+      background: var(--border);
+    }
+    .collection-topic-remove {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 0.8rem; padding: 0.25rem;
+    }
+    .collection-topic-remove:hover { color: #ff6b6b; }
+    .collection-empty {
+      text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.85rem;
+    }
+    .collection-add-btn {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 0.75rem; padding: 0.2rem 0.4rem; border-radius: 4px;
+    }
+    .collection-add-btn:hover { color: var(--accent); background: var(--border); }
+    .collection-picker {
+      position: absolute; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.5rem; box-shadow: 0 4px 16px var(--shadow);
+      z-index: 100; min-width: 160px;
+    }
+    .collection-picker-title {
+      font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem;
+      padding: 0 0.3rem;
+    }
+    .collection-picker-item {
+      padding: 0.35rem 0.5rem; border-radius: 4px; font-size: 0.8rem;
+      cursor: pointer; display: flex; align-items: center; gap: 0.3rem;
+    }
+    .collection-picker-item:hover { background: var(--border); }
+    .collection-picker-item.active { color: var(--accent); }
+    @media (max-width: 600px) {
+      .collections-header { padding: 0.75rem 1rem; }
+      .collections-body { padding: 1rem 0.75rem; }
+    }
     .embed-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.6); z-index: 1001; display: none;
@@ -1201,7 +1303,7 @@
       .item-action-btn, .load-more-btn, .bottom-nav, .tag-filter-bar,
       #shortcutsOverlay, #wordcloudOverlay, #compareOverlay, #timelineOverlay,
       #graphOverlay, #topicModal, #shareImagePreview, #morningBriefOverlay, #embedOverlay,
-      #statsOverlay, #heatmapOverlay { display: none !important; }
+      #statsOverlay, #heatmapOverlay, #collectionsOverlay { display: none !important; }
       body { background: #fff; color: #000; font-size: 10pt; }
       .container { max-width: 100%; margin: 0; padding: 0; }
       .source-section {
@@ -1248,6 +1350,7 @@
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
       <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
+      <button class="share-btn" id="collectionsBtn" onclick="toggleCollections()">收藏集</button>
       <button class="share-btn" id="embedBtn" onclick="showEmbedWidget()">嵌入</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
@@ -1467,6 +1570,19 @@
     <div class="heatmap-tooltip" id="heatmapTooltip"></div>
   </div>
 
+  <div class="collections-overlay" id="collectionsOverlay">
+    <div class="collections-header">
+      <div class="collections-title" id="collectionsTitle">话题收藏集</div>
+      <div class="collections-actions">
+        <button class="collections-close" onclick="toggleCollections()">✕</button>
+      </div>
+    </div>
+    <div class="collections-body" id="collectionsBody">
+      <div class="collection-tabs" id="collectionTabs"></div>
+      <div class="collection-topics" id="collectionTopics"></div>
+    </div>
+  </div>
+
   <div class="tag-filter-bar" id="tagFilterBar"></div>
 
   <nav class="mobile-nav">
@@ -1657,6 +1773,16 @@
         heatmapNoData: '暂无历史数据',
         heatmapTopics: '个话题',
         heatmapDays: '天',
+        collections: '收藏集',
+        collectionsTitle: '话题收藏集',
+        collectionsNew: '+ 新建',
+        collectionsNewPrompt: '输入收藏集名称',
+        collectionsEmpty: '暂无话题，点击话题旁的 + 按钮添加',
+        collectionsNoCollections: '点击 "+ 新建" 创建第一个收藏集',
+        collectionsAddTo: '添加到收藏集',
+        collectionsAdded: '已添加到 {collection}',
+        collectionsRemoved: '已移除',
+        collectionsDeleteConfirm: '确定删除此收藏集？',
         wordCloud: '词云',
         wordCloudTitle: '热点词云',
         compare: '对比',
@@ -1857,6 +1983,16 @@
         heatmapNoData: 'No historical data',
         heatmapTopics: 'topics',
         heatmapDays: 'days',
+        collections: 'Collections',
+        collectionsTitle: 'Topic Collections',
+        collectionsNew: '+ New',
+        collectionsNewPrompt: 'Enter collection name',
+        collectionsEmpty: 'No topics yet. Click + next to a topic to add it.',
+        collectionsNoCollections: 'Click "+ New" to create your first collection',
+        collectionsAddTo: 'Add to collection',
+        collectionsAdded: 'Added to {collection}',
+        collectionsRemoved: 'Removed',
+        collectionsDeleteConfirm: 'Delete this collection?',
         wordCloud: 'Cloud',
         wordCloudTitle: 'Topic Word Cloud',
         compare: 'Compare',
@@ -2710,6 +2846,7 @@
                 <button class="item-action-btn" onclick="showTopicDetail('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="跨平台详情">🔍</button>
                 <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(title).replace(/'/g, "\\'")}', '${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
                 <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
+                <button class="item-action-btn" onclick="showCollectionPicker(event,'${source.key}','${source.source.replace(/'/g, "\\'")}','${source.icon}','${escapeHtml(title).replace(/'/g, "\\'")}','${url.replace(/'/g, "\\'")}',${item.hot || 0})" title="收藏集">+</button>
               </div>
               ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
               ${item.comments ? `<span class="item-comments">💬 ${formatComments(item.comments)}</span>` : ''}
@@ -3626,7 +3763,7 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); if (document.getElementById('heatmapOverlay')?.classList.contains('active')) toggleHeatmap(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); if (document.getElementById('heatmapOverlay')?.classList.contains('active')) toggleHeatmap(); if (document.getElementById('collectionsOverlay')?.classList.contains('active')) toggleCollections(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
@@ -3637,6 +3774,7 @@
       if (e.key === 'g' || e.key === 'G') { toggleGraph(); }
       if (e.key === 'e' || e.key === 'E') { showEmbedWidget(); }
       if (e.key === 'h' || e.key === 'H') { toggleHeatmap(); }
+      if (e.key === 'o' || e.key === 'O') { toggleCollections(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
     });
 
@@ -4229,6 +4367,7 @@
           { keys: ['D'], desc: t('shortcutDevMode') },
           { keys: ['E'], desc: t('shortcutEmbed') },
           { keys: ['H'], desc: t('heatmap') },
+          { keys: ['O'], desc: t('collections') },
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
         ]
@@ -5058,6 +5197,174 @@
           if (tooltip) tooltip.classList.remove('visible');
         });
       });
+    }
+
+    // Topic Collections
+    let topicCollections = JSON.parse(localStorage.getItem('trendingHubCollections') || '[]');
+    let activeCollectionId = null;
+
+    function saveCollections() {
+      localStorage.setItem('trendingHubCollections', JSON.stringify(topicCollections));
+    }
+
+    function toggleCollections() {
+      const overlay = document.getElementById('collectionsOverlay');
+      overlay.classList.toggle('active');
+      if (overlay.classList.contains('active')) {
+        renderCollections();
+      }
+    }
+
+    function renderCollections() {
+      const titleEl = document.getElementById('collectionsTitle');
+      if (titleEl) titleEl.textContent = t('collectionsTitle');
+
+      const tabsEl = document.getElementById('collectionTabs');
+      const topicsEl = document.getElementById('collectionTopics');
+
+      if (topicCollections.length === 0) {
+        tabsEl.innerHTML = `<button class="collection-new-btn" onclick="createCollection()">${t('collectionsNew')}</button>`;
+        topicsEl.innerHTML = `<div class="collection-empty">${t('collectionsNoCollections')}</div>`;
+        return;
+      }
+
+      if (!activeCollectionId || !topicCollections.find(c => c.id === activeCollectionId)) {
+        activeCollectionId = topicCollections[0].id;
+      }
+
+      tabsEl.innerHTML = topicCollections.map(c => `
+        <button class="collection-tab ${c.id === activeCollectionId ? 'active' : ''}" onclick="switchCollection('${c.id}')">
+          ${c.name}
+          <span class="tab-count">${c.topics.length}</span>
+          <span class="tab-delete" onclick="event.stopPropagation();deleteCollection('${c.id}')" title="删除">✕</span>
+        </button>
+      `).join('') + `<button class="collection-new-btn" onclick="createCollection()">${t('collectionsNew')}</button>`;
+
+      const collection = topicCollections.find(c => c.id === activeCollectionId);
+      if (!collection || collection.topics.length === 0) {
+        topicsEl.innerHTML = `<div class="collection-empty">${t('collectionsEmpty')}</div>`;
+        return;
+      }
+
+      topicsEl.innerHTML = collection.topics.map((topic, i) => `
+        <div class="collection-topic-item">
+          <div class="collection-topic-rank">${i + 1}</div>
+          <div class="collection-topic-info">
+            <div class="collection-topic-title">
+              <a href="${topic.url}" target="_blank" rel="noopener">${topic.title}</a>
+            </div>
+            <div class="collection-topic-meta">
+              <span class="collection-topic-source">${topic.sourceIcon || ''} ${topic.sourceName || topic.source}</span>
+              ${topic.hot ? `<span>${formatHot(topic.hot)}</span>` : ''}
+            </div>
+          </div>
+          <button class="collection-topic-remove" onclick="removeFromCollection('${activeCollectionId}', ${i})" title="移除">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function switchCollection(id) {
+      activeCollectionId = id;
+      renderCollections();
+    }
+
+    function createCollection() {
+      const name = prompt(t('collectionsNewPrompt'));
+      if (!name || !name.trim()) return;
+      const id = 'col_' + Date.now();
+      topicCollections.push({ id, name: name.trim(), topics: [] });
+      activeCollectionId = id;
+      saveCollections();
+      renderCollections();
+    }
+
+    function deleteCollection(id) {
+      if (!confirm(t('collectionsDeleteConfirm'))) return;
+      topicCollections = topicCollections.filter(c => c.id !== id);
+      if (activeCollectionId === id) {
+        activeCollectionId = topicCollections.length > 0 ? topicCollections[0].id : null;
+      }
+      saveCollections();
+      renderCollections();
+    }
+
+    function addToCollection(sourceKey, sourceName, sourceIcon, title, url, hot) {
+      if (topicCollections.length === 0) {
+        const name = prompt(t('collectionsNewPrompt'));
+        if (!name || !name.trim()) return;
+        const id = 'col_' + Date.now();
+        topicCollections.push({ id, name: name.trim(), topics: [] });
+        activeCollectionId = id;
+      }
+
+      const picker = document.getElementById('collectionPicker');
+      if (picker) picker.remove();
+
+      const collection = topicCollections.find(c => c.id === activeCollectionId);
+      if (!collection) return;
+
+      const exists = collection.topics.some(t => t.title === title && t.source === sourceKey);
+      if (exists) return;
+
+      collection.topics.push({ title, url, source: sourceKey, sourceName, sourceIcon, hot: hot || 0, addedAt: Date.now() });
+      saveCollections();
+      showToast(t('collectionsAdded').replace('{collection}', collection.name));
+    }
+
+    function removeFromCollection(collectionId, index) {
+      const collection = topicCollections.find(c => c.id === collectionId);
+      if (!collection) return;
+      collection.topics.splice(index, 1);
+      saveCollections();
+      renderCollections();
+      showToast(t('collectionsRemoved'));
+    }
+
+    function showCollectionPicker(e, sourceKey, sourceName, sourceIcon, title, url, hot) {
+      e.stopPropagation();
+      const existing = document.getElementById('collectionPicker');
+      if (existing) existing.remove();
+
+      const picker = document.createElement('div');
+      picker.id = 'collectionPicker';
+      picker.className = 'collection-picker';
+
+      const rect = e.target.getBoundingClientRect();
+      picker.style.top = (rect.bottom + 4) + 'px';
+      picker.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
+
+      let html = `<div class="collection-picker-title">${t('collectionsAddTo')}</div>`;
+      topicCollections.forEach(c => {
+        const inCollection = c.topics.some(t => t.title === title && t.source === sourceKey);
+        html += `<div class="collection-picker-item ${inCollection ? 'active' : ''}" onclick="event.stopPropagation();addToCollectionFromPicker('${c.id}','${sourceKey}','${sourceName.replace(/'/g, "\\'")}','${sourceIcon}','${title.replace(/'/g, "\\'")}','${url.replace(/'/g, "\\'")}',${hot || 0})">${inCollection ? '✓ ' : ''}${c.name}</div>`;
+      });
+      if (topicCollections.length === 0) {
+        html += `<div class="collection-picker-item" onclick="event.stopPropagation();document.getElementById('collectionPicker')?.remove();createCollection()">${t('collectionsNew')}</div>`;
+      }
+      picker.innerHTML = html;
+      document.body.appendChild(picker);
+
+      setTimeout(() => {
+        document.addEventListener('click', function closePicker() {
+          picker.remove();
+          document.removeEventListener('click', closePicker);
+        }, { once: true });
+      }, 10);
+    }
+
+    function addToCollectionFromPicker(collectionId, sourceKey, sourceName, sourceIcon, title, url, hot) {
+      const picker = document.getElementById('collectionPicker');
+      if (picker) picker.remove();
+
+      const collection = topicCollections.find(c => c.id === collectionId);
+      if (!collection) return;
+
+      const exists = collection.topics.some(t => t.title === title && t.source === sourceKey);
+      if (exists) return;
+
+      collection.topics.push({ title, url, source: sourceKey, sourceName, sourceIcon, hot: hot || 0, addedAt: Date.now() });
+      saveCollections();
+      showToast(t('collectionsAdded').replace('{collection}', collection.name));
     }
 
     // Tag system
