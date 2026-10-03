@@ -1778,6 +1778,8 @@
         daysOnList: '天在榜',
         risingFast: '飙升榜',
         risingFastDesc: '新晋上榜或热度飙升',
+        devDigest: '开发者热点',
+        devDigestDesc: 'GitHub/掘金/Dev.to/开源中国/IT之家/少数派 精选',
         newEntry: '新上榜',
         sourceHealthTitle: '各平台数据状态',
         shortcutsTitle: '⌨️ 键盘快捷键',
@@ -1993,6 +1995,8 @@
         daysOnList: 'days on list',
         risingFast: 'Rising Fast',
         risingFastDesc: 'New or rapidly gaining topics',
+        devDigest: 'Developer Digest',
+        devDigestDesc: 'Curated from GitHub/Juejin/Dev.to/OSChina/ITHome/SSPai',
         newEntry: 'NEW',
         sourceHealthTitle: 'Platform Data Status',
         shortcutsTitle: '⌨️ Keyboard Shortcuts',
@@ -2753,7 +2757,7 @@
         return;
       }
 
-      const devSourceKeys = ['github-trending', 'juejin', 'ithome', 'sspai'];
+      const devSourceKeys = ['github-trending', 'github-newrepos', 'juejin', 'ithome', 'sspai', 'devto', 'oschina'];
       const sources = activeSource === 'all'
         ? allData
         : activeSource === 'dev'
@@ -2884,6 +2888,46 @@
                 <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a> ${sourceTags} ${newBadge}</div>
               </div>
               <span class="item-hot" style="color:#ff6b6b">${item.isNew ? '🆕' : formatHot(item.hot)}</span>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+      }
+
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+        const devKeys = ['github-trending', 'github-newrepos', 'juejin', 'devto', 'oschina', 'ithome', 'sspai'];
+        const devItems = [];
+        const devSeen = new Set();
+        for (const source of allData) {
+          if (!devKeys.includes(source.key)) continue;
+          for (const item of source.items.slice(0, 15)) {
+            const norm = item.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+            if (norm.length < 4 || devSeen.has(norm)) continue;
+            devSeen.add(norm);
+            devItems.push({
+              title: item.title, url: item.url, hot: item.hot || 0,
+              description: item.description,
+              sourceKey: source.key, sourceName: source.source,
+              sourceIcon: source.icon, sourceColor: source.color
+            });
+          }
+        }
+        devItems.sort((a, b) => b.hot - a.hot);
+        if (devItems.length > 0) {
+          html += '<div class="source-section" style="border: 1px solid #007acc;">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#24292F,#007acc)">💻</div>';
+          html += `<span class="source-name">${t('devDigest') || '开发者热点'}</span>`;
+          html += `<span class="source-count">${t('devDigestDesc') || 'GitHub/掘金/Dev.to/开源中国/IT之家/少数派 精选'}</span></div>`;
+          html += '<ul class="item-list">';
+          devItems.slice(0, 15).forEach((item, i) => {
+            html += `<li class="item">
+              <span class="item-rank" style="background:${i < 3 ? 'linear-gradient(135deg,#24292F,#007acc)' : 'var(--rank-bg)'};color:${i < 3 ? '#fff' : 'var(--rank-color)'}">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                <span class="item-source-tag" style="background:${item.sourceColor};color:#fff">${item.sourceIcon}</span></div>
+                ${item.description ? `<div class="item-desc">${escapeHtml(item.description).slice(0, 80)}</div>` : ''}
+              </div>
+              <span class="item-hot">${item.hot ? formatHot(item.hot) : ''}</span>
             </li>`;
           });
           html += '</ul></div>';

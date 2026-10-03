@@ -73,6 +73,25 @@ npm start
 
 启动后访问 http://localhost:3000
 
+### Docker 部署
+
+```bash
+# 使用 Docker
+docker build -t trending-hub .
+docker run -d -p 3000:3000 trending-hub
+
+# 使用 Docker Compose
+docker-compose up -d
+```
+
+容器内置 cron 定时任务，每 2 小时自动抓取最新数据。
+
+### 一键部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/shixingya/trending-hub)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/shixingya/trending-hub)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/shixingya/trending-hub)
+
 ## API
 
 ### 获取全部热榜
