@@ -340,6 +340,10 @@
       padding: 0.05rem 0.4rem; border-radius: 6px; margin-left: 0.3rem;
       display: inline-block; vertical-align: middle; font-weight: 600;
     }
+    .buzz-badge {
+      font-size: 0.7rem; margin-left: 0.3rem;
+      display: inline-block; vertical-align: middle;
+    }
     .item-alert-badge {
       font-size: 0.7rem; margin-left: 0.3rem;
       display: inline-block; vertical-align: middle;
@@ -1656,6 +1660,7 @@
       <button class="share-btn" id="compactBtn" onclick="toggleCompactMode()">紧凑</button>
       <button class="share-btn" id="langFilterBtn" onclick="toggleLangFilter()">全部</button>
       <button class="share-btn" id="globalSortBtn" onclick="toggleGlobalSort()">排序</button>
+      <button class="share-btn" id="buzzBtn" onclick="toggleBuzz()">🔥</button>
       <button class="share-btn" onclick="showStats()">统计</button>
       <button class="share-btn" onclick="showSourceHealth()">状态</button>
       <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
@@ -2016,6 +2021,7 @@
     let trendHistoryData = null;
     let langFilter = localStorage.getItem('langFilter') || 'all';
     let globalSort = localStorage.getItem('globalSort') === 'true';
+    let showBuzz = localStorage.getItem('showBuzz') === 'true';
 
     const translations = {
       zh: {
@@ -2272,7 +2278,9 @@
         langFilter: '语言过滤',
         shortcutLang: '语言过滤切换',
         globalSort: '全局排序',
-        shortcutGlobalSort: '全局热度排序'
+        shortcutGlobalSort: '全局热度排序',
+        buzz: '热度指标',
+        shortcutBuzz: '显示热度指标'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2528,7 +2536,9 @@
         langFilter: 'Language Filter',
         shortcutLang: 'Toggle Language Filter',
         globalSort: 'Global Sort',
-        shortcutGlobalSort: 'Sort All by Hot Score'
+        shortcutGlobalSort: 'Sort All by Hot Score',
+        buzz: 'Buzz',
+        shortcutBuzz: 'Show Buzz Indicators'
       }
     };
 
@@ -3013,6 +3023,33 @@
         btn.style.color = globalSort ? '#fff' : '';
       }
       renderContent();
+    }
+
+    function toggleBuzz() {
+      showBuzz = !showBuzz;
+      localStorage.setItem('showBuzz', showBuzz);
+      const btn = document.getElementById('buzzBtn');
+      if (btn) {
+        btn.style.background = showBuzz ? 'var(--accent)' : '';
+        btn.style.color = showBuzz ? '#fff' : '';
+      }
+      renderContent();
+    }
+
+    function getBuzzLevel(hot) {
+      if (!hot || hot <= 0) return 0;
+      if (hot >= 1000000) return 3;
+      if (hot >= 100000) return 2;
+      if (hot >= 10000) return 1;
+      return 0;
+    }
+
+    function renderBuzzBadge(hot) {
+      if (!showBuzz) return '';
+      const level = getBuzzLevel(hot);
+      if (level === 0) return '';
+      const fires = '🔥'.repeat(level);
+      return `<span class="buzz-badge" title="Buzz Level ${level}">${fires}</span>`;
     }
 
     function findCrossPlatformTopics() {
@@ -3563,7 +3600,7 @@
               <span class="item-rank">${i + 1}</span>
               ${renderPositionChange(source.key, title, i + 1)}
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${alertBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${alertBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
@@ -4749,6 +4786,7 @@
       if (e.key === 'v' || e.key === 'V') { togglePlatformChart(); }
       if (e.key === 'n' || e.key === 'N') { toggleLangFilter(); }
       if (e.key === 's' || e.key === 'S') { toggleGlobalSort(); }
+      if (e.key === 'i' || e.key === 'I') { toggleBuzz(); }
     });
 
     let focusMode = false;
@@ -4798,6 +4836,11 @@
 
     if (globalSort) {
       const btn = document.getElementById('globalSortBtn');
+      if (btn) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; }
+    }
+
+    if (showBuzz) {
+      const btn = document.getElementById('buzzBtn');
       if (btn) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; }
     }
 
@@ -5518,6 +5561,7 @@
           { keys: ['V'], desc: t('platformChart') },
           { keys: ['N'], desc: t('shortcutLang') },
           { keys: ['S'], desc: t('shortcutGlobalSort') },
+          { keys: ['I'], desc: t('shortcutBuzz') },
         ]
       };
 
@@ -6918,6 +6962,7 @@
         { label: '紧凑模式', hint: '快捷键 M', icon: '📐', color: '#1abc9c', action: () => toggleCompactMode() },
         { label: '语言过滤', hint: '快捷键 N', icon: '🌐', color: '#e74c3c', action: () => toggleLangFilter() },
         { label: '全局排序', hint: '快捷键 S', icon: '🔥', color: '#f39c12', action: () => toggleGlobalSort() },
+        { label: '热度指标', hint: '快捷键 I', icon: '🔥', color: '#e74c3c', action: () => toggleBuzz() },
       ];
       actions.forEach(a => paletteItems.push({ ...a, type: 'action' }));
 
