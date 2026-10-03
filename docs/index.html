@@ -2833,114 +2833,172 @@
       if (allData.length === 0) return;
       const canvas = document.getElementById('shareCanvas');
       const ctx = canvas.getContext('2d');
-      const width = 800;
-      const height = 1200;
+      const width = 1080;
+      const height = 1920;
       canvas.width = width;
       canvas.height = height;
 
+      // Enhanced gradient background with more vibrant colors
       const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#1a1a2e');
-      gradient.addColorStop(0.5, '#16213e');
-      gradient.addColorStop(1, '#0f3460');
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(0.5, '#764ba2');
+      gradient.addColorStop(1, '#f093fb');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
+      // Add decorative circles
+      ctx.globalAlpha = 0.1;
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Trending Hub', width / 2, 80);
+      ctx.beginPath();
+      ctx.arc(width * 0.8, height * 0.1, 150, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(width * 0.2, height * 0.9, 200, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
 
-      ctx.font = '24px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      // Header with logo and title
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔥 Trending Hub', width / 2, 120);
+
+      ctx.font = '32px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
       const now = new Date();
       const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
-      ctx.fillText(`全网热点 · ${dateStr}`, width / 2, 120);
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      const weekDay = weekDays[now.getDay()];
+      ctx.fillText(`全网热点速览 · ${dateStr} ${weekDay}`, width / 2, 170);
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth = 2;
+      // Stats bar
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillRect(80, 210, width - 160, 60);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillText(`${allData.length} 大平台 · ${total} 条热点 · 实时更新`, width / 2, 248);
+
+      // Divider line
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(100, 150);
-      ctx.lineTo(width - 100, 150);
+      ctx.moveTo(80, 300);
+      ctx.lineTo(width - 80, 300);
       ctx.stroke();
 
-      const picks = getDailyPicks().slice(0, 5);
-      let y = 200;
+      const picks = getDailyPicks().slice(0, 8);
+      let y = 360;
 
       if (picks.length > 0) {
+        // Section header with icon
         ctx.fillStyle = '#feca57';
-        ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+        ctx.font = 'bold 42px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('🔥 全网必看', 60, y);
-        y += 40;
+        ctx.fillText('🏆 全网必看 TOP 8', 80, y);
+        y += 60;
 
         picks.forEach((item, i) => {
-          ctx.fillStyle = i < 3 ? '#ff6b6b' : '#48dbfb';
-          ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-          ctx.fillText(`${i + 1}`, 60, y);
+          // Rank badge with gradient
+          const badgeGradient = ctx.createLinearGradient(80, y - 30, 140, y + 10);
+          if (i < 3) {
+            badgeGradient.addColorStop(0, '#ff6b6b');
+            badgeGradient.addColorStop(1, '#ee5a6f');
+          } else {
+            badgeGradient.addColorStop(0, '#48dbfb');
+            badgeGradient.addColorStop(1, '#0abde3');
+          }
+          ctx.fillStyle = badgeGradient;
+          ctx.beginPath();
+          ctx.roundRect(80, y - 35, 60, 60, 12);
+          ctx.fill();
 
           ctx.fillStyle = '#ffffff';
-          ctx.font = '22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-          const title = item.title.length > 35 ? item.title.substring(0, 35) + '...' : item.title;
-          ctx.fillText(title, 100, y);
+          ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${i + 1}`, 110, y + 8);
 
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-          ctx.fillText(`${item.sources.length} 平台`, width - 150, y);
+          // Title with better wrapping
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          const title = item.title.length > 40 ? item.title.substring(0, 40) + '...' : item.title;
+          ctx.fillText(title, 160, y);
 
-          y += 45;
+          // Platform count badge
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.beginPath();
+          ctx.roundRect(width - 240, y - 25, 160, 40, 20);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${item.sources.length} 平台`, width - 160, y + 2);
+
+          y += 80;
         });
       }
 
-      y += 20;
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.beginPath();
-      ctx.moveTo(60, y);
-      ctx.lineTo(width - 60, y);
-      ctx.stroke();
       y += 30;
+      // Divider
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath();
+      ctx.moveTo(80, y);
+      ctx.lineTo(width - 80, y);
+      ctx.stroke();
+      y += 50;
 
+      // Category breakdown section
       ctx.fillStyle = '#48dbfb';
-      ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.font = 'bold 42px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('📊 各平台 TOP 1', 60, y);
-      y += 40;
+      ctx.fillText('📊 热点分类', 80, y);
+      y += 60;
 
-      const topSources = allData.filter(s => s.items.length > 0).slice(0, 8);
-      topSources.forEach(source => {
-        if (y > height - 200) return;
+      const categoryCounts = {};
+      for (const source of allData) {
+        for (const item of source.items) {
+          const cat = categorize(item.title);
+          categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        }
+      }
+      const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const maxCount = Math.max(...sortedCategories.map(c => c[1]));
 
-        ctx.fillStyle = source.color;
-        ctx.fillRect(60, y - 20, 30, 30);
+      sortedCategories.forEach(([category, count]) => {
+        const barWidth = (width - 300) * (count / maxCount);
+        const barGradient = ctx.createLinearGradient(200, 0, 200 + barWidth, 0);
+        barGradient.addColorStop(0, '#feca57');
+        barGradient.addColorStop(1, '#ff6b6b');
+        ctx.fillStyle = barGradient;
+        ctx.beginPath();
+        ctx.roundRect(200, y - 25, barWidth, 40, 8);
+        ctx.fill();
+
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(source.icon, 75, y);
-
+        ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '18px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-        ctx.fillText(source.source, 100, y);
+        ctx.fillText(category, 80, y + 2);
 
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-        const topTitle = source.items[0]?.title || '';
-        const displayTitle = topTitle.length > 30 ? topTitle.substring(0, 30) + '...' : topTitle;
-        ctx.fillText(displayTitle, 250, y);
+        ctx.textAlign = 'right';
+        ctx.fillText(`${count}`, width - 80, y + 2);
 
-        y += 40;
+        y += 65;
       });
 
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '16px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      // Footer with branding
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.font = '28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('扫码查看更多热点 →', width / 2, height - 100);
+      ctx.fillText('扫码查看更多热点 →', width / 2, height - 140);
 
-      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
-      ctx.fillText(`${allData.length} 大平台 · ${total} 条热点`, width / 2, height - 70);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '24px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillText('https://shixingya.github.io/trending-hub/', width / 2, height - 90);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.font = '14px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-      ctx.fillText('https://shixingya.github.io/trending-hub/', width / 2, height - 40);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '20px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+      ctx.fillText('每 2 小时自动更新 · 纯静态部署 · 零成本运行', width / 2, height - 50);
 
       document.getElementById('shareImagePreview').classList.add('active');
     }
