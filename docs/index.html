@@ -1336,6 +1336,7 @@
       <a href="data/feed.xml" target="_blank">RSS</a>
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
+      <button class="share-btn" onclick="exportData('json')">导出JSON</button>
       <button class="share-btn" onclick="copyAllTopics()">复制全部</button>
       <button class="share-btn" onclick="showMorningBrief()">早报</button>
       <button class="share-btn" onclick="generateShareImage()">生成图片</button>
@@ -1656,6 +1657,7 @@
         searchPlaceholder: '搜索热点话题... (按 / 聚焦)',
         exportMD: '导出MD',
         exportCSV: '导出CSV',
+        exportJSON: '导出JSON',
         copyAll: '复制全部',
         morningBrief: '早报',
         generateImage: '生成图片',
@@ -1869,6 +1871,7 @@
         searchPlaceholder: 'Search topics... (Press / to focus)',
         exportMD: 'Export MD',
         exportCSV: 'Export CSV',
+        exportJSON: 'Export JSON',
         copyAll: 'Copy All',
         morningBrief: 'Brief',
         generateImage: 'Image',
@@ -2105,17 +2108,23 @@
       const buttons = document.querySelectorAll('.header-links .share-btn, .header-links .theme-toggle');
       if (buttons[0]) buttons[0].textContent = t('exportMD');
       if (buttons[1]) buttons[1].textContent = t('exportCSV');
-      if (buttons[2]) buttons[2].textContent = t('morningBrief');
-      if (buttons[3]) buttons[3].textContent = t('generateImage');
-      if (buttons[4]) buttons[4].textContent = t('random');
-      if (buttons[5]) buttons[5].textContent = t('share');
-      if (buttons[6]) buttons[6].textContent = focusMode ? t('focus') : t('focus');
-      if (buttons[7]) buttons[7].textContent = t('stats');
-      if (buttons[8]) buttons[8].textContent = wordCloudActive ? '✕' : t('wordCloud');
-      if (buttons[9]) buttons[9].textContent = compareActive ? '✕' : t('compare');
-      if (buttons[10]) buttons[10].textContent = t('timeline');
-      if (buttons[11]) buttons[11].textContent = graphActive ? '✕' : t('graph');
-      if (buttons[12]) buttons[12].textContent = currentLang === 'zh' ? 'EN' : '中文';
+      if (buttons[2]) buttons[2].textContent = t('exportJSON');
+      if (buttons[3]) buttons[3].textContent = t('morningBrief');
+      if (buttons[4]) buttons[4].textContent = t('generateImage');
+      if (buttons[5]) buttons[5].textContent = t('random');
+      if (buttons[6]) buttons[6].textContent = t('share');
+      if (buttons[7]) buttons[7].textContent = focusMode ? t('focus') : t('focus');
+      if (buttons[8]) buttons[8].textContent = t('stats');
+      if (buttons[9]) buttons[9].textContent = t('sourceHealth');
+      if (buttons[10]) buttons[10].textContent = t('alerts');
+      if (buttons[11]) buttons[11].textContent = wordCloudActive ? '✕' : t('wordCloud');
+      if (buttons[12]) buttons[12].textContent = compareActive ? '✕' : t('compare');
+      if (buttons[13]) buttons[13].textContent = t('timeline');
+      if (buttons[14]) buttons[14].textContent = graphActive ? '✕' : t('graph');
+      if (buttons[15]) buttons[15].textContent = t('heatmap');
+      if (buttons[16]) buttons[16].textContent = t('collections');
+      if (buttons[17]) buttons[17].textContent = t('embed');
+      if (buttons[18]) buttons[18].textContent = currentLang === 'zh' ? 'EN' : '中文';
       
       const themeBtn = document.getElementById('themeToggle');
       if (themeBtn) {
@@ -3371,6 +3380,25 @@
             content += `${source.source},${i + 1},${title},${url},${hot}\n`;
           });
         }
+      } else if (format === 'json') {
+        filename = `trending-${date}.json`;
+        mimeType = 'application/json';
+        const jsonData = {
+          generatedAt: new Date().toISOString(),
+          platforms: allData.map(source => ({
+            name: source.source,
+            key: source.key,
+            icon: source.icon,
+            count: source.items.length,
+            items: source.items.slice(0, 20).map(item => ({
+              title: item.title,
+              url: item.url,
+              hot: item.hot || null,
+              description: item.description || null
+            }))
+          }))
+        };
+        content = JSON.stringify(jsonData, null, 2);
       }
 
       const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
