@@ -1844,6 +1844,7 @@
     let activeSource = 'all';
     let activeCategory = 'all';
     let searchQuery = '';
+    let hashRestored = false;
     let sortedSources = new Set();
     let expandedSources = new Set();
     let currentLang = localStorage.getItem('lang') || 'zh';
@@ -2496,8 +2497,60 @@
     applyAutoTheme();
     setInterval(applyAutoTheme, 300000);
 
+    function updateHash() {
+      let hash = '';
+      if (searchQuery) {
+        hash = 'search=' + encodeURIComponent(searchQuery);
+      } else if (activeSource === 'dev') {
+        hash = 'dev';
+      } else if (activeSource === 'bookmarks') {
+        hash = 'bookmarks';
+      } else if (activeSource === 'recommended') {
+        hash = 'recommended';
+      } else if (activeSource === 'changes') {
+        hash = 'changes';
+      } else if (activeSource !== 'all') {
+        hash = 'source=' + activeSource;
+      } else if (activeCategory !== 'all') {
+        hash = 'category=' + activeCategory;
+      }
+      history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
+    }
+
+    function restoreFromHash() {
+      const hash = location.hash.slice(1);
+      if (!hash) return;
+      const params = new URLSearchParams(hash);
+      if (params.has('search')) {
+        searchQuery = decodeURIComponent(params.get('search')).toLowerCase();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = searchQuery;
+      } else if (params.has('source')) {
+        activeSource = params.get('source');
+        activeCategory = 'all';
+      } else if (params.has('category')) {
+        activeCategory = params.get('category');
+        activeSource = 'all';
+      } else if (hash === 'dev') {
+        activeSource = 'dev';
+        activeCategory = 'all';
+      } else if (hash === 'bookmarks') {
+        activeSource = 'bookmarks';
+        activeCategory = 'all';
+      } else if (hash === 'recommended') {
+        activeSource = 'recommended';
+        activeCategory = 'all';
+      } else if (hash === 'changes') {
+        activeSource = 'changes';
+        activeCategory = 'all';
+      }
+      renderTabs();
+      renderContent();
+    }
+
     function onSearch(query) {
       searchQuery = query.trim().toLowerCase();
+      updateHash();
       renderContent();
     }
 
@@ -2520,7 +2573,7 @@
         renderStats();
         updateAlertsButton();
         renderTagFilterBar();
-        renderContent();
+        if (!hashRestored) { hashRestored = true; restoreFromHash(); } else { renderContent(); }
         renderHotIndex();
         initScrollAnimations();
         checkAndNotifyAlerts();
@@ -2614,6 +2667,7 @@
             activeSource = key;
             activeCategory = 'all';
           }
+          updateHash();
           renderContent();
         });
       });
