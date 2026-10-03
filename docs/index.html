@@ -378,6 +378,23 @@
       padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--text-muted);
     }
     .stats-bar span { display: flex; align-items: center; gap: 0.3rem; }
+    .daily-digest {
+      margin: 0 1rem 0.5rem; padding: 0.8rem 1.2rem;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-input));
+      border: 1px solid var(--border); border-radius: 12px;
+      display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
+      justify-content: center; font-size: 0.78rem; color: var(--text-secondary);
+    }
+    .digest-item { display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+    .digest-icon { font-size: 0.9rem; }
+    .digest-value { font-weight: 600; color: var(--text); }
+    .digest-toggle {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 0.8rem; padding: 0.2rem 0.4rem; flex-shrink: 0;
+    }
+    .digest-toggle:hover { color: var(--accent); }
+    .digest-content { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .digest-content.collapsed { display: none; }
     .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; }
     footer {
       text-align: center; padding: 2rem 1rem; color: var(--text-muted);
@@ -1655,6 +1672,7 @@
 
   <div class="tabs" id="tabs"></div>
   <div class="stats-bar" id="statsBar"></div>
+  <div class="daily-digest" id="dailyDigest" style="display:none"></div>
 
   <div class="container" id="content">
     <div class="source-section">
@@ -2204,7 +2222,13 @@
         pkNext: '换一组',
         pkTotalVotes: '共 {count} 人参与',
         pkVoted: '已投票',
-        pkNoData: '暂无可PK的话题'
+        pkNoData: '暂无可PK的话题',
+        digestHottest: '最热',
+        digestActive: '最活跃',
+        digestCross: '跨平台',
+        digestTopCat: '热门分类',
+        digestTotal: '总计',
+        digestItems: '条'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2445,7 +2469,13 @@
         pkNext: 'Next Round',
         pkTotalVotes: '{count} votes total',
         pkVoted: 'Voted',
-        pkNoData: 'No topics available for PK'
+        pkNoData: 'No topics available for PK',
+        digestHottest: 'Hottest',
+        digestActive: 'Most Active',
+        digestCross: 'Cross-platform',
+        digestTopCat: 'Top Category',
+        digestTotal: 'Total',
+        digestItems: 'items'
       }
     };
 
@@ -2691,6 +2721,7 @@
         } catch { trendHistoryData = null; }
         renderTabs();
         renderStats();
+        renderDailyDigest();
         updateAlertsButton();
         renderTagFilterBar();
         if (!hashRestored) { hashRestored = true; restoreFromHash(); } else { renderContent(); }
@@ -2751,6 +2782,58 @@
           if (progress >= 1) clearInterval(timer);
         }, 16);
       });
+    }
+
+    let digestCollapsed = localStorage.getItem('digestCollapsed') === 'true';
+
+    function renderDailyDigest() {
+      const digest = document.getElementById('dailyDigest');
+      if (!digest || allData.length === 0) return;
+
+      const total = allData.reduce((s, src) => s + src.items.length, 0);
+      const topSource = allData.filter(s => !s.error).sort((a, b) => b.items.length - a.items.length)[0];
+
+      let hottest = { title: '', hot: 0 };
+      for (const src of allData) {
+        for (const item of src.items) {
+          if ((item.hot || 0) > hottest.hot) hottest = { title: item.title, hot: item.hot, source: src.source };
+        }
+      }
+
+      const crossCount = getDailyPicks().length;
+
+      const cats = {};
+      for (const src of allData) {
+        for (const item of src.items) {
+          const c = categorize(item.title);
+          cats[c] = (cats[c] || 0) + 1;
+        }
+      }
+      const sortedCats = Object.entries(cats).filter(([c]) => c !== 'other').sort((a, b) => b[1] - a[1]);
+      const topCat = sortedCats[0];
+      const catNames = { tech: '科技', entertainment: '娱乐', sports: '体育', finance: '财经', society: '社会', international: '国际', health: '健康', education: '教育', auto: '汽车', game: '游戏' };
+
+      let html = '<button class="digest-toggle" onclick="toggleDigest()" title="收起/展开">' + (digestCollapsed ? '▸' : '▾') + '</button>';
+      const itemsHtml = [
+        `<span class="digest-item"><span class="digest-icon">🔥</span> ${t('digestHottest')}: <span class="digest-value">${hottest.title.length > 20 ? hottest.title.slice(0, 20) + '…' : hottest.title}</span></span>`,
+        topSource ? `<span class="digest-item"><span class="digest-icon">📊</span> ${t('digestActive')}: <span class="digest-value">${topSource.source} (${topSource.items.length})</span></span>` : '',
+        crossCount > 0 ? `<span class="digest-item"><span class="digest-icon">🌐</span> ${t('digestCross')}: <span class="digest-value">${crossCount} ${t('digestItems')}</span></span>` : '',
+        topCat ? `<span class="digest-item"><span class="digest-icon">📂</span> ${t('digestTopCat')}: <span class="digest-value">${catNames[topCat[0]] || topCat[0]} (${topCat[1]})</span></span>` : '',
+        `<span class="digest-item"><span class="digest-icon">📈</span> ${t('digestTotal')}: <span class="digest-value">${total} ${t('digestItems')}</span></span>`
+      ].filter(Boolean).join('');
+      html += `<div class="digest-content${digestCollapsed ? ' collapsed' : ''}">${itemsHtml}</div>`;
+
+      digest.innerHTML = html;
+      digest.style.display = 'flex';
+    }
+
+    function toggleDigest() {
+      digestCollapsed = !digestCollapsed;
+      localStorage.setItem('digestCollapsed', digestCollapsed);
+      const content = document.querySelector('.digest-content');
+      if (content) content.classList.toggle('collapsed', digestCollapsed);
+      const btn = document.querySelector('.digest-toggle');
+      if (btn) btn.textContent = digestCollapsed ? '▸' : '▾';
     }
 
     function renderTabs() {
