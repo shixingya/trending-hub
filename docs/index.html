@@ -920,6 +920,98 @@
       .graph-header { padding: 0.75rem 1rem; }
       .graph-legend { bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.5rem; }
     }
+    .heatmap-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 1000; display: none;
+      flex-direction: column; overflow: hidden;
+    }
+    .heatmap-overlay.active { display: flex; }
+    .heatmap-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .heatmap-title { font-size: 1.1rem; font-weight: 600; }
+    .heatmap-close {
+      background: none; border: none; color: var(--text-muted); font-size: 1.2rem;
+      cursor: pointer; padding: 0.25rem 0.5rem;
+    }
+    .heatmap-close:hover { color: var(--text); }
+    .heatmap-body {
+      flex: 1; overflow: auto; padding: 1.5rem;
+    }
+    .heatmap-grid-wrapper {
+      display: flex; gap: 0;
+    }
+    .heatmap-labels {
+      display: flex; flex-direction: column; gap: 3px;
+      padding-right: 8px; min-width: 80px;
+    }
+    .heatmap-label {
+      height: 14px; font-size: 0.65rem; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: flex-end;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .heatmap-grid {
+      display: flex; flex-direction: column; gap: 3px; flex: 1;
+    }
+    .heatmap-row {
+      display: flex; gap: 3px; height: 14px;
+    }
+    .heatmap-cell {
+      width: 14px; height: 14px; border-radius: 2px;
+      background: var(--border); transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer; position: relative;
+    }
+    .heatmap-cell:hover {
+      transform: scale(1.8); z-index: 5;
+      box-shadow: 0 0 4px var(--accent);
+    }
+    .heatmap-cell.l1 { background: #9be9a8; }
+    .heatmap-cell.l2 { background: #40c463; }
+    .heatmap-cell.l3 { background: #30a14e; }
+    .heatmap-cell.l4 { background: #216e39; }
+    [data-theme="dark"] .heatmap-cell.l1 { background: #0e4429; }
+    [data-theme="dark"] .heatmap-cell.l2 { background: #006d32; }
+    [data-theme="dark"] .heatmap-cell.l3 { background: #26a641; }
+    [data-theme="dark"] .heatmap-cell.l4 { background: #39d353; }
+    .heatmap-dates {
+      display: flex; gap: 3px; padding-left: 88px; margin-bottom: 4px;
+      font-size: 0.6rem; color: var(--text-muted);
+    }
+    .heatmap-dates span { width: 14px; text-align: center; }
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 4px; margin-top: 1rem;
+      font-size: 0.7rem; color: var(--text-muted); justify-content: flex-end;
+    }
+    .heatmap-legend-cell {
+      width: 12px; height: 12px; border-radius: 2px;
+    }
+    .heatmap-tooltip {
+      position: fixed; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.7rem;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s;
+      box-shadow: 0 4px 12px var(--shadow); z-index: 1001; max-width: 200px;
+    }
+    .heatmap-tooltip.visible { opacity: 1; }
+    .heatmap-summary {
+      display: flex; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .heatmap-stat {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem 1rem; min-width: 120px;
+    }
+    .heatmap-stat-value { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+    .heatmap-stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    @media (max-width: 600px) {
+      .heatmap-header { padding: 0.75rem 1rem; }
+      .heatmap-body { padding: 1rem 0.75rem; }
+      .heatmap-labels { min-width: 60px; }
+      .heatmap-label { font-size: 0.55rem; }
+      .heatmap-cell { width: 10px; height: 10px; }
+      .heatmap-row { height: 10px; }
+      .heatmap-dates { padding-left: 68px; }
+      .heatmap-dates span { width: 10px; }
+    }
     .embed-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.6); z-index: 1001; display: none;
@@ -1109,7 +1201,7 @@
       .item-action-btn, .load-more-btn, .bottom-nav, .tag-filter-bar,
       #shortcutsOverlay, #wordcloudOverlay, #compareOverlay, #timelineOverlay,
       #graphOverlay, #topicModal, #shareImagePreview, #morningBriefOverlay, #embedOverlay,
-      #statsOverlay { display: none !important; }
+      #statsOverlay, #heatmapOverlay { display: none !important; }
       body { background: #fff; color: #000; font-size: 10pt; }
       .container { max-width: 100%; margin: 0; padding: 0; }
       .source-section {
@@ -1155,6 +1247,7 @@
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
+      <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
       <button class="share-btn" id="embedBtn" onclick="showEmbedWidget()">嵌入</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
@@ -1357,6 +1450,23 @@
     </div>
   </div>
 
+  <div class="heatmap-overlay" id="heatmapOverlay">
+    <div class="heatmap-header">
+      <div class="heatmap-title" id="heatmapTitle">平台活跃热力图</div>
+      <button class="heatmap-close" onclick="toggleHeatmap()">✕</button>
+    </div>
+    <div class="heatmap-body" id="heatmapBody">
+      <div class="heatmap-summary" id="heatmapSummary"></div>
+      <div class="heatmap-dates" id="heatmapDates"></div>
+      <div class="heatmap-grid-wrapper">
+        <div class="heatmap-labels" id="heatmapLabels"></div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
+      </div>
+      <div class="heatmap-legend" id="heatmapLegend"></div>
+    </div>
+    <div class="heatmap-tooltip" id="heatmapTooltip"></div>
+  </div>
+
   <div class="tag-filter-bar" id="tagFilterBar"></div>
 
   <nav class="mobile-nav">
@@ -1538,6 +1648,15 @@
         shortcutBookmarks: '查看收藏',
         shortcutDevMode: '开发者模式',
         shortcutEmbed: '嵌入小组件',
+        heatmap: '热力图',
+        heatmapTitle: '平台活跃热力图',
+        heatmapTotalTopics: '总话题数',
+        heatmapActiveDays: '活跃天数',
+        heatmapPeakDay: '最活跃日',
+        heatmapAvgDaily: '日均话题',
+        heatmapNoData: '暂无历史数据',
+        heatmapTopics: '个话题',
+        heatmapDays: '天',
         wordCloud: '词云',
         wordCloudTitle: '热点词云',
         compare: '对比',
@@ -1729,6 +1848,15 @@
         shortcutBookmarks: 'View bookmarks',
         shortcutDevMode: 'Dev mode',
         shortcutEmbed: 'Embed widget',
+        heatmap: 'Heatmap',
+        heatmapTitle: 'Platform Activity Heatmap',
+        heatmapTotalTopics: 'Total Topics',
+        heatmapActiveDays: 'Active Days',
+        heatmapPeakDay: 'Peak Day',
+        heatmapAvgDaily: 'Daily Avg',
+        heatmapNoData: 'No historical data',
+        heatmapTopics: 'topics',
+        heatmapDays: 'days',
         wordCloud: 'Cloud',
         wordCloudTitle: 'Topic Word Cloud',
         compare: 'Compare',
@@ -3498,7 +3626,7 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); if (document.getElementById('heatmapOverlay')?.classList.contains('active')) toggleHeatmap(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
@@ -3508,6 +3636,7 @@
       if (e.key === 'l' || e.key === 'L') { toggleTimeline(); }
       if (e.key === 'g' || e.key === 'G') { toggleGraph(); }
       if (e.key === 'e' || e.key === 'E') { showEmbedWidget(); }
+      if (e.key === 'h' || e.key === 'H') { toggleHeatmap(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
     });
 
@@ -4099,6 +4228,7 @@
           { keys: ['B'], desc: t('shortcutBookmarks') },
           { keys: ['D'], desc: t('shortcutDevMode') },
           { keys: ['E'], desc: t('shortcutEmbed') },
+          { keys: ['H'], desc: t('heatmap') },
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
         ]
@@ -4778,6 +4908,157 @@
     window.addEventListener('resize', () => {
       if (graphActive) renderGraph();
     });
+
+    // Platform Activity Heatmap
+    let heatmapData = null;
+    async function toggleHeatmap() {
+      const overlay = document.getElementById('heatmapOverlay');
+      overlay.classList.toggle('active');
+      if (overlay.classList.contains('active')) {
+        await renderHeatmap();
+      }
+    }
+
+    async function renderHeatmap() {
+      const body = document.getElementById('heatmapBody');
+      const titleEl = document.getElementById('heatmapTitle');
+      if (titleEl) titleEl.textContent = t('heatmapTitle');
+
+      if (!heatmapData) {
+        try {
+          const resp = await fetch('data/trending-history.json?t=' + Date.now());
+          if (resp.ok) heatmapData = await resp.json();
+        } catch (e) { console.warn('Heatmap history load failed:', e); }
+      }
+
+      const snapshots = heatmapData?.snapshots;
+      if (!snapshots || snapshots.length === 0) {
+        body.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted)">${t('heatmapNoData')}</div>`;
+        return;
+      }
+
+      const sourceKeys = [...new Set(snapshots.flatMap(s => (s.topics || []).map(t => t.source)))];
+      const sourceNames = {};
+      allData.forEach(s => { sourceNames[s.key] = { name: s.source, icon: s.icon, color: s.color }; });
+      sourceKeys.forEach(k => {
+        if (!sourceNames[k]) sourceNames[k] = { name: k, icon: k[0]?.toUpperCase() || '?', color: '#888' };
+      });
+
+      const dateSet = new Set();
+      const countMap = {};
+      snapshots.forEach(snap => {
+        const date = snap.date || snap.timestamp?.slice(0, 10);
+        if (!date) return;
+        dateSet.add(date);
+        (snap.topics || []).forEach(topic => {
+          const key = `${date}__${topic.source}`;
+          countMap[key] = (countMap[key] || 0) + 1;
+        });
+      });
+
+      const dates = [...dateSet].sort();
+      const maxCount = Math.max(1, ...Object.values(countMap));
+
+      let totalTopics = 0;
+      const dayCounts = {};
+      dates.forEach(d => { dayCounts[d] = 0; });
+      Object.entries(countMap).forEach(([key, count]) => {
+        const [date] = key.split('__');
+        totalTopics += count;
+        dayCounts[date] = (dayCounts[date] || 0) + count;
+      });
+      const peakDay = dates.reduce((a, b) => (dayCounts[a] || 0) >= (dayCounts[b] || 0) ? a : b, dates[0]);
+
+      const summaryEl = document.getElementById('heatmapSummary');
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <div class="heatmap-stat">
+            <div class="heatmap-stat-value">${totalTopics}</div>
+            <div class="heatmap-stat-label">${t('heatmapTotalTopics')}</div>
+          </div>
+          <div class="heatmap-stat">
+            <div class="heatmap-stat-value">${dates.length}</div>
+            <div class="heatmap-stat-label">${t('heatmapActiveDays')}</div>
+          </div>
+          <div class="heatmap-stat">
+            <div class="heatmap-stat-value">${peakDay?.slice(5) || '--'}</div>
+            <div class="heatmap-stat-label">${t('heatmapPeakDay')}</div>
+          </div>
+          <div class="heatmap-stat">
+            <div class="heatmap-stat-value">${Math.round(totalTopics / Math.max(1, dates.length))}</div>
+            <div class="heatmap-stat-label">${t('heatmapAvgDaily')}</div>
+          </div>
+        `;
+      }
+
+      const datesEl = document.getElementById('heatmapDates');
+      if (datesEl) {
+        datesEl.innerHTML = dates.map(d => {
+          const day = d.slice(8);
+          return parseInt(day) % 5 === 1 ? `<span>${day}</span>` : '<span></span>';
+        }).join('');
+      }
+
+      const labelsEl = document.getElementById('heatmapLabels');
+      if (labelsEl) {
+        labelsEl.innerHTML = sourceKeys.map(k => {
+          const info = sourceNames[k];
+          return `<div class="heatmap-label" title="${info.name}">${info.icon} ${info.name}</div>`;
+        }).join('');
+      }
+
+      const gridEl = document.getElementById('heatmapGrid');
+      if (gridEl) {
+        gridEl.innerHTML = sourceKeys.map(sourceKey => {
+          const cells = dates.map(date => {
+            const count = countMap[`${date}__${sourceKey}`] || 0;
+            let level = '';
+            if (count > 0) {
+              const ratio = count / maxCount;
+              if (ratio > 0.75) level = 'l4';
+              else if (ratio > 0.5) level = 'l3';
+              else if (ratio > 0.25) level = 'l2';
+              else level = 'l1';
+            }
+            const info = sourceNames[sourceKey];
+            return `<div class="heatmap-cell ${level}" data-source="${info.name}" data-date="${date}" data-count="${count}"></div>`;
+          }).join('');
+          return `<div class="heatmap-row">${cells}</div>`;
+        }).join('');
+      }
+
+      const legendEl = document.getElementById('heatmapLegend');
+      if (legendEl) {
+        legendEl.innerHTML = `
+          <span>Less</span>
+          <div class="heatmap-legend-cell" style="background:var(--border)"></div>
+          <div class="heatmap-legend-cell l1" style="background:#9be9a8"></div>
+          <div class="heatmap-legend-cell l2" style="background:#40c463"></div>
+          <div class="heatmap-legend-cell l3" style="background:#30a14e"></div>
+          <div class="heatmap-legend-cell l4" style="background:#216e39"></div>
+          <span>More</span>
+        `;
+      }
+
+      const tooltip = document.getElementById('heatmapTooltip');
+      gridEl?.querySelectorAll('.heatmap-cell').forEach(cell => {
+        cell.addEventListener('mouseenter', (e) => {
+          const src = cell.dataset.source;
+          const date = cell.dataset.date;
+          const count = cell.dataset.count;
+          if (tooltip) {
+            tooltip.innerHTML = `<strong>${src}</strong><br>${date}: ${count} ${t('heatmapTopics')}`;
+            tooltip.classList.add('visible');
+            const r = cell.getBoundingClientRect();
+            tooltip.style.left = (r.left + r.width / 2) + 'px';
+            tooltip.style.top = (r.top - 50) + 'px';
+          }
+        });
+        cell.addEventListener('mouseleave', () => {
+          if (tooltip) tooltip.classList.remove('visible');
+        });
+      });
+    }
 
     // Tag system
     const tagKeywords = {

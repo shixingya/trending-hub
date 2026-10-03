@@ -5,7 +5,6 @@ export const kuaishou: TrendingSource = {
   key: 'kuaishou',
   icon: '快',
   color: '#FF4906',
-  url: 'https://www.kuaishou.com/',
   async fetch() {
     const query = `query visionHotRank {
       visionHotRank {
