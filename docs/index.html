@@ -1655,6 +1655,7 @@
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" id="compactBtn" onclick="toggleCompactMode()">紧凑</button>
       <button class="share-btn" id="langFilterBtn" onclick="toggleLangFilter()">全部</button>
+      <button class="share-btn" id="globalSortBtn" onclick="toggleGlobalSort()">排序</button>
       <button class="share-btn" onclick="showStats()">统计</button>
       <button class="share-btn" onclick="showSourceHealth()">状态</button>
       <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
@@ -2014,6 +2015,7 @@
     let currentLang = localStorage.getItem('lang') || 'zh';
     let trendHistoryData = null;
     let langFilter = localStorage.getItem('langFilter') || 'all';
+    let globalSort = localStorage.getItem('globalSort') === 'true';
 
     const translations = {
       zh: {
@@ -2268,7 +2270,9 @@
         langZh: '中文',
         langEn: '英文',
         langFilter: '语言过滤',
-        shortcutLang: '语言过滤切换'
+        shortcutLang: '语言过滤切换',
+        globalSort: '全局排序',
+        shortcutGlobalSort: '全局热度排序'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2522,7 +2526,9 @@
         langZh: 'Chinese',
         langEn: 'English',
         langFilter: 'Language Filter',
-        shortcutLang: 'Toggle Language Filter'
+        shortcutLang: 'Toggle Language Filter',
+        globalSort: 'Global Sort',
+        shortcutGlobalSort: 'Sort All by Hot Score'
       }
     };
 
@@ -2998,6 +3004,17 @@
       renderContent();
     }
 
+    function toggleGlobalSort() {
+      globalSort = !globalSort;
+      localStorage.setItem('globalSort', globalSort);
+      const btn = document.getElementById('globalSortBtn');
+      if (btn) {
+        btn.style.background = globalSort ? 'var(--accent)' : '';
+        btn.style.color = globalSort ? '#fff' : '';
+      }
+      renderContent();
+    }
+
     function findCrossPlatformTopics() {
       const titleMap = {};
       const normalizedMap = {};
@@ -3297,6 +3314,42 @@
 
       if (activeSource === 'changes') {
         container.innerHTML = renderChangesView();
+        return;
+      }
+
+      if (globalSort && activeSource === 'all') {
+        const allItems = [];
+        for (const source of allData) {
+          const items = filterItems(source.items);
+          for (const item of items) {
+            allItems.push({ ...item, sourceName: source.source, sourceIcon: source.icon, sourceColor: source.color, sourceKey: source.key });
+          }
+        }
+        allItems.sort((a, b) => (b.hot || 0) - (a.hot || 0));
+        let html = '<div class="source-section" style="border: 2px solid var(--accent);">';
+        html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#e74c3c,#f39c12)">🔥</div>';
+        html += `<span class="source-name">${t('globalSort')}</span>`;
+        html += `<span class="source-count">${allItems.length} ${t('items')}</span></div>`;
+        html += '<ul class="item-list">';
+        allItems.slice(0, 200).forEach((item, i) => {
+          const itemTags = extractTags(item.title);
+          const tagsHtml = itemTags.length > 0 ? `<div class="tag-pills">${itemTags.map(tag => `<span class="tag-pill" onclick="toggleTagFilter('${tag}');event.stopPropagation()">${tag}</span>`).join('')}</div>` : '';
+          html += `<li class="item">
+            <span class="item-rank" style="background:${i < 3 ? 'linear-gradient(135deg,#e74c3c,#f39c12)' : 'var(--rank-bg)'};color:${i < 3 ? '#fff' : 'var(--rank-color)'}">${i + 1}</span>
+            <div class="item-content">
+              <div class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+              <span class="item-source-tag" style="background:${item.sourceColor};color:#fff">${item.sourceIcon}</span></div>
+              ${item.description ? `<div class="item-desc">${escapeHtml(item.description).slice(0, 80)}</div>` : ''}
+              ${tagsHtml}
+            </div>
+            <div class="item-actions">
+              <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(item.title).replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
+            </div>
+            ${item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : ''}
+          </li>`;
+        });
+        html += '</ul></div>';
+        container.innerHTML = html;
         return;
       }
 
@@ -4695,6 +4748,7 @@
       if (e.key === 'q' || e.key === 'Q') { toggleQuiz(); }
       if (e.key === 'v' || e.key === 'V') { togglePlatformChart(); }
       if (e.key === 'n' || e.key === 'N') { toggleLangFilter(); }
+      if (e.key === 's' || e.key === 'S') { toggleGlobalSort(); }
     });
 
     let focusMode = false;
@@ -4740,6 +4794,11 @@
         btn.style.background = 'var(--accent)';
         btn.style.color = '#fff';
       }
+    }
+
+    if (globalSort) {
+      const btn = document.getElementById('globalSortBtn');
+      if (btn) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; }
     }
 
     function mobileNavAction(action, btn) {
@@ -5458,6 +5517,7 @@
           { keys: ['C'], desc: t('compare') },
           { keys: ['V'], desc: t('platformChart') },
           { keys: ['N'], desc: t('shortcutLang') },
+          { keys: ['S'], desc: t('shortcutGlobalSort') },
         ]
       };
 
@@ -6857,6 +6917,7 @@
         { label: '生成分享图片', hint: '分享当前视图', icon: '🖼️', color: '#9b59b6', action: () => generateShareImage() },
         { label: '紧凑模式', hint: '快捷键 M', icon: '📐', color: '#1abc9c', action: () => toggleCompactMode() },
         { label: '语言过滤', hint: '快捷键 N', icon: '🌐', color: '#e74c3c', action: () => toggleLangFilter() },
+        { label: '全局排序', hint: '快捷键 S', icon: '🔥', color: '#f39c12', action: () => toggleGlobalSort() },
       ];
       actions.forEach(a => paletteItems.push({ ...a, type: 'action' }));
 
