@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - 页面未找到 | Trending Hub</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      text-align: center;
+      max-width: 500px;
+    }
+    .error-code {
+      font-size: 8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    .error-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+    .error-desc {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .home-btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .home-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    .trending-hint {
+      margin-top: 3rem;
+      padding: 1.5rem;
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+    }
+    .trending-hint-title {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+    .trending-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .trending-item {
+      padding: 0.4rem 0.8rem;
+      background: #222;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      color: #48dbfb;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .trending-item:hover {
+      background: #333;
+    }
+    @media (max-width: 600px) {
+      .error-code { font-size: 5rem; }
+      .error-title { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">页面走丢了</h1>
+    <p class="error-desc">你访问的页面不存在，可能已被移除或地址输入有误。<br>不如回去看看全网热点？</p>
+    <a href="/trending-hub/" class="home-btn">回到首页</a>
+    
+    <div class="trending-hint" id="trendingHint" style="display:none">
+      <div class="trending-hint-title">当前热门话题</div>
+      <div class="trending-items" id="trendingItems"></div>
+    </div>
+  </div>
+
+  <script>
+    fetch('/trending-hub/data/trending.json')
+      .then(r => r.json())
+      .then(data => {
+        const items = [];
+        for (const source of data) {
+          if (source.items && source.items.length > 0) {
+            items.push(...source.items.slice(0, 3).map(i => ({ ...i, sourceName: source.source })));
+          }
+        }
+        const top = items.sort((a, b) => (b.hot || 0) - (a.hot || 0)).slice(0, 8);
+        if (top.length > 0) {
+          const container = document.getElementById('trendingItems');
+          const hint = document.getElementById('trendingHint');
+          top.forEach(item => {
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.target = '_blank';
+            a.className = 'trending-item';
+            a.textContent = item.title;
+            container.appendChild(a);
+          });
+          hint.style.display = 'block';
+        }
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
