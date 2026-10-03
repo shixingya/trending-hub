@@ -1347,6 +1347,39 @@
       0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
       100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
     }
+    .palette-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 2500;
+      display: flex; justify-content: center; padding-top: 15vh;
+    }
+    .palette-modal {
+      width: 480px; max-width: 90vw; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 8px 32px var(--shadow); overflow: hidden;
+      align-self: flex-start;
+    }
+    .palette-input {
+      width: 100%; padding: 0.8rem 1rem; border: none; border-bottom: 1px solid var(--border);
+      background: transparent; color: var(--text); font-size: 0.95rem;
+      outline: none; box-sizing: border-box;
+    }
+    .palette-input::placeholder { color: var(--text-muted); }
+    .palette-results {
+      max-height: 50vh; overflow-y: auto; padding: 0.4rem;
+    }
+    .palette-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem;
+      border-radius: 8px; cursor: pointer; transition: background 0.1s;
+      font-size: 0.85rem; color: var(--text);
+    }
+    .palette-item:hover, .palette-item.selected { background: var(--hover-bg); }
+    .palette-item-icon {
+      width: 28px; height: 28px; border-radius: 6px; display: flex;
+      align-items: center; justify-content: center; font-size: 0.75rem;
+      color: #fff; flex-shrink: 0; font-weight: 600;
+    }
+    .palette-item-label { flex: 1; }
+    .palette-item-hint { font-size: 0.7rem; color: var(--text-muted); }
     .pk-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7); z-index: 2000;
@@ -1782,6 +1815,13 @@
     </div>
   </div>
 
+  <div class="palette-overlay" id="paletteOverlay" style="display:none" onclick="if(event.target===this)closePalette()">
+    <div class="palette-modal">
+      <input class="palette-input" id="paletteInput" type="text" placeholder="搜索平台或功能..." oninput="filterPalette(this.value)" autocomplete="off">
+      <div class="palette-results" id="paletteResults"></div>
+    </div>
+  </div>
+
   <div class="pk-overlay" id="pkOverlay" style="display:none" onclick="if(event.target===this)toggleHotPK()">
     <div class="pk-container">
       <div class="pk-header">
@@ -1976,6 +2016,7 @@
         shortcutToggleTheme: '切换主题',
         shortcutFocusMode: '切换专注模式',
         shortcutCompactMode: '切换紧凑模式',
+        shortcutPalette: '命令面板',
         shortcutShowHelp: '显示快捷键帮助',
         shortcutRandomTopic: '随机话题',
         shortcutBookmarks: '查看收藏',
@@ -2215,6 +2256,7 @@
         shortcutToggleTheme: 'Toggle theme',
         shortcutFocusMode: 'Toggle focus mode',
         shortcutCompactMode: 'Toggle compact mode',
+        shortcutPalette: 'Command palette',
         shortcutShowHelp: 'Show shortcuts help',
         shortcutRandomTopic: 'Random topic',
         shortcutBookmarks: 'View bookmarks',
@@ -3805,7 +3847,7 @@
       if (e.key === 'Escape') {
         document.getElementById('searchInput').blur();
       }
-      if ((e.key === 'j' || e.key === 'k') && document.activeElement.tagName !== 'INPUT') {
+      if ((e.key === 'j' || e.key === 'k') && document.activeElement.tagName !== 'INPUT' && document.getElementById('paletteOverlay')?.style.display === 'none') {
         const links = Array.from(document.querySelectorAll('.item-title a'));
         if (links.length === 0) return;
         const current = document.activeElement.closest('.item');
@@ -4407,6 +4449,7 @@
       if (e.key === 'x' || e.key === 'X') { switchSource(activeSource === 'changes' ? 'all' : 'changes'); }
       if (e.key === 'p' || e.key === 'P') { toggleHotPK(); }
       if (e.key === 'm' || e.key === 'M') { toggleCompactMode(); }
+      if (e.key === 'k' || e.key === 'K') { openPalette(); }
     });
 
     let focusMode = false;
@@ -5143,6 +5186,7 @@
           { keys: ['T'], desc: t('shortcutToggleTheme') },
           { keys: ['F'], desc: t('shortcutFocusMode') },
           { keys: ['M'], desc: t('shortcutCompactMode') },
+          { keys: ['K'], desc: t('shortcutPalette') },
           { keys: ['?'], desc: t('shortcutShowHelp'), special: true },
         ],
         actions: [
@@ -6517,6 +6561,110 @@
 
       return pairs;
     }
+
+    let paletteSelectedIndex = 0;
+    let paletteItems = [];
+
+    function openPalette() {
+      const overlay = document.getElementById('paletteOverlay');
+      overlay.style.display = 'flex';
+      const input = document.getElementById('paletteInput');
+      input.value = '';
+      input.focus();
+      paletteSelectedIndex = 0;
+      buildPaletteItems();
+      renderPaletteResults('');
+    }
+
+    function closePalette() {
+      document.getElementById('paletteOverlay').style.display = 'none';
+    }
+
+    function buildPaletteItems() {
+      paletteItems = [];
+      const actions = [
+        { label: '全部热点', hint: '查看所有平台', icon: '📊', color: '#667eea', action: () => switchSource('all') },
+        { label: '开发者模式', hint: '快捷键 D', icon: '💻', color: '#6c5ce7', action: () => switchSource('dev') },
+        { label: '变更视图', hint: '快捷键 X', icon: '📊', color: '#00b894', action: () => switchSource('changes') },
+        { label: '我的收藏', hint: '快捷键 B', icon: '🔖', color: '#e17055', action: () => switchSource('bookmarks') },
+        { label: '为你推荐', hint: '智能推荐', icon: '💡', color: '#fdcb6e', action: () => switchSource('recommended') },
+        { label: '词云', hint: '快捷键 W', icon: '☁️', color: '#74b9ff', action: () => toggleWordCloud() },
+        { label: '对比模式', hint: '快捷键 C', icon: '🔍', color: '#a29bfe', action: () => toggleCompareMode() },
+        { label: '热点PK', hint: '快捷键 P', icon: '🔥', color: '#ff6b6b', action: () => toggleHotPK() },
+        { label: '关系图谱', hint: '快捷键 G', icon: '🕸️', color: '#55a3f0', action: () => toggleGraph() },
+        { label: '活动热力图', hint: '快捷键 H', icon: '📅', color: '#2ecc71', action: () => toggleHeatmap() },
+        { label: '话题收藏集', hint: '快捷键 O', icon: '📁', color: '#e67e22', action: () => toggleCollections() },
+        { label: '生成分享图片', hint: '分享当前视图', icon: '🖼️', color: '#9b59b6', action: () => generateShareImage() },
+        { label: '紧凑模式', hint: '快捷键 M', icon: '📐', color: '#1abc9c', action: () => toggleCompactMode() },
+      ];
+      actions.forEach(a => paletteItems.push({ ...a, type: 'action' }));
+
+      if (typeof allData !== 'undefined') {
+        allData.forEach(src => {
+          paletteItems.push({
+            label: src.source,
+            hint: `${src.items.length} 条`,
+            icon: src.icon,
+            color: src.color,
+            type: 'source',
+            action: () => switchSource(src.key)
+          });
+        });
+      }
+    }
+
+    function filterPalette(query) {
+      paletteSelectedIndex = 0;
+      renderPaletteResults(query);
+    }
+
+    function renderPaletteResults(query) {
+      const q = query.toLowerCase().trim();
+      const filtered = q
+        ? paletteItems.filter(item => item.label.toLowerCase().includes(q) || (item.hint || '').toLowerCase().includes(q))
+        : paletteItems;
+
+      const container = document.getElementById('paletteResults');
+      container.innerHTML = filtered.slice(0, 20).map((item, i) => `
+        <div class="palette-item ${i === paletteSelectedIndex ? 'selected' : ''}" data-index="${i}" onclick="selectPaletteItem(${i})">
+          <div class="palette-item-icon" style="background:${item.color}">${item.icon}</div>
+          <span class="palette-item-label">${item.label}</span>
+          <span class="palette-item-hint">${item.hint || ''}</span>
+        </div>
+      `).join('');
+
+      container._filtered = filtered;
+    }
+
+    function selectPaletteItem(index) {
+      const container = document.getElementById('paletteResults');
+      const filtered = container._filtered || [];
+      if (filtered[index]) {
+        closePalette();
+        filtered[index].action();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const overlay = document.getElementById('paletteOverlay');
+      if (overlay.style.display === 'none') return;
+      const container = document.getElementById('paletteResults');
+      const filtered = container._filtered || [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        paletteSelectedIndex = Math.min(paletteSelectedIndex + 1, filtered.length - 1);
+        renderPaletteResults(document.getElementById('paletteInput').value);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        paletteSelectedIndex = Math.max(paletteSelectedIndex - 1, 0);
+        renderPaletteResults(document.getElementById('paletteInput').value);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        selectPaletteItem(paletteSelectedIndex);
+      } else if (e.key === 'Escape') {
+        closePalette();
+      }
+    });
 
     function toggleHotPK() {
       const overlay = document.getElementById('pkOverlay');
