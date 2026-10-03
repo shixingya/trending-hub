@@ -1654,6 +1654,7 @@
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" id="compactBtn" onclick="toggleCompactMode()">紧凑</button>
+      <button class="share-btn" id="langFilterBtn" onclick="toggleLangFilter()">全部</button>
       <button class="share-btn" onclick="showStats()">统计</button>
       <button class="share-btn" onclick="showSourceHealth()">状态</button>
       <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
@@ -2012,6 +2013,7 @@
     let expandedSources = new Set();
     let currentLang = localStorage.getItem('lang') || 'zh';
     let trendHistoryData = null;
+    let langFilter = localStorage.getItem('langFilter') || 'all';
 
     const translations = {
       zh: {
@@ -2261,7 +2263,12 @@
         digestTotal: '总计',
         digestItems: '条',
         installApp: '安装',
-        platformChart: '平台数据概览'
+        platformChart: '平台数据概览',
+        langAll: '全部',
+        langZh: '中文',
+        langEn: '英文',
+        langFilter: '语言过滤',
+        shortcutLang: '语言过滤切换'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2510,7 +2517,12 @@
         digestTotal: 'Total',
         digestItems: 'items',
         installApp: 'Install',
-        platformChart: 'Platform Overview'
+        platformChart: 'Platform Overview',
+        langAll: 'All',
+        langZh: 'Chinese',
+        langEn: 'English',
+        langFilter: 'Language Filter',
+        shortcutLang: 'Toggle Language Filter'
       }
     };
 
@@ -2960,7 +2972,30 @@
       if (activeTagFilter) {
         filtered = filtered.filter(item => filterByTags(item.title));
       }
+      if (langFilter !== 'all') {
+        filtered = filtered.filter(item => detectLanguage(item.title) === langFilter);
+      }
       return filtered;
+    }
+
+    function detectLanguage(title) {
+      const cjk = (title.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
+      if (cjk >= 2) return 'zh';
+      return 'en';
+    }
+
+    function toggleLangFilter() {
+      const cycle = { all: 'zh', zh: 'en', en: 'all' };
+      langFilter = cycle[langFilter] || 'all';
+      localStorage.setItem('langFilter', langFilter);
+      const btn = document.getElementById('langFilterBtn');
+      if (btn) {
+        const labels = { all: t('langAll'), zh: t('langZh'), en: t('langEn') };
+        btn.textContent = labels[langFilter] || t('langAll');
+        btn.style.background = langFilter !== 'all' ? 'var(--accent)' : '';
+        btn.style.color = langFilter !== 'all' ? '#fff' : '';
+      }
+      renderContent();
     }
 
     function findCrossPlatformTopics() {
@@ -3279,7 +3314,7 @@
         html += `<span class="source-name">${t('devMode')}</span>`;
         html += `<span class="source-count">${t('devModeDesc')}</span></div></div>`;
       }
-      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery && langFilter === 'all') {
         const dailyPicks = getDailyPicks();
         if (dailyPicks.length > 0) {
           html += '<div class="source-section" style="border: 2px solid var(--accent);background:linear-gradient(135deg, rgba(72,219,251,0.05), rgba(255,107,107,0.05));">';
@@ -3352,7 +3387,7 @@
         }
       }
 
-      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery && langFilter === 'all') {
         const weeklyHottest = getWeeklyHottest();
         if (weeklyHottest.length > 0) {
           html += '<div class="source-section" style="border: 1px solid var(--accent);">';
@@ -3377,7 +3412,7 @@
         }
       }
 
-      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery && langFilter === 'all') {
         const risingFast = getRisingFast();
         if (risingFast.length > 0) {
           html += '<div class="source-section" style="border: 1px solid #ff6b6b;">';
@@ -3402,7 +3437,7 @@
         }
       }
 
-      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
+      if (activeSource === 'all' && activeCategory === 'all' && !searchQuery && langFilter === 'all') {
         const devKeys = ['github-trending', 'github-newrepos', 'juejin', 'devto', 'oschina', 'lobsters', 'hackernews', 'ithome', 'sspai'];
         const devItems = [];
         const devSeen = new Set();
@@ -3445,7 +3480,7 @@
       let totalShown = 0;
       for (const source of sources) {
         const items = filterItems(source.items);
-        if (items.length === 0 && (activeCategory !== 'all' || searchQuery)) continue;
+        if (items.length === 0 && (activeCategory !== 'all' || searchQuery || langFilter !== 'all')) continue;
         totalShown += items.length;
         html += `<div class="source-section" data-source-key="${source.key}">
           <div class="source-header" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -4659,6 +4694,7 @@
       if (e.key === 'k' || e.key === 'K') { openPalette(); }
       if (e.key === 'q' || e.key === 'Q') { toggleQuiz(); }
       if (e.key === 'v' || e.key === 'V') { togglePlatformChart(); }
+      if (e.key === 'n' || e.key === 'N') { toggleLangFilter(); }
     });
 
     let focusMode = false;
@@ -4694,6 +4730,16 @@
     if (compactMode) {
       const btn = document.getElementById('compactBtn');
       if (btn) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; }
+    }
+
+    if (langFilter !== 'all') {
+      const btn = document.getElementById('langFilterBtn');
+      if (btn) {
+        const labels = { all: t('langAll'), zh: t('langZh'), en: t('langEn') };
+        btn.textContent = labels[langFilter] || t('langAll');
+        btn.style.background = 'var(--accent)';
+        btn.style.color = '#fff';
+      }
     }
 
     function mobileNavAction(action, btn) {
@@ -5411,6 +5457,7 @@
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
           { keys: ['V'], desc: t('platformChart') },
+          { keys: ['N'], desc: t('shortcutLang') },
         ]
       };
 
@@ -6809,6 +6856,7 @@
         { label: '话题收藏集', hint: '快捷键 O', icon: '📁', color: '#e67e22', action: () => toggleCollections() },
         { label: '生成分享图片', hint: '分享当前视图', icon: '🖼️', color: '#9b59b6', action: () => generateShareImage() },
         { label: '紧凑模式', hint: '快捷键 M', icon: '📐', color: '#1abc9c', action: () => toggleCompactMode() },
+        { label: '语言过滤', hint: '快捷键 N', icon: '🌐', color: '#e74c3c', action: () => toggleLangFilter() },
       ];
       actions.forEach(a => paletteItems.push({ ...a, type: 'action' }));
 
