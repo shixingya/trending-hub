@@ -1329,6 +1329,59 @@
       0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
       100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
     }
+    .position-change {
+      font-size: 0.65rem; font-weight: 600; min-width: 28px; text-align: center;
+      display: inline-flex; align-items: center; justify-content: center; gap: 1px;
+      border-radius: 4px; padding: 1px 4px; margin-left: 4px;
+    }
+    .position-change.up { color: #22c55e; background: rgba(34,197,94,0.1); }
+    .position-change.down { color: #ef4444; background: rgba(239,68,68,0.1); }
+    .position-change.new-pos { color: #f59e0b; background: rgba(245,158,11,0.1); }
+    .position-change.same { color: var(--text-muted); opacity: 0.5; }
+
+    .changes-view { padding: 0.5rem 0; }
+    .changes-summary {
+      padding: 0.8rem 1rem; margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(236,72,153,0.08));
+      border-radius: 10px; font-size: 0.85rem; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .changes-summary strong { color: var(--text-primary); }
+    .changes-platform {
+      margin-bottom: 0.5rem; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .changes-platform-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 0.8rem; cursor: pointer;
+      background: var(--bg-secondary); font-size: 0.85rem; font-weight: 600;
+    }
+    .changes-platform-header:hover { background: var(--bg-tertiary); }
+    .changes-badge {
+      font-size: 0.7rem; padding: 1px 6px; border-radius: 8px; font-weight: 500;
+    }
+    .changes-badge.new-badge { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .changes-badge.dropped-badge { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .changes-list { padding: 0.3rem 0; }
+    .changes-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.8rem; font-size: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .changes-item:last-child { border-bottom: none; }
+    .changes-item.new-item { border-left: 3px solid #22c55e; }
+    .changes-item.dropped-item { border-left: 3px solid #ef4444; opacity: 0.7; }
+    .changes-item a {
+      color: var(--text-primary); text-decoration: none;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+    }
+    .changes-item a:hover { color: var(--accent); }
+    .changes-item .changes-rank {
+      font-size: 0.65rem; color: var(--text-muted); min-width: 20px; text-align: right;
+    }
+    .changes-empty {
+      padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;
+    }
     @media print {
       header, .search-bar, .tabs, .stats-bar, .refresh-time, footer,
       .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
@@ -1800,6 +1853,7 @@
         shortcutRandomTopic: '随机话题',
         shortcutBookmarks: '查看收藏',
         shortcutDevMode: '开发者模式',
+        shortcutChanges: '数据变更',
         shortcutEmbed: '嵌入小组件',
         heatmap: '热力图',
         heatmapTitle: '平台活跃热力图',
@@ -1898,7 +1952,18 @@
         sourceHealth: '数据源状态',
         sourceHealthOk: '正常',
         sourceHealthError: '异常',
-        sourceHealthItems: '条数据'
+        sourceHealthItems: '条数据',
+        changes: '变更',
+        changesTitle: '数据变更',
+        changesDesc: '与上次快照对比的变化',
+        changesNew: '新上榜',
+        changesDropped: '已跌出',
+        changesNoPrev: '暂无上次快照数据，下次更新后将显示变更对比',
+        changesSummary: '共 {new} 条新上榜，{dropped} 条跌出',
+        positionUp: '上升',
+        positionDown: '下降',
+        positionNew: '新',
+        positionSame: '持平'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2017,6 +2082,7 @@
         shortcutRandomTopic: 'Random topic',
         shortcutBookmarks: 'View bookmarks',
         shortcutDevMode: 'Dev mode',
+        shortcutChanges: 'Data changes',
         shortcutEmbed: 'Embed widget',
         heatmap: 'Heatmap',
         heatmapTitle: 'Platform Activity Heatmap',
@@ -2115,7 +2181,18 @@
         sourceHealth: 'Data Source Status',
         sourceHealthOk: 'OK',
         sourceHealthError: 'Error',
-        sourceHealthItems: 'items'
+        sourceHealthItems: 'items',
+        changes: 'Changes',
+        changesTitle: 'Data Changes',
+        changesDesc: 'Changes compared to previous snapshot',
+        changesNew: 'New Entries',
+        changesDropped: 'Dropped',
+        changesNoPrev: 'No previous snapshot data yet. Changes will appear after the next update.',
+        changesSummary: '{new} new entries, {dropped} dropped',
+        positionUp: 'Up',
+        positionDown: 'Down',
+        positionNew: 'New',
+        positionSame: 'Same'
       }
     };
 
@@ -2298,6 +2375,7 @@
         allData = await res.json();
         prevTitleSet = null;
         streakMap = null;
+        prevPlatformMap = null;
         try {
           const prevRes = await fetch('data/trending-prev.json?t=' + Date.now());
           prevData = await prevRes.json();
@@ -2377,6 +2455,7 @@
       html += `<div class="tab" data-type="source" data-key="bookmarks">☆ ${t('bookmarks')}${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
       html += `<div class="tab" data-type="source" data-key="recommended">💡 ${t('recommended')}</div>`;
       html += `<div class="tab" data-type="source" data-key="dev" title="${t('devModeDesc')}">💻 ${t('devMode')}</div>`;
+      html += `<div class="tab" data-type="source" data-key="changes">📊 ${t('changes')}</div>`;
       html += `<div class="tab active" data-type="category" data-key="all">${t('all')}</div>`;
       for (const [key, cat] of Object.entries(categories)) {
         html += `<div class="tab" data-type="category" data-key="${key}">${t(cat.nameKey)}</div>`;
@@ -2757,6 +2836,11 @@
         return;
       }
 
+      if (activeSource === 'changes') {
+        container.innerHTML = renderChangesView();
+        return;
+      }
+
       const devSourceKeys = ['github-trending', 'github-newrepos', 'juejin', 'ithome', 'sspai', 'devto', 'oschina', 'lobsters'];
       const sources = activeSource === 'all'
         ? allData
@@ -2965,6 +3049,7 @@
             const itemClass = isAlerted ? 'item item-alerted' : 'item';
             html += `<li class="${itemClass}">
               <span class="item-rank">${i + 1}</span>
+              ${renderPositionChange(source.key, title, i + 1)}
               <div class="item-content">
                 <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${alertBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
@@ -3245,6 +3330,143 @@
       if (!map || map.size === 0) return 0;
       const norm = title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
       return map.get(norm) || 0;
+    }
+
+    function normalizeTitle(title) {
+      return title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+    }
+
+    function buildPrevPlatformMap() {
+      const map = new Map();
+      for (const source of prevData) {
+        const items = (source.items || []).map((item, idx) => ({
+          norm: normalizeTitle(item.title),
+          title: item.title,
+          url: item.url || '',
+          rank: idx + 1
+        }));
+        map.set(source.key, items);
+      }
+      return map;
+    }
+
+    let prevPlatformMap = null;
+    function getPrevPlatformMap() {
+      if (!prevPlatformMap && prevData.length > 0) prevPlatformMap = buildPrevPlatformMap();
+      return prevPlatformMap;
+    }
+
+    function getPositionChange(sourceKey, title, currentRank) {
+      const map = getPrevPlatformMap();
+      if (!map || !map.size) return null;
+      const prevItems = map.get(sourceKey);
+      if (!prevItems) return { type: 'new' };
+      const norm = normalizeTitle(title);
+      const prevItem = prevItems.find(p => p.norm === norm);
+      if (!prevItem) return { type: 'new' };
+      const diff = prevItem.rank - currentRank;
+      if (diff > 0) return { type: 'up', value: diff };
+      if (diff < 0) return { type: 'down', value: Math.abs(diff) };
+      return { type: 'same' };
+    }
+
+    function renderPositionChange(sourceKey, title, currentRank) {
+      const change = getPositionChange(sourceKey, title, currentRank);
+      if (!change) return '';
+      if (change.type === 'up') return `<span class="position-change up" title="${t('positionUp')} ${change.value}">↑${change.value}</span>`;
+      if (change.type === 'down') return `<span class="position-change down" title="${t('positionDown')} ${change.value}">↓${change.value}</span>`;
+      if (change.type === 'new') return `<span class="position-change new-pos" title="${t('positionNew')}">NEW</span>`;
+      return '';
+    }
+
+    function renderChangesView() {
+      if (prevData.length === 0) {
+        return `<div class="source-section"><div class="changes-empty">
+          <div style="font-size:2rem;margin-bottom:0.5rem">📊</div>
+          ${t('changesNoPrev')}
+        </div></div>`;
+      }
+
+      const prevMap = getPrevPlatformMap() || new Map();
+      let totalNew = 0, totalDropped = 0;
+      const platformDiffs = [];
+
+      for (const source of allData) {
+        if (source.error || !source.items || source.items.length === 0) continue;
+        const currentNorms = new Set(source.items.map(item => normalizeTitle(item.title)));
+        const prevItems = prevMap.get(source.key) || [];
+        const prevNorms = new Set(prevItems.map(p => p.norm));
+
+        const newItems = [];
+        source.items.forEach((item, idx) => {
+          if (!prevNorms.has(normalizeTitle(item.title))) {
+            newItems.push({ title: item.title, url: item.url || '', rank: idx + 1 });
+          }
+        });
+
+        const droppedItems = [];
+        prevItems.forEach(p => {
+          if (!currentNorms.has(p.norm)) {
+            droppedItems.push({ title: p.title, url: p.url || '', rank: p.rank });
+          }
+        });
+
+        if (newItems.length > 0 || droppedItems.length > 0) {
+          platformDiffs.push({
+            key: source.key,
+            name: source.source,
+            icon: source.icon,
+            color: source.color,
+            newItems,
+            droppedItems
+          });
+          totalNew += newItems.length;
+          totalDropped += droppedItems.length;
+        }
+      }
+
+      let html = '<div class="changes-view">';
+      html += `<div class="changes-summary">
+        <span style="font-size:1.2rem">📊</span>
+        <span>${t('changesSummary', { new: String(totalNew), dropped: String(totalDropped) })}</span>
+      </div>`;
+
+      if (platformDiffs.length === 0) {
+        html += `<div class="changes-empty">${t('changesNoPrev')}</div>`;
+      }
+
+      platformDiffs.forEach(diff => {
+        const id = 'changes-' + diff.key;
+        html += `<div class="changes-platform">
+          <div class="changes-platform-header" onclick="document.getElementById('${id}').style.display = document.getElementById('${id}').style.display === 'none' ? 'block' : 'none'">
+            <span style="font-size:0.9rem">${diff.icon}</span>
+            <span style="flex:1">${diff.name}</span>
+            ${diff.newItems.length > 0 ? `<span class="changes-badge new-badge">+${diff.newItems.length} ${t('changesNew')}</span>` : ''}
+            ${diff.droppedItems.length > 0 ? `<span class="changes-badge dropped-badge">-${diff.droppedItems.length} ${t('changesDropped')}</span>` : ''}
+          </div>
+          <div class="changes-list" id="${id}">`;
+
+        diff.newItems.forEach(item => {
+          html += `<div class="changes-item new-item">
+            <span class="changes-rank">#${item.rank}</span>
+            <span style="color:#22c55e;font-size:0.75rem">↑新</span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+          </div>`;
+        });
+
+        diff.droppedItems.forEach(item => {
+          html += `<div class="changes-item dropped-item">
+            <span class="changes-rank">#${item.rank}</span>
+            <span style="color:#ef4444;font-size:0.75rem">↓出</span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+          </div>`;
+        });
+
+        html += '</div></div>';
+      });
+
+      html += '</div>';
+      return html;
     }
 
     function relativeTime(dateStr) {
@@ -3983,6 +4205,7 @@
       if (e.key === 'h' || e.key === 'H') { toggleHeatmap(); }
       if (e.key === 'o' || e.key === 'O') { toggleCollections(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
+      if (e.key === 'x' || e.key === 'X') { switchSource(activeSource === 'changes' ? 'all' : 'changes'); }
     });
 
     let focusMode = false;
@@ -4647,6 +4870,7 @@
           { keys: ['R'], desc: t('shortcutRandomTopic') },
           { keys: ['B'], desc: t('shortcutBookmarks') },
           { keys: ['D'], desc: t('shortcutDevMode') },
+          { keys: ['X'], desc: t('shortcutChanges') },
           { keys: ['E'], desc: t('shortcutEmbed') },
           { keys: ['H'], desc: t('heatmap') },
           { keys: ['O'], desc: t('collections') },
