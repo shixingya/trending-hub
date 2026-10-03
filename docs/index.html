@@ -4432,7 +4432,17 @@
       const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
       const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
       const weekDay = weekDays[now.getDay()];
-      ctx.fillText(`全网热点速览 · ${dateStr} ${weekDay}`, width / 2, 170);
+      let viewLabel = '全网热点速览';
+      if (activeSource !== 'all' && activeSource !== 'bookmarks' && activeSource !== 'recommended' && activeSource !== 'dev' && activeSource !== 'changes') {
+        const src = allData.find(s => s.key === activeSource);
+        if (src) viewLabel = src.source + ' · 热点';
+      } else if (activeCategory !== 'all') {
+        const cat = categories[activeCategory];
+        if (cat) viewLabel = t(cat.nameKey) + ' · 热点';
+      } else if (searchQuery) {
+        viewLabel = '搜索: ' + searchQuery;
+      }
+      ctx.fillText(`${viewLabel} · ${dateStr} ${weekDay}`, width / 2, 170);
 
       // Stats bar
       const total = allData.reduce((sum, s) => sum + s.items.length, 0);
@@ -4450,19 +4460,61 @@
       ctx.lineTo(width - 80, 300);
       ctx.stroke();
 
-      const picks = getDailyPicks().slice(0, 8);
+      let shareItems = [];
+      let shareHeader = '🏆 全网必看 TOP 8';
+      let showPlatformBadge = true;
+
+      if (activeSource !== 'all' && activeSource !== 'bookmarks' && activeSource !== 'recommended' && activeSource !== 'dev' && activeSource !== 'changes') {
+        const src = allData.find(s => s.key === activeSource);
+        if (src) {
+          shareItems = src.items.slice(0, 8).map(item => ({ title: item.title, heat: item.hot }));
+          shareHeader = `🔥 ${src.source} · 热门 TOP 8`;
+          showPlatformBadge = false;
+        }
+      } else if (activeCategory !== 'all') {
+        const catItems = [];
+        for (const source of allData) {
+          for (const item of source.items) {
+            if (categorize(item.title) === activeCategory) {
+              catItems.push({ title: item.title, heat: item.hot || 0, _src: source.source });
+            }
+          }
+        }
+        catItems.sort((a, b) => b.heat - a.heat);
+        shareItems = catItems.slice(0, 8);
+        const cat = categories[activeCategory];
+        shareHeader = `📂 ${cat ? t(cat.nameKey) : activeCategory} · TOP 8`;
+        showPlatformBadge = false;
+      } else if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matched = [];
+        for (const source of allData) {
+          for (const item of source.items) {
+            if (item.title.toLowerCase().includes(q)) {
+              matched.push({ title: item.title, heat: item.hot || 0, _src: source.source });
+            }
+          }
+        }
+        matched.sort((a, b) => b.heat - a.heat);
+        shareItems = matched.slice(0, 8);
+        shareHeader = `🔍 搜索「${searchQuery}」· TOP 8`;
+        showPlatformBadge = false;
+      }
+
+      if (shareItems.length === 0) {
+        shareItems = getDailyPicks().slice(0, 8);
+      }
+
       let y = 360;
 
-      if (picks.length > 0) {
-        // Section header with icon
+      if (shareItems.length > 0) {
         ctx.fillStyle = '#feca57';
         ctx.font = 'bold 42px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('🏆 全网必看 TOP 8', 80, y);
+        ctx.fillText(shareHeader, 80, y);
         y += 60;
 
-        picks.forEach((item, i) => {
-          // Rank badge with gradient
+        shareItems.forEach((item, i) => {
           const badgeGradient = ctx.createLinearGradient(80, y - 30, 140, y + 10);
           if (i < 3) {
             badgeGradient.addColorStop(0, '#ff6b6b');
@@ -4481,22 +4533,32 @@
           ctx.textAlign = 'center';
           ctx.fillText(`${i + 1}`, 110, y + 8);
 
-          // Title with better wrapping
           ctx.textAlign = 'left';
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
           const title = item.title.length > 40 ? item.title.substring(0, 40) + '...' : item.title;
           ctx.fillText(title, 160, y);
 
-          // Platform count badge
-          ctx.fillStyle = 'rgba(255,255,255,0.25)';
-          ctx.beginPath();
-          ctx.roundRect(width - 240, y - 25, 160, 40, 20);
-          ctx.fill();
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`${item.sources.length} 平台`, width - 160, y + 2);
+          if (showPlatformBadge && item.sources) {
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.beginPath();
+            ctx.roundRect(width - 240, y - 25, 160, 40, 20);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${item.sources.length} 平台`, width - 160, y + 2);
+          } else if (item.heat != null && item.heat > 0) {
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.beginPath();
+            ctx.roundRect(width - 240, y - 25, 160, 40, 20);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            const heatLabel = item.heat >= 10000 ? (item.heat / 10000).toFixed(1) + 'w' : String(item.heat);
+            ctx.fillText(`🔥 ${heatLabel}`, width - 160, y + 2);
+          }
 
           y += 80;
         });
