@@ -192,6 +192,8 @@
     .tab:hover { border-color: var(--text-muted); color: var(--text); }
     .tab.active { background: var(--tab-active-bg); border-color: var(--tab-active-border); color: var(--text); font-weight: 500; }
     .container { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
+    .container.fade-out { opacity: 0; transform: translateY(4px); transition: opacity 0.15s, transform 0.15s; }
+    .container.fade-in { opacity: 1; transform: translateY(0); transition: opacity 0.2s 0.05s, transform 0.2s 0.05s; }
     .source-section {
       background: var(--bg-card);
       border-radius: 12px;
@@ -2181,6 +2183,11 @@
 
     function renderContent() {
       const container = document.getElementById('content');
+      container.classList.remove('fade-in');
+      container.classList.add('fade-out');
+
+      const doRender = () => {
+      container.classList.remove('fade-out');
 
       if (activeSource === 'bookmarks') {
         const bookmarks = getBookmarks();
@@ -2414,6 +2421,11 @@
         document.getElementById('refreshTime').textContent =
           `${t('updated')} ${relativeTime(latestFetch.fetchedAt)}`;
       }
+
+      requestAnimationFrame(() => container.classList.add('fade-in'));
+      };
+
+      setTimeout(doRender, 150);
     }
 
     function escapeHtml(str) {
