@@ -1380,6 +1380,54 @@
     }
     .palette-item-label { flex: 1; }
     .palette-item-hint { font-size: 0.7rem; color: var(--text-muted); }
+    .quiz-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .quiz-container {
+      background: var(--bg-card); border-radius: 16px; padding: 2rem;
+      width: 500px; max-width: 90vw; box-shadow: 0 8px 32px var(--shadow);
+    }
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .quiz-title { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .quiz-close { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+    .quiz-close:hover { color: var(--text); }
+    .quiz-score { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .quiz-question {
+      font-size: 1.1rem; font-weight: 600; color: var(--text);
+      padding: 1rem; background: var(--bg-input); border-radius: 10px;
+      margin-bottom: 1rem; line-height: 1.5; text-align: center;
+    }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; }
+    .quiz-option {
+      padding: 0.7rem; border: 2px solid var(--border); border-radius: 10px;
+      background: transparent; color: var(--text); font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+      gap: 0.4rem; justify-content: center;
+    }
+    .quiz-option:hover { border-color: var(--accent); background: var(--hover-bg); }
+    .quiz-option.correct { border-color: #2ecc71; background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .quiz-option.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.1); color: #e74c3c; }
+    .quiz-option.disabled { pointer-events: none; opacity: 0.6; }
+    .quiz-option-icon {
+      width: 22px; height: 22px; border-radius: 5px; display: flex;
+      align-items: center; justify-content: center; font-size: 0.6rem;
+      color: #fff; font-weight: 600; flex-shrink: 0;
+    }
+    .quiz-result {
+      padding: 0.8rem; border-radius: 10px; text-align: center;
+      font-size: 0.9rem; margin-bottom: 1rem;
+    }
+    .quiz-result.correct { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .quiz-result.wrong { background: rgba(231,76,60,0.1); color: #e74c3c; }
+    .quiz-actions { text-align: center; }
+    .quiz-next-btn {
+      padding: 0.6rem 1.5rem; border: none; border-radius: 10px;
+      background: var(--accent); color: #fff; font-size: 0.9rem;
+      cursor: pointer; font-weight: 600;
+    }
+    .quiz-next-btn:hover { opacity: 0.9; }
     .pk-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7); z-index: 2000;
@@ -1576,6 +1624,7 @@
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="pkBtn" onclick="toggleHotPK()">PK</button>
+      <button class="share-btn" onclick="toggleQuiz()">猜</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
       <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
@@ -1819,6 +1868,20 @@
     <div class="palette-modal">
       <input class="palette-input" id="paletteInput" type="text" placeholder="搜索平台或功能..." oninput="filterPalette(this.value)" autocomplete="off">
       <div class="palette-results" id="paletteResults"></div>
+    </div>
+  </div>
+
+  <div class="quiz-overlay" id="quizOverlay" style="display:none" onclick="if(event.target===this)toggleQuiz()">
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <span class="quiz-title">🧠 热点猜猜猜</span>
+        <button class="quiz-close" onclick="toggleQuiz()">✕</button>
+      </div>
+      <div class="quiz-score" id="quizScore">得分: 0 / 0</div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-result" id="quizResult" style="display:none"></div>
+      <div class="quiz-actions" id="quizActions"></div>
     </div>
   </div>
 
@@ -2133,6 +2196,7 @@
         positionNew: '新',
         positionSame: '持平',
         pk: 'PK',
+        quiz: '猜谜',
         pkTitle: '🔥 热点PK',
         pkDesc: '选择你更关注的话题',
         pkVoteA: '支持左边',
@@ -2373,6 +2437,7 @@
         positionNew: 'New',
         positionSame: 'Same',
         pk: 'PK',
+        quiz: 'Quiz',
         pkTitle: '🔥 Hot PK',
         pkDesc: 'Pick the topic you care about more',
         pkVoteA: 'Vote Left',
@@ -4450,6 +4515,7 @@
       if (e.key === 'p' || e.key === 'P') { toggleHotPK(); }
       if (e.key === 'm' || e.key === 'M') { toggleCompactMode(); }
       if (e.key === 'k' || e.key === 'K') { openPalette(); }
+      if (e.key === 'q' || e.key === 'Q') { toggleQuiz(); }
     });
 
     let focusMode = false;
@@ -5195,6 +5261,7 @@
           { keys: ['D'], desc: t('shortcutDevMode') },
           { keys: ['X'], desc: t('shortcutChanges') },
           { keys: ['P'], desc: t('pk') },
+          { keys: ['Q'], desc: t('quiz') },
           { keys: ['E'], desc: t('shortcutEmbed') },
           { keys: ['H'], desc: t('heatmap') },
           { keys: ['O'], desc: t('collections') },
@@ -6591,6 +6658,7 @@
         { label: '词云', hint: '快捷键 W', icon: '☁️', color: '#74b9ff', action: () => toggleWordCloud() },
         { label: '对比模式', hint: '快捷键 C', icon: '🔍', color: '#a29bfe', action: () => toggleCompareMode() },
         { label: '热点PK', hint: '快捷键 P', icon: '🔥', color: '#ff6b6b', action: () => toggleHotPK() },
+        { label: '热点猜谜', hint: '快捷键 Q', icon: '🧠', color: '#e056fd', action: () => toggleQuiz() },
         { label: '关系图谱', hint: '快捷键 G', icon: '🕸️', color: '#55a3f0', action: () => toggleGraph() },
         { label: '活动热力图', hint: '快捷键 H', icon: '📅', color: '#2ecc71', action: () => toggleHeatmap() },
         { label: '话题收藏集', hint: '快捷键 O', icon: '📁', color: '#e67e22', action: () => toggleCollections() },
@@ -6665,6 +6733,71 @@
         closePalette();
       }
     });
+
+    let quizScore = 0, quizTotal = 0, quizAnswered = false;
+
+    function toggleQuiz() {
+      const overlay = document.getElementById('quizOverlay');
+      if (overlay.style.display === 'none') {
+        overlay.style.display = 'flex';
+        quizScore = 0; quizTotal = 0;
+        nextQuizRound();
+      } else {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function nextQuizRound() {
+      quizAnswered = false;
+      const sourcesWithItems = allData.filter(s => s.items.length > 0 && !s.error);
+      if (sourcesWithItems.length < 4) return;
+
+      const correctSource = sourcesWithItems[Math.floor(Math.random() * sourcesWithItems.length)];
+      const item = correctSource.items[Math.floor(Math.random() * correctSource.items.length)];
+
+      const otherSources = sourcesWithItems.filter(s => s.key !== correctSource.key);
+      const shuffledOthers = otherSources.sort(() => Math.random() - 0.5).slice(0, 3);
+      const options = [correctSource, ...shuffledOthers].sort(() => Math.random() - 0.5);
+
+      document.getElementById('quizScore').textContent = `得分: ${quizScore} / ${quizTotal}`;
+      document.getElementById('quizQuestion').textContent = `「${item.title}」来自哪个平台？`;
+      document.getElementById('quizResult').style.display = 'none';
+      document.getElementById('quizActions').innerHTML = '';
+
+      document.getElementById('quizOptions').innerHTML = options.map((src, i) => `
+        <button class="quiz-option" data-key="${src.key}" onclick="answerQuiz('${src.key}', '${correctSource.key}', this)">
+          <span class="quiz-option-icon" style="background:${src.color}">${src.icon}</span>
+          ${src.source}
+        </button>
+      `).join('');
+    }
+
+    function answerQuiz(chosen, correct, btn) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      quizTotal++;
+
+      const allBtns = document.querySelectorAll('.quiz-option');
+      allBtns.forEach(b => {
+        b.classList.add('disabled');
+        if (b.dataset.key === correct) b.classList.add('correct');
+      });
+
+      const resultEl = document.getElementById('quizResult');
+      if (chosen === correct) {
+        quizScore++;
+        resultEl.className = 'quiz-result correct';
+        resultEl.textContent = '✅ 答对了！';
+      } else {
+        btn.classList.add('wrong');
+        const src = allData.find(s => s.key === correct);
+        resultEl.className = 'quiz-result wrong';
+        resultEl.textContent = `❌ 答错了，正确答案是 ${src ? src.source : correct}`;
+      }
+      resultEl.style.display = 'block';
+      document.getElementById('quizScore').textContent = `得分: ${quizScore} / ${quizTotal}`;
+      document.getElementById('quizActions').innerHTML = `<button class="quiz-next-btn" onclick="nextQuizRound()">下一题 →</button>`;
+    }
 
     function toggleHotPK() {
       const overlay = document.getElementById('pkOverlay');
