@@ -1329,6 +1329,96 @@
       0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
       100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
     }
+    .pk-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 2000;
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .pk-container {
+      background: var(--bg); border-radius: 16px; padding: 1.5rem;
+      max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .pk-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;
+    }
+    .pk-title { font-size: 1.2rem; font-weight: 700; }
+    .pk-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .pk-close {
+      background: none; border: none; font-size: 1.2rem; cursor: pointer;
+      color: var(--text-muted); padding: 4px 8px; border-radius: 6px;
+    }
+    .pk-close:hover { background: var(--bg-secondary); color: var(--text); }
+    .pk-arena { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .pk-card {
+      flex: 1; border-radius: 12px; padding: 1rem; cursor: pointer;
+      border: 2px solid var(--border); transition: all 0.3s ease;
+      display: flex; flex-direction: column; gap: 0.5rem; position: relative; overflow: hidden;
+    }
+    .pk-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .pk-card.voted { cursor: default; }
+    .pk-card.winner { border-color: #22c55e; background: rgba(34,197,94,0.05); }
+    .pk-card.loser { opacity: 0.6; }
+    .pk-card-rank {
+      font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+      background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px; align-self: flex-start;
+    }
+    .pk-card-title {
+      font-size: 0.9rem; font-weight: 600; line-height: 1.4;
+      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    }
+    .pk-card-title a { color: var(--text); text-decoration: none; }
+    .pk-card-title a:hover { color: var(--accent); }
+    .pk-card-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .pk-card-source-tag {
+      font-size: 0.6rem; padding: 1px 5px; border-radius: 3px;
+      background: var(--bg-secondary); color: var(--text-secondary);
+    }
+    .pk-vote-btn {
+      padding: 0.5rem; border: 2px solid var(--accent); border-radius: 8px;
+      background: transparent; color: var(--accent); font-weight: 600;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+      margin-top: auto;
+    }
+    .pk-vote-btn:hover { background: var(--accent); color: #fff; }
+    .pk-result-bar {
+      height: 24px; border-radius: 6px; overflow: hidden;
+      display: flex; margin-top: auto; background: var(--bg-secondary);
+    }
+    .pk-result-fill-a {
+      background: linear-gradient(90deg, #48dbfb, #0abde3);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: #fff; min-width: 30px;
+    }
+    .pk-result-fill-b {
+      background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: #fff; min-width: 30px;
+    }
+    .pk-vs {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 900; color: var(--text-muted);
+      align-self: center; flex-shrink: 0; width: 40px;
+      background: linear-gradient(135deg, #48dbfb, #ff6b6b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .pk-actions { display: flex; gap: 0.5rem; justify-content: center; }
+    .pk-next-btn {
+      padding: 0.5rem 1.5rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-secondary); color: var(--text); cursor: pointer;
+      font-size: 0.85rem; transition: all 0.2s;
+    }
+    .pk-next-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .pk-total-votes { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; }
+    @media (max-width: 600px) {
+      .pk-arena { flex-direction: column; }
+      .pk-vs { width: auto; height: 30px; }
+    }
+
     .position-change {
       font-size: 0.65rem; font-weight: 600; min-width: 28px; text-align: center;
       display: inline-flex; align-items: center; justify-content: center; gap: 1px;
@@ -1433,6 +1523,7 @@
       <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
+      <button class="share-btn" id="pkBtn" onclick="toggleHotPK()">PK</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
       <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
@@ -1666,6 +1757,18 @@
     <div class="collections-body" id="collectionsBody">
       <div class="collection-tabs" id="collectionTabs"></div>
       <div class="collection-topics" id="collectionTopics"></div>
+    </div>
+  </div>
+
+  <div class="pk-overlay" id="pkOverlay" style="display:none" onclick="if(event.target===this)toggleHotPK()">
+    <div class="pk-container">
+      <div class="pk-header">
+        <span class="pk-title" id="pkTitle">🔥 热点PK</span>
+        <button class="pk-close" onclick="toggleHotPK()">✕</button>
+      </div>
+      <div class="pk-desc" id="pkDesc">选择你更关注的话题</div>
+      <div class="pk-arena" id="pkArena"></div>
+      <div class="pk-actions" id="pkActions"></div>
     </div>
   </div>
 
@@ -1963,7 +2066,16 @@
         positionUp: '上升',
         positionDown: '下降',
         positionNew: '新',
-        positionSame: '持平'
+        positionSame: '持平',
+        pk: 'PK',
+        pkTitle: '🔥 热点PK',
+        pkDesc: '选择你更关注的话题',
+        pkVoteA: '支持左边',
+        pkVoteB: '支持右边',
+        pkNext: '换一组',
+        pkTotalVotes: '共 {count} 人参与',
+        pkVoted: '已投票',
+        pkNoData: '暂无可PK的话题'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -2192,7 +2304,16 @@
         positionUp: 'Up',
         positionDown: 'Down',
         positionNew: 'New',
-        positionSame: 'Same'
+        positionSame: 'Same',
+        pk: 'PK',
+        pkTitle: '🔥 Hot PK',
+        pkDesc: 'Pick the topic you care about more',
+        pkVoteA: 'Vote Left',
+        pkVoteB: 'Vote Right',
+        pkNext: 'Next Round',
+        pkTotalVotes: '{count} votes total',
+        pkVoted: 'Voted',
+        pkNoData: 'No topics available for PK'
       }
     };
 
@@ -4206,6 +4327,7 @@
       if (e.key === 'o' || e.key === 'O') { toggleCollections(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
       if (e.key === 'x' || e.key === 'X') { switchSource(activeSource === 'changes' ? 'all' : 'changes'); }
+      if (e.key === 'p' || e.key === 'P') { toggleHotPK(); }
     });
 
     let focusMode = false;
@@ -4871,6 +4993,7 @@
           { keys: ['B'], desc: t('shortcutBookmarks') },
           { keys: ['D'], desc: t('shortcutDevMode') },
           { keys: ['X'], desc: t('shortcutChanges') },
+          { keys: ['P'], desc: t('pk') },
           { keys: ['E'], desc: t('shortcutEmbed') },
           { keys: ['H'], desc: t('heatmap') },
           { keys: ['O'], desc: t('collections') },
@@ -6133,6 +6256,193 @@
         document.body.appendChild(piece);
         setTimeout(() => piece.remove(), 2500);
       }
+    }
+
+    let pkVotes = JSON.parse(localStorage.getItem('trendingHubPKVotes') || '{}');
+    let pkPairIndex = 0;
+    let pkPairs = [];
+
+    function findPKPairs() {
+      if (allData.length === 0) return [];
+      const candidates = [];
+      for (const source of allData) {
+        if (!source.items || source.error) continue;
+        for (let i = 0; i < source.items.length; i++) {
+          const item = source.items[i];
+          const title = item.title || '';
+          if (title.length < 6) continue;
+          candidates.push({
+            title,
+            url: item.url || '#',
+            hot: item.hot || 0,
+            source: source.source,
+            sourceKey: source.key,
+            icon: source.icon,
+            color: source.color,
+            rank: i + 1,
+            isQuestion: /[？?]/.test(title),
+            crossCount: 0,
+            norm: normalizeTitle(title)
+          });
+        }
+      }
+
+      const titleMap = new Map();
+      for (const c of candidates) {
+        if (!titleMap.has(c.norm)) titleMap.set(c.norm, []);
+        titleMap.get(c.norm).push(c);
+      }
+      for (const [norm, items] of titleMap) {
+        if (items.length > 1) {
+          items.forEach(item => { item.crossCount = items.length; });
+        }
+      }
+
+      const deduped = new Map();
+      for (const c of candidates) {
+        if (!deduped.has(c.norm) || c.hot > deduped.get(c.norm).hot) {
+          deduped.set(c.norm, c);
+        }
+      }
+      const unique = Array.from(deduped.values());
+
+      const scored = unique.map(c => {
+        let score = 0;
+        if (c.isQuestion) score += 30;
+        score += Math.min(c.crossCount * 20, 60);
+        score += Math.min(Math.log10(c.hot + 1) * 10, 30);
+        if (c.rank <= 5) score += 10;
+        score += Math.random() * 15;
+        return { ...c, score };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+
+      const pairs = [];
+      const used = new Set();
+      for (let i = 0; i < scored.length && pairs.length < 20; i++) {
+        if (used.has(scored[i].norm)) continue;
+        for (let j = i + 1; j < scored.length && pairs.length < 20; j++) {
+          if (used.has(scored[j].norm)) continue;
+          if (scored[i].norm === scored[j].norm) continue;
+          if (Math.abs(scored[i].score - scored[j].score) < 25) {
+            pairs.push([scored[i], scored[j]]);
+            used.add(scored[i].norm);
+            used.add(scored[j].norm);
+            break;
+          }
+        }
+      }
+
+      return pairs;
+    }
+
+    function toggleHotPK() {
+      const overlay = document.getElementById('pkOverlay');
+      const isVisible = overlay.style.display !== 'none';
+      if (isVisible) {
+        overlay.style.display = 'none';
+      } else {
+        overlay.style.display = 'flex';
+        if (pkPairs.length === 0) {
+          pkPairs = findPKPairs();
+          pkPairIndex = 0;
+        }
+        renderPKRound();
+      }
+    }
+
+    function renderPKRound() {
+      const arena = document.getElementById('pkArena');
+      const actions = document.getElementById('pkActions');
+      document.getElementById('pkTitle').textContent = t('pkTitle');
+      document.getElementById('pkDesc').textContent = t('pkDesc');
+
+      if (pkPairs.length === 0) {
+        arena.innerHTML = `<div class="pk-no-data" style="text-align:center;padding:2rem;color:var(--text-muted)">${t('pkNoData')}</div>`;
+        actions.innerHTML = '';
+        return;
+      }
+
+      if (pkPairIndex >= pkPairs.length) pkPairIndex = 0;
+      const [topicA, topicB] = pkPairs[pkPairIndex];
+      const pairKey = [normalizeTitle(topicA.title), normalizeTitle(topicB.title)].sort().join('|');
+      const votes = pkVotes[pairKey] || { a: 0, b: 0 };
+      const totalVotes = votes.a + votes.b;
+      const userVoted = localStorage.getItem('trendingHubPKVoted_' + pairKey);
+
+      const pctA = totalVotes > 0 ? Math.round((votes.a / totalVotes) * 100) : 50;
+      const pctB = totalVotes > 0 ? Math.round((votes.b / totalVotes) * 100) : 50;
+
+      const sourceTagsA = topicA.crossCount > 1
+        ? `<span class="pk-card-source-tag" style="background:${topicA.color};color:#fff">${topicA.icon} ${topicA.source}</span>`
+        : `<span class="pk-card-source-tag" style="background:${topicA.color};color:#fff">${topicA.icon} ${topicA.source}</span>`;
+      const sourceTagsB = topicB.crossCount > 1
+        ? `<span class="pk-card-source-tag" style="background:${topicB.color};color:#fff">${topicB.icon} ${topicB.source}</span>`
+        : `<span class="pk-card-source-tag" style="background:${topicB.color};color:#fff">${topicB.icon} ${topicB.source}</span>`;
+
+      let arenaHtml = '<div class="pk-arena">';
+
+      arenaHtml += `<div class="pk-card ${userVoted ? 'voted' : ''} ${userVoted === 'a' ? 'winner' : userVoted ? 'loser' : ''}" id="pkCardA" ${!userVoted ? `onclick="votePK('a')"` : ''}>
+        <span class="pk-card-rank">#${topicA.rank} ${topicA.source}</span>
+        <div class="pk-card-title"><a href="${topicA.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${escapeHtml(topicA.title)}</a></div>
+        <div class="pk-card-meta">${sourceTagsA}${topicA.hot ? `<span>🔥 ${formatHot(topicA.hot)}</span>` : ''}</div>`;
+
+      if (userVoted) {
+        arenaHtml += `<div class="pk-result-bar"><div class="pk-result-fill-a" style="width:${pctA}%">${pctA}%</div><div class="pk-result-fill-b" style="width:${pctB}%">${pctB}%</div></div>`;
+      } else {
+        arenaHtml += `<button class="pk-vote-btn" onclick="votePK('a');event.stopPropagation()">${t('pkVoteA')}</button>`;
+      }
+      arenaHtml += '</div>';
+
+      arenaHtml += '<div class="pk-vs">VS</div>';
+
+      arenaHtml += `<div class="pk-card ${userVoted ? 'voted' : ''} ${userVoted === 'b' ? 'winner' : userVoted ? 'loser' : ''}" id="pkCardB" ${!userVoted ? `onclick="votePK('b')"` : ''}>
+        <span class="pk-card-rank">#${topicB.rank} ${topicB.source}</span>
+        <div class="pk-card-title"><a href="${topicB.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${escapeHtml(topicB.title)}</a></div>
+        <div class="pk-card-meta">${sourceTagsB}${topicB.hot ? `<span>🔥 ${formatHot(topicB.hot)}</span>` : ''}</div>`;
+
+      if (userVoted) {
+        arenaHtml += `<div class="pk-result-bar"><div class="pk-result-fill-a" style="width:${pctA}%">${pctA}%</div><div class="pk-result-fill-b" style="width:${pctB}%">${pctB}%</div></div>`;
+      } else {
+        arenaHtml += `<button class="pk-vote-btn" onclick="votePK('b');event.stopPropagation()">${t('pkVoteB')}</button>`;
+      }
+      arenaHtml += '</div>';
+      arenaHtml += '</div>';
+
+      arena.innerHTML = arenaHtml;
+
+      let actionsHtml = '';
+      if (totalVotes > 0) {
+        actionsHtml += `<div class="pk-total-votes">${t('pkTotalVotes', { count: String(totalVotes) })}</div>`;
+      }
+      actionsHtml += `<button class="pk-next-btn" onclick="nextPKRound()">${t('pkNext')} →</button>`;
+      actions.innerHTML = actionsHtml;
+    }
+
+    function votePK(side) {
+      if (pkPairIndex >= pkPairs.length) return;
+      const [topicA, topicB] = pkPairs[pkPairIndex];
+      const pairKey = [normalizeTitle(topicA.title), normalizeTitle(topicB.title)].sort().join('|');
+
+      if (localStorage.getItem('trendingHubPKVoted_' + pairKey)) return;
+
+      if (!pkVotes[pairKey]) pkVotes[pairKey] = { a: 0, b: 0 };
+      pkVotes[pairKey][side]++;
+      localStorage.setItem('trendingHubPKVotes', JSON.stringify(pkVotes));
+      localStorage.setItem('trendingHubPKVoted_' + pairKey, side);
+
+      renderPKRound();
+      showToast(t('pkVoted') + ' ✓', 'success');
+    }
+
+    function nextPKRound() {
+      pkPairIndex++;
+      if (pkPairIndex >= pkPairs.length) {
+        pkPairs = findPKPairs();
+        pkPairIndex = 0;
+      }
+      renderPKRound();
     }
   </script>
   <div class="toast-container" id="toastContainer"></div>
