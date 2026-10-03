@@ -2962,7 +2962,7 @@
         return;
       }
 
-      const devSourceKeys = ['github-trending', 'github-newrepos', 'juejin', 'ithome', 'sspai', 'devto', 'oschina', 'lobsters'];
+      const devSourceKeys = ['github-trending', 'github-newrepos', 'juejin', 'ithome', 'sspai', 'devto', 'oschina', 'lobsters', 'hackernews'];
       const sources = activeSource === 'all'
         ? allData
         : activeSource === 'dev'
@@ -3100,7 +3100,7 @@
       }
 
       if (activeSource === 'all' && activeCategory === 'all' && !searchQuery) {
-        const devKeys = ['github-trending', 'github-newrepos', 'juejin', 'devto', 'oschina', 'lobsters', 'ithome', 'sspai'];
+        const devKeys = ['github-trending', 'github-newrepos', 'juejin', 'devto', 'oschina', 'lobsters', 'hackernews', 'ithome', 'sspai'];
         const devItems = [];
         const devSeen = new Set();
         for (const source of allData) {

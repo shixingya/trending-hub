@@ -27,6 +27,7 @@ export { devto } from './dev-to.js';
 export { githubNewRepos } from './github-newrepos.js';
 export { oschina } from './oschina.js';
 export { lobsters } from './lobsters.js';
+export { hackernews } from './hackernews.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -57,6 +58,7 @@ import { devto } from './dev-to.js';
 import { githubNewRepos } from './github-newrepos.js';
 import { oschina } from './oschina.js';
 import { lobsters } from './lobsters.js';
+import { hackernews } from './hackernews.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -91,5 +93,6 @@ export const allSources: TrendingSource[] = [
   devto,
   githubNewRepos,
   oschina,
-  lobsters
+  lobsters,
+  hackernews
 ];
