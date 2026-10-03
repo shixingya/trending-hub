@@ -1783,6 +1783,9 @@
         collectionsAdded: '已添加到 {collection}',
         collectionsRemoved: '已移除',
         collectionsDeleteConfirm: '确定删除此收藏集？',
+        recommended: '推荐',
+        recommendedDesc: '根据你的收藏智能推荐',
+        recommendedEmpty: '收藏一些话题后，这里会显示智能推荐',
         wordCloud: '词云',
         wordCloudTitle: '热点词云',
         compare: '对比',
@@ -1993,6 +1996,9 @@
         collectionsAdded: 'Added to {collection}',
         collectionsRemoved: 'Removed',
         collectionsDeleteConfirm: 'Delete this collection?',
+        recommended: 'For You',
+        recommendedDesc: 'Smart picks based on your bookmarks',
+        recommendedEmpty: 'Bookmark some topics to see smart recommendations here',
         wordCloud: 'Cloud',
         wordCloudTitle: 'Topic Word Cloud',
         compare: 'Compare',
@@ -2322,6 +2328,7 @@
       const bookmarkCount = getBookmarks().length;
       let html = `<div class="tab-group"><span class="tab-group-label">${t('categories')}</span>`;
       html += `<div class="tab" data-type="source" data-key="bookmarks">☆ ${t('bookmarks')}${bookmarkCount > 0 ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:2px">${bookmarkCount}</span>` : ''}</div>`;
+      html += `<div class="tab" data-type="source" data-key="recommended">💡 ${t('recommended')}</div>`;
       html += `<div class="tab" data-type="source" data-key="dev" title="${t('devModeDesc')}">💻 ${t('devMode')}</div>`;
       html += `<div class="tab active" data-type="category" data-key="all">${t('all')}</div>`;
       for (const [key, cat] of Object.entries(categories)) {
@@ -2661,6 +2668,40 @@
                 <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.2rem">${new Date(item.time).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')}</div>
               </div>
               <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(item.title).replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}');renderContent()" title="取消收藏" style="color:var(--accent-yellow)">★</button>
+            </li>`;
+          });
+          html += '</ul></div>';
+        }
+        container.innerHTML = html;
+        return;
+      }
+
+      if (activeSource === 'recommended') {
+        const recommended = getRecommendations();
+        let html = '';
+        if (recommended.length === 0) {
+          html = `<div class="source-section"><div class="empty-state">${t('recommendedEmpty')}</div></div>`;
+        } else {
+          html += '<div class="source-section" style="border: 1px solid var(--accent);">';
+          html += '<div class="source-header"><div class="source-icon" style="background:linear-gradient(135deg,#48dbfb,#ff6b6b)">💡</div>';
+          html += `<span class="source-name">${t('recommended')}</span>`;
+          html += `<span class="source-count">${t('recommendedDesc')}</span></div>`;
+          html += '<ul class="item-list">';
+          recommended.forEach((rec, i) => {
+            const tags = extractTags(rec.title);
+            const tagsHtml = tags.length > 0 ? `<div class="item-tags">${tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}</div>` : '';
+            html += `<li class="item">
+              <span class="item-rank">${i + 1}</span>
+              <div class="item-content">
+                <div class="item-title"><a href="${rec.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(rec.title)}</a></div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem">${rec.sourceIcon} ${rec.sourceName} ${rec.hot ? '· ' + formatHot(rec.hot) : ''}</div>
+                ${tagsHtml}
+              </div>
+              <div class="item-actions">
+                <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(rec.title).replace(/'/g, "\\'")}', '${rec.url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
+                <button class="item-action-btn" onclick="showCollectionPicker(event,'${rec.sourceKey}','${rec.sourceName.replace(/'/g, "\\'")}','${rec.sourceIcon}','${escapeHtml(rec.title).replace(/'/g, "\\'")}','${rec.url.replace(/'/g, "\\'")}',${rec.hot || 0})" title="收藏集">+</button>
+              </div>
+              ${rec.hot ? `<span class="item-hot">${formatHot(rec.hot)}</span>` : ''}
             </li>`;
           });
           html += '</ul></div>';
@@ -3411,6 +3452,59 @@
         showToast(t('toastBookmarked'), 'success');
       }
       localStorage.setItem('trending-bookmarks', JSON.stringify(bookmarks));
+    }
+
+    function getRecommendations() {
+      const bookmarks = getBookmarks();
+      if (bookmarks.length === 0 || allData.length === 0) return [];
+
+      const bookmarkTags = {};
+      bookmarks.forEach(bm => {
+        const tags = extractTags(bm.title);
+        tags.forEach(tag => { bookmarkTags[tag] = (bookmarkTags[tag] || 0) + 1; });
+      });
+
+      const topTags = Object.entries(bookmarkTags)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([tag]) => tag);
+
+      if (topTags.length === 0) return [];
+
+      const bookmarkTitles = new Set(bookmarks.map(b => b.title));
+      const scored = [];
+
+      allData.forEach(source => {
+        source.items.forEach(item => {
+          if (bookmarkTitles.has(item.title)) return;
+          const tags = extractTags(item.title);
+          let score = 0;
+          tags.forEach(tag => {
+            if (topTags.includes(tag)) score += (bookmarkTags[tag] || 0);
+          });
+          if (item.hot) score += Math.min(item.hot / 1000000, 3);
+          if (score > 0) {
+            scored.push({
+              title: item.title,
+              url: item.url,
+              hot: item.hot,
+              sourceKey: source.key,
+              sourceName: source.source,
+              sourceIcon: source.icon,
+              score
+            });
+          }
+        });
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      const seen = new Set();
+      return scored.filter(item => {
+        const key = item.title.slice(0, 30);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, 20);
     }
 
     function getAlerts() {
