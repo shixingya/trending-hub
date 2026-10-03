@@ -999,6 +999,14 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    .confetti-piece {
+      position: fixed; width: 8px; height: 8px; z-index: 99999;
+      pointer-events: none; animation: confettiFall 1.5s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
+    }
     @media print {
       header, .search-bar, .tabs, .stats-bar, .refresh-time, footer,
       .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
@@ -2589,6 +2597,7 @@
         const btn = event.target;
         const orig = btn.textContent;
         btn.textContent = '✓ 已复制';
+        triggerConfetti(25);
         setTimeout(() => btn.textContent = orig, 2000);
       });
     }
@@ -2919,6 +2928,7 @@
       navigator.clipboard.writeText(text).then(() => {
         const count = visibleSources.reduce((sum, s) => sum + Math.min(filterItems(s.items).length, 10), 0);
         showToast(t('toastCopied', { count }) || `已复制 ${count} 个话题`, 'success');
+        triggerConfetti(40);
       }).catch(() => {
         showToast(t('toastCopyFailed'), 'error');
       });
@@ -4710,6 +4720,24 @@
       toast.textContent = message;
       container.appendChild(toast);
       setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
+    }
+
+    function triggerConfetti(count = 30) {
+      const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#a29bfe', '#fd79a8'];
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.top = `-10px`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        piece.style.width = `${6 + Math.random() * 6}px`;
+        piece.style.height = `${6 + Math.random() * 6}px`;
+        piece.style.animationDuration = `${1 + Math.random() * 1}s`;
+        piece.style.animationDelay = `${Math.random() * 0.3}s`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2500);
+      }
     }
   </script>
   <div class="toast-container" id="toastContainer"></div>
