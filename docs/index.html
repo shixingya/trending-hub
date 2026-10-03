@@ -916,6 +916,98 @@
       .graph-header { padding: 0.75rem 1rem; }
       .graph-legend { bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.5rem; }
     }
+    .embed-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); z-index: 1001; display: none;
+      align-items: center; justify-content: center;
+    }
+    .embed-overlay.active { display: flex; }
+    .embed-modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; width: 90%; max-width: 600px; max-height: 85vh;
+      overflow-y: auto; box-shadow: 0 8px 32px var(--shadow);
+    }
+    .embed-header {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .embed-title { font-size: 1.1rem; font-weight: 600; }
+    .embed-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.3rem; cursor: pointer; padding: 0.25rem 0.5rem;
+    }
+    .embed-close:hover { color: var(--text); }
+    .embed-body { padding: 1.5rem; }
+    .embed-option-group { margin-bottom: 1.25rem; }
+    .embed-option-label {
+      font-size: 0.85rem; font-weight: 500; margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+    .embed-select {
+      width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-input);
+      color: var(--text); font-size: 0.85rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .embed-select:focus { border-color: var(--accent); }
+    .embed-row { display: flex; gap: 0.75rem; }
+    .embed-row .embed-option-group { flex: 1; }
+    .embed-toggle-group { display: flex; gap: 0.5rem; }
+    .embed-toggle {
+      flex: 1; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-input); color: var(--text-secondary); cursor: pointer;
+      font-size: 0.8rem; text-align: center; transition: all 0.15s;
+    }
+    .embed-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .embed-code-box {
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem; margin-top: 1rem;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      font-size: 0.75rem; color: var(--text-secondary);
+      word-break: break-all; white-space: pre-wrap; line-height: 1.5;
+      max-height: 200px; overflow-y: auto;
+    }
+    .embed-preview-frame {
+      width: 100%; height: 300px; border: 1px solid var(--border);
+      border-radius: 8px; margin-top: 1rem; background: var(--bg);
+    }
+    .embed-copy-btn {
+      width: 100%; margin-top: 0.75rem; padding: 0.6rem;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+      font-weight: 500; transition: opacity 0.15s;
+    }
+    .embed-copy-btn:hover { opacity: 0.85; }
+    .source-health-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem; margin-top: 1rem;
+    }
+    .source-health-card {
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.75rem 1rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      transition: border-color 0.15s;
+    }
+    .source-health-card:hover { border-color: var(--accent); }
+    .source-health-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 0.75rem; color: #fff; flex-shrink: 0;
+    }
+    .source-health-info { flex: 1; min-width: 0; }
+    .source-health-name { font-size: 0.8rem; font-weight: 500; }
+    .source-health-count { font-size: 0.7rem; color: var(--text-muted); }
+    .source-health-status {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .source-health-status.ok { background: #1dd1a1; box-shadow: 0 0 6px rgba(29,209,161,0.4); }
+    .source-health-status.error { background: var(--accent-red); box-shadow: 0 0 6px rgba(255,107,107,0.4); }
+    @media (max-width: 600px) {
+      .embed-modal { width: 95%; border-radius: 12px; }
+      .embed-body { padding: 1rem; }
+      .embed-row { flex-direction: column; gap: 0; }
+      .source-health-grid { grid-template-columns: 1fr; }
+    }
     .bottom-nav {
       display: none;
       position: fixed;
@@ -1012,7 +1104,7 @@
       .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
       .item-action-btn, .load-more-btn, .bottom-nav, .tag-filter-bar,
       #shortcutsOverlay, #wordcloudOverlay, #compareOverlay, #timelineOverlay,
-      #graphOverlay, #topicModal, #shareImagePreview, #morningBriefOverlay,
+      #graphOverlay, #topicModal, #shareImagePreview, #morningBriefOverlay, #embedOverlay,
       #statsOverlay { display: none !important; }
       body { background: #fff; color: #000; font-size: 10pt; }
       .container { max-width: 100%; margin: 0; padding: 0; }
@@ -1053,11 +1145,13 @@
       <button class="share-btn" onclick="shareSite()">分享</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" onclick="showStats()">统计</button>
+      <button class="share-btn" onclick="showSourceHealth()">状态</button>
       <button class="share-btn" id="alertsBtn" onclick="showAlerts()">提醒</button>
       <button class="share-btn" id="wordCloudBtn" onclick="toggleWordCloud()">词云</button>
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
+      <button class="share-btn" id="embedBtn" onclick="showEmbedWidget()">嵌入</button>
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
@@ -1095,7 +1189,7 @@
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 28大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
-    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
+    <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">E</kbd> 嵌入 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
   <nav class="bottom-nav" id="bottomNav">
@@ -1140,6 +1234,52 @@
     <div class="share-image-actions">
       <button onclick="downloadShareImage()">下载图片</button>
       <button class="secondary" onclick="closeShareImage()">关闭</button>
+    </div>
+  </div>
+
+  <div class="embed-overlay" id="embedOverlay" onclick="if(event.target===this)closeEmbedWidget()">
+    <div class="embed-modal">
+      <div class="embed-header">
+        <div class="embed-title" data-i18n="embedTitle">嵌入小组件</div>
+        <button class="embed-close" onclick="closeEmbedWidget()">&times;</button>
+      </div>
+      <div class="embed-body">
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.25rem" data-i18n="embedDesc">将热点小组件嵌入你的网站，实时展示全网热点</p>
+        <div class="embed-row">
+          <div class="embed-option-group">
+            <div class="embed-option-label" data-i18n="embedPlatform">选择平台</div>
+            <select class="embed-select" id="embedPlatform" onchange="updateEmbedCode()">
+              <option value="all" data-i18n="embedAllPlatforms">全部平台</option>
+            </select>
+          </div>
+          <div class="embed-option-group">
+            <div class="embed-option-label" data-i18n="embedCount">显示数量</div>
+            <select class="embed-select" id="embedCount" onchange="updateEmbedCode()">
+              <option value="5">5 条</option>
+              <option value="10" selected>10 条</option>
+              <option value="20">20 条</option>
+              <option value="50">50 条</option>
+            </select>
+          </div>
+        </div>
+        <div class="embed-option-group">
+          <div class="embed-option-label" data-i18n="embedTheme">主题风格</div>
+          <div class="embed-toggle-group">
+            <div class="embed-toggle active" onclick="setEmbedTheme('auto',this)" data-i18n="embedAuto">自动</div>
+            <div class="embed-toggle" onclick="setEmbedTheme('dark',this)" data-i18n="embedDark">暗色</div>
+            <div class="embed-toggle" onclick="setEmbedTheme('light',this)" data-i18n="embedLight">亮色</div>
+          </div>
+        </div>
+        <div class="embed-option-group">
+          <div class="embed-option-label" data-i18n="embedCode">嵌入代码</div>
+          <div class="embed-code-box" id="embedCode"></div>
+          <button class="embed-copy-btn" onclick="copyEmbedCode()" data-i18n="embedCopy">复制代码</button>
+        </div>
+        <div class="embed-option-group">
+          <div class="embed-option-label" data-i18n="embedPreview">预览</div>
+          <iframe class="embed-preview-frame" id="embedPreview" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1393,6 +1533,7 @@
         shortcutRandomTopic: '随机话题',
         shortcutBookmarks: '查看收藏',
         shortcutDevMode: '开发者模式',
+        shortcutEmbed: '嵌入小组件',
         wordCloud: '词云',
         wordCloudTitle: '热点词云',
         compare: '对比',
@@ -1450,7 +1591,25 @@
         hotIndex: '热度指数',
         hotIndexHotter: '更热',
         hotIndexCooler: '降温',
-        hotIndexStable: '→ 平稳'
+        hotIndexStable: '→ 平稳',
+        embed: '嵌入',
+        embedTitle: '嵌入小组件',
+        embedDesc: '将热点小组件嵌入你的网站，实时展示全网热点',
+        embedPlatform: '选择平台',
+        embedAllPlatforms: '全部平台',
+        embedCount: '显示数量',
+        embedTheme: '主题风格',
+        embedAuto: '自动',
+        embedDark: '暗色',
+        embedLight: '亮色',
+        embedCode: '嵌入代码',
+        embedCopy: '复制代码',
+        embedPreview: '预览',
+        embedCopied: '嵌入代码已复制',
+        sourceHealth: '数据源状态',
+        sourceHealthOk: '正常',
+        sourceHealthError: '异常',
+        sourceHealthItems: '条数据'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1565,6 +1724,7 @@
         shortcutRandomTopic: 'Random topic',
         shortcutBookmarks: 'View bookmarks',
         shortcutDevMode: 'Dev mode',
+        shortcutEmbed: 'Embed widget',
         wordCloud: 'Cloud',
         wordCloudTitle: 'Topic Word Cloud',
         compare: 'Compare',
@@ -1622,7 +1782,25 @@
         hotIndex: 'Hot Index',
         hotIndexHotter: 'Hotter',
         hotIndexCooler: 'Cooler',
-        hotIndexStable: '→ Stable'
+        hotIndexStable: '→ Stable',
+        embed: 'Embed',
+        embedTitle: 'Embed Widget',
+        embedDesc: 'Embed the trending widget on your website to show real-time hot topics',
+        embedPlatform: 'Select Platform',
+        embedAllPlatforms: 'All Platforms',
+        embedCount: 'Items Count',
+        embedTheme: 'Theme',
+        embedAuto: 'Auto',
+        embedDark: 'Dark',
+        embedLight: 'Light',
+        embedCode: 'Embed Code',
+        embedCopy: 'Copy Code',
+        embedPreview: 'Preview',
+        embedCopied: 'Embed code copied',
+        sourceHealth: 'Data Source Status',
+        sourceHealthOk: 'OK',
+        sourceHealthError: 'Error',
+        sourceHealthItems: 'items'
       }
     };
 
@@ -3175,6 +3353,123 @@
       }
     }
 
+    let embedTheme = 'auto';
+
+    function showEmbedWidget() {
+      const overlay = document.getElementById('embedOverlay');
+      overlay.classList.add('active');
+      const select = document.getElementById('embedPlatform');
+      select.innerHTML = `<option value="all">${t('embedAllPlatforms')}</option>`;
+      for (const source of allData) {
+        if (source.items && source.items.length > 0) {
+          const opt = document.createElement('option');
+          opt.value = source.key;
+          opt.textContent = `${source.source} (${source.items.length})`;
+          select.appendChild(opt);
+        }
+      }
+      updateEmbedCode();
+    }
+
+    function closeEmbedWidget() {
+      document.getElementById('embedOverlay').classList.remove('active');
+    }
+
+    function setEmbedTheme(theme, el) {
+      embedTheme = theme;
+      document.querySelectorAll('.embed-toggle-group .embed-toggle').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+      updateEmbedCode();
+    }
+
+    function updateEmbedCode() {
+      const platform = document.getElementById('embedPlatform').value;
+      const count = document.getElementById('embedCount').value;
+      const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
+      const dataUrl = baseUrl + 'data/trending.json';
+      const themeAttr = embedTheme !== 'auto' ? ` data-theme="${embedTheme}"` : '';
+      const code = `<!-- Trending Hub Widget -->
+<div id="trending-hub-widget" data-source="${platform}" data-count="${count}"${themeAttr}></div>
+<script src="${baseUrl}widget.js"><\/script>`;
+      document.getElementById('embedCode').textContent = code;
+      updateEmbedPreview(platform, count);
+    }
+
+    function updateEmbedPreview(platform, count) {
+      const iframe = document.getElementById('embedPreview');
+      const sources = platform === 'all' ? allData : allData.filter(s => s.key === platform);
+      const isDark = embedTheme === 'dark' || (embedTheme === 'auto' && document.documentElement.getAttribute('data-theme') !== 'light');
+      let html = `<!DOCTYPE html><html><head><style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:${isDark ? '#0f0f0f' : '#f5f5f5'};color:${isDark ? '#e0e0e0' : '#333'};padding:8px}
+        .w-header{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid ${isDark ? '#2a2a2a' : '#e0e0e0'};margin-bottom:6px}
+        .w-title{font-size:13px;font-weight:600;background:linear-gradient(90deg,#ff6b6b,#feca57,#48dbfb);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .w-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:${isDark ? '#333' : '#eee'};color:${isDark ? '#888' : '#999'}}
+        .w-item{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid ${isDark ? '#1a1a1a' : '#f0f0f0'};font-size:12px}
+        .w-item:last-child{border-bottom:none}
+        .w-rank{min-width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;background:${isDark ? '#333' : '#f0f0f0'};color:${isDark ? '#888' : '#999'}}
+        .w-item:nth-child(-n+3) .w-rank{background:#ff6b6b;color:#fff}
+        .w-link{color:${isDark ? '#48dbfb' : '#0066ff'};text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+        .w-link:hover{text-decoration:underline}
+        .w-hot{font-size:10px;color:#ff6b6b;white-space:nowrap}
+        .w-src{font-size:9px;color:${isDark ? '#666' : '#999'};padding:2px 0;border-bottom:1px solid ${isDark ? '#2a2a2a' : '#e0e0e0'};margin-top:4px;font-weight:500}
+        .w-footer{text-align:center;padding:6px 0;font-size:10px;color:${isDark ? '#666' : '#999'}}
+        .w-footer a{color:${isDark ? '#48dbfb' : '#0066ff'};text-decoration:none}
+      </style></head><body>`;
+      html += `<div class="w-header"><span class="w-title">Trending Hub</span><span class="w-badge">${t('embed' + (isDark ? 'Dark' : 'Light'))}</span></div>`;
+      for (const source of sources) {
+        if (!source.items || source.items.length === 0) continue;
+        const items = source.items.slice(0, parseInt(count));
+        html += `<div class="w-src">${source.icon} ${source.source}</div>`;
+        items.forEach((item, i) => {
+          html += `<div class="w-item">
+            <span class="w-rank">${i + 1}</span>
+            <a class="w-link" href="${item.url}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
+            ${item.hot ? `<span class="w-hot">${formatHot(item.hot)}</span>` : ''}
+          </div>`;
+        });
+      }
+      html += `<div class="w-footer"><a href="${window.location.href}" target="_blank">Powered by Trending Hub</a></div>`;
+      html += '</body></html>';
+      iframe.srcdoc = html;
+    }
+
+    function copyEmbedCode() {
+      const code = document.getElementById('embedCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(t('embedCopied'), 'success');
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast(t('embedCopied'), 'success');
+      });
+    }
+
+    function showSourceHealth() {
+      const modal = document.getElementById('topicModal');
+      document.getElementById('modalTitle').textContent = t('sourceHealth');
+      let body = '<div class="source-health-grid">';
+      for (const source of allData) {
+        const isError = !!source.error;
+        const count = source.items ? source.items.length : 0;
+        body += `<div class="source-health-card">
+          <div class="source-health-icon" style="background:${source.color}">${source.icon}</div>
+          <div class="source-health-info">
+            <div class="source-health-name">${source.source}</div>
+            <div class="source-health-count">${count} ${t('sourceHealthItems')}</div>
+          </div>
+          <div class="source-health-status ${isError ? 'error' : 'ok'}"></div>
+        </div>`;
+      }
+      body += '</div>';
+      document.getElementById('modalBody').innerHTML = body;
+      modal.classList.add('active');
+    }
+
     function sortSource(key) {
       const source = allData.find(s => s.key === key);
       if (!source) return;
@@ -3199,7 +3494,7 @@
       if (e.key === '/') { e.preventDefault(); document.querySelector('.search-bar input')?.focus(); }
       if (e.key === 't' || e.key === 'T') { toggleTheme(); }
       if (e.key === '0') { switchSource('all'); }
-      if (e.key === 'Escape') { closeModal(); closeShortcuts(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); }
+      if (e.key === 'Escape') { closeModal(); closeShortcuts(); closeEmbedWidget(); if (wordCloudActive) toggleWordCloud(); if (compareActive) toggleCompareMode(); if (document.getElementById('timelineOverlay')?.classList.contains('active')) toggleTimeline(); if (graphActive) toggleGraph(); }
       if (e.key === '?') { showShortcuts(); }
       if (e.key === 'f' || e.key === 'F') { toggleFocusMode(); }
       if (e.key === 'r' || e.key === 'R') { randomTopic(); }
@@ -3208,6 +3503,7 @@
       if (e.key === 'c' || e.key === 'C') { toggleCompareMode(); }
       if (e.key === 'l' || e.key === 'L') { toggleTimeline(); }
       if (e.key === 'g' || e.key === 'G') { toggleGraph(); }
+      if (e.key === 'e' || e.key === 'E') { showEmbedWidget(); }
       if (e.key === 'd' || e.key === 'D') { switchSource(activeSource === 'dev' ? 'all' : 'dev'); }
     });
 
@@ -3798,6 +4094,7 @@
           { keys: ['R'], desc: t('shortcutRandomTopic') },
           { keys: ['B'], desc: t('shortcutBookmarks') },
           { keys: ['D'], desc: t('shortcutDevMode') },
+          { keys: ['E'], desc: t('shortcutEmbed') },
           { keys: ['W'], desc: t('wordCloud') },
           { keys: ['C'], desc: t('compare') },
         ]

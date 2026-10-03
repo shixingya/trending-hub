@@ -39,6 +39,8 @@
 - 每日早报：快速了解全网热点概览
 - 词云可视化：直观展示热点关键词
 - 平台对比模式：多平台话题重叠分析
+- 嵌入小组件：一键生成 iframe 代码，将热点嵌入你的网站
+- 数据源状态监控：实时查看各平台数据源是否正常
 - 移动端底部导航栏：快速访问核心功能
 - 下拉刷新：移动端原生体验，下拉即可刷新数据
 - 键盘快捷键：/ 搜索、T 切换主题、L 时间线、0 查看全部
@@ -88,6 +90,25 @@ npm run fetch
 
 数据保存到 `docs/data/trending.json`，RSS 保存到 `docs/data/feed.xml`
 
+### 嵌入小组件
+
+在你的网站中添加以下代码即可嵌入热点小组件：
+
+```html
+<!-- 基础用法：展示全部平台 TOP 10 -->
+<div id="trending-hub-widget" data-source="all" data-count="10"></div>
+<script src="https://shixingya.github.io/trending-hub/widget.js"></script>
+
+<!-- 指定平台 + 暗色主题 -->
+<div id="trending-hub-widget" data-source="github-trending" data-count="5" data-theme="dark"></div>
+<script src="https://shixingya.github.io/trending-hub/widget.js"></script>
+```
+
+参数说明：
+- `data-source`: 平台 key（如 `zhihu`、`weibo`、`github-trending`），`all` 为全部平台
+- `data-count`: 每个平台显示的条目数（默认 10）
+- `data-theme`: 主题风格（`auto`/`dark`/`light`，默认 `auto` 跟随系统）
+
 ## 项目结构
 
 ```
@@ -124,6 +145,7 @@ src/
     └── kuaishou.ts         # 快手热榜
 docs/
 ├── index.html          # GitHub Pages 前端
+├── widget.js           # 可嵌入小组件脚本
 ├── manifest.json       # PWA 配置
 ├── sitemap.xml         # SEO 站点地图
 └── data/
