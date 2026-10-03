@@ -902,6 +902,40 @@
       .scroll-top { bottom: 80px; }
       footer { margin-bottom: 0; }
     }
+    .pull-refresh {
+      position: fixed;
+      top: -60px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      transition: top 0.3s ease;
+      z-index: 999;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .pull-refresh.active {
+      top: 0;
+    }
+    .pull-refresh.refreshing {
+      top: 0;
+    }
+    .pull-refresh-icon {
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+    }
+    .pull-refresh.refreshing .pull-refresh-icon {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     @media print {
       header, .search-bar, .tabs, .stats-bar, .refresh-time, footer,
       .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
@@ -926,6 +960,10 @@
   </style>
 </head>
 <body>
+  <div class="pull-refresh" id="pullRefresh">
+    <span class="pull-refresh-icon">↓</span>
+    <span id="pullRefreshText">下拉刷新</span>
+  </div>
   <header>
     <h1>Trending Hub</h1>
     <p>全网热点聚合 - 28大平台实时热点</p>
@@ -1316,7 +1354,11 @@
         navSearch: '搜索',
         navBookmarks: '收藏',
         navStats: '统计',
-        navMore: '更多'
+        navMore: '更多',
+        pullRefresh: '下拉刷新',
+        pullRelease: '释放刷新',
+        pullRefreshing: '刷新中...',
+        pullSuccess: '✓ 已刷新'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1480,7 +1522,11 @@
         navSearch: 'Search',
         navBookmarks: 'Bookmarks',
         navStats: 'Stats',
-        navMore: 'More'
+        navMore: 'More',
+        pullRefresh: 'Pull down to refresh',
+        pullRelease: 'Release to refresh',
+        pullRefreshing: 'Refreshing...',
+        pullSuccess: '✓ Refreshed'
       }
     };
 
@@ -2530,6 +2576,52 @@
     if (currentLang === 'en') {
       updateUILanguage();
     }
+
+    // Pull to refresh
+    let pullStartY = 0;
+    let pullDistance = 0;
+    let isPulling = false;
+    const pullRefresh = document.getElementById('pullRefresh');
+    const pullRefreshText = document.getElementById('pullRefreshText');
+
+    document.addEventListener('touchstart', (e) => {
+      if (window.scrollY === 0) {
+        pullStartY = e.touches[0].clientY;
+        isPulling = true;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!isPulling) return;
+      pullDistance = e.touches[0].clientY - pullStartY;
+      if (pullDistance > 0 && window.scrollY === 0) {
+        const threshold = 80;
+        if (pullDistance > threshold) {
+          pullRefresh.classList.add('active');
+          pullRefreshText.textContent = t('pullRelease');
+        } else {
+          pullRefresh.classList.remove('active');
+          pullRefreshText.textContent = t('pullRefresh');
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', async (e) => {
+      if (!isPulling) return;
+      isPulling = false;
+      const threshold = 80;
+      if (pullDistance > threshold) {
+        pullRefresh.classList.add('refreshing');
+        pullRefreshText.textContent = t('pullRefreshing');
+        await loadTrending();
+        setTimeout(() => {
+          pullRefresh.classList.remove('refreshing', 'active');
+          pullRefreshText.textContent = t('pullRefresh');
+          showToast(t('pullSuccess'), 'success');
+        }, 500);
+      }
+      pullDistance = 0;
+    }, { passive: true });
 
     let touchStartX = 0;
     let touchStartY = 0;
