@@ -28,6 +28,7 @@ export { githubNewRepos } from './github-newrepos.js';
 export { oschina } from './oschina.js';
 export { lobsters } from './lobsters.js';
 export { hackernews } from './hackernews.js';
+export { stackoverflow } from './stackoverflow.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -59,6 +60,7 @@ import { githubNewRepos } from './github-newrepos.js';
 import { oschina } from './oschina.js';
 import { lobsters } from './lobsters.js';
 import { hackernews } from './hackernews.js';
+import { stackoverflow } from './stackoverflow.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -94,5 +96,6 @@ export const allSources: TrendingSource[] = [
   githubNewRepos,
   oschina,
   lobsters,
-  hackernews
+  hackernews,
+  stackoverflow
 ];
