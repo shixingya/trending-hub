@@ -853,6 +853,55 @@
       .graph-header { padding: 0.75rem 1rem; }
       .graph-legend { bottom: 0.5rem; left: 0.5rem; right: 0.5rem; padding: 0.5rem; }
     }
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 0.5rem 0;
+      z-index: 1000;
+      box-shadow: 0 -2px 10px var(--shadow);
+    }
+    .bottom-nav-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      user-select: none;
+    }
+    .bottom-nav-item:hover {
+      background: var(--hover-bg);
+      color: var(--text);
+    }
+    .bottom-nav-item.active {
+      color: var(--accent);
+    }
+    .bottom-nav-item-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .bottom-nav { display: block; }
+      body { padding-bottom: 70px; }
+      .scroll-top { bottom: 80px; }
+      footer { margin-bottom: 0; }
+    }
     @media print {
       header, .search-bar, .tabs, .stats-bar, .refresh-time, footer,
       .scroll-top, .toast-container, .share-btn, .theme-toggle, .sort-toggle,
@@ -922,6 +971,31 @@
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 28大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
     <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bottom-nav-items">
+      <div class="bottom-nav-item active" onclick="navTo('home')" data-nav="home">
+        <span class="bottom-nav-item-icon">🏠</span>
+        <span data-i18n="navHome">首页</span>
+      </div>
+      <div class="bottom-nav-item" onclick="navTo('search')" data-nav="search">
+        <span class="bottom-nav-item-icon">🔍</span>
+        <span data-i18n="navSearch">搜索</span>
+      </div>
+      <div class="bottom-nav-item" onclick="navTo('bookmarks')" data-nav="bookmarks">
+        <span class="bottom-nav-item-icon">⭐</span>
+        <span data-i18n="navBookmarks">收藏</span>
+      </div>
+      <div class="bottom-nav-item" onclick="navTo('stats')" data-nav="stats">
+        <span class="bottom-nav-item-icon">📊</span>
+        <span data-i18n="navStats">统计</span>
+      </div>
+      <div class="bottom-nav-item" onclick="navTo('more')" data-nav="more">
+        <span class="bottom-nav-item-icon">⚙️</span>
+        <span data-i18n="navMore">更多</span>
+      </div>
+    </div>
+  </nav>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
@@ -1237,7 +1311,12 @@
         alertsMatched: '{count} 条匹配',
         alertDelete: '删除',
         alertAdded: '已添加提醒',
-        alertRemoved: '已移除提醒'
+        alertRemoved: '已移除提醒',
+        navHome: '首页',
+        navSearch: '搜索',
+        navBookmarks: '收藏',
+        navStats: '统计',
+        navMore: '更多'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1396,7 +1475,12 @@
         alertsMatched: '{count} matched',
         alertDelete: 'Delete',
         alertAdded: 'Alert added',
-        alertRemoved: 'Alert removed'
+        alertRemoved: 'Alert removed',
+        navHome: 'Home',
+        navSearch: 'Search',
+        navBookmarks: 'Bookmarks',
+        navStats: 'Stats',
+        navMore: 'More'
       }
     };
 
@@ -1453,6 +1537,42 @@
       renderContent();
       updateRefreshTime();
       updateAlertsButton();
+      updateBottomNav();
+    }
+
+    function updateBottomNav() {
+      const navItems = document.querySelectorAll('.bottom-nav-item span[data-i18n]');
+      navItems.forEach(item => {
+        const key = item.getAttribute('data-i18n');
+        item.textContent = t(key);
+      });
+    }
+
+    function navTo(section) {
+      const navItems = document.querySelectorAll('.bottom-nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      document.querySelector(`[data-nav="${section}"]`).classList.add('active');
+
+      switch(section) {
+        case 'home':
+          switchSource('all');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        case 'search':
+          document.getElementById('searchInput').focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        case 'bookmarks':
+          switchSource('bookmarks');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          break;
+        case 'stats':
+          showStats();
+          break;
+        case 'more':
+          showShortcuts();
+          break;
+      }
     }
 
     const categories = {

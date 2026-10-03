@@ -78,7 +78,7 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `douban-book` / `netease-music` / `github-trending` / `hupu` / `sina-news` / `weread` / `juejin` / `dongqiudi`
+source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `douban-book` / `netease-music` / `github-trending` / `hupu` / `sina-news` / `weread` / `juejin` / `dongqiudi` / `kuaishou`
 
 ### CLI 抓取
 ```bash
@@ -119,7 +119,8 @@ src/
     ├── sina-news.ts        # 新浪新闻
     ├── weread.ts           # 微信读书
     ├── juejin.ts           # 掘金热门
-    └── dongqiudi.ts        # 懂球帝热帖
+    ├── dongqiudi.ts        # 懂球帝热帖
+    └── kuaishou.ts         # 快手热榜
 docs/
 ├── index.html          # GitHub Pages 前端
 ├── manifest.json       # PWA 配置
