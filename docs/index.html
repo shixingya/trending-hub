@@ -160,10 +160,30 @@
       border: 1px solid var(--border);
       overflow: hidden;
       box-shadow: 0 2px 8px var(--shadow);
-      animation: fadeIn 0.3s ease;
-      content-visibility: auto;
-      contain-intrinsic-size: auto 400px;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
+    .source-section.visible {
+      opacity: 1; transform: translateY(0);
+    }
+    .hot-index-bar {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      padding: 0.5rem 1rem; background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="light"] .hot-index-bar { background: rgba(0,0,0,0.03); }
+    .hot-index-gauge { position: relative; width: 52px; height: 28px; overflow: hidden; flex-shrink: 0; }
+    .hot-index-gauge svg { width: 52px; height: 52px; }
+    .hot-index-value {
+      font-size: 1.15rem; font-weight: 700;
+      background: linear-gradient(90deg, var(--accent-yellow), var(--accent-red));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hot-index-label { font-size: 0.7rem; color: var(--text-muted); }
+    .hot-index-trend { font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 8px; font-weight: 600; }
+    .hot-index-trend.up { background: rgba(255,107,107,0.15); color: var(--accent-red); }
+    .hot-index-trend.down { background: rgba(72,219,251,0.15); color: var(--accent); }
+    .hot-index-trend.stable { background: rgba(254,202,87,0.15); color: var(--accent-yellow); }
     .toast-container {
       position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex;
       flex-direction: column; gap: 0.5rem; pointer-events: none;
@@ -358,6 +378,8 @@
       .tab { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
       .container { margin: 0.75rem auto; }
       .scroll-top { bottom: 1rem; right: 1rem; width: 36px; height: 36px; }
+      .hot-index-bar { gap: 0.5rem; padding: 0.4rem 0.75rem; }
+      .hot-index-value { font-size: 1rem; }
     }
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -987,6 +1009,20 @@
       <button class="theme-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
     </div>
+    <div class="hot-index-bar" id="hotIndexBar" style="display:none">
+      <div class="hot-index-gauge">
+        <svg viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="22" fill="none" stroke="var(--border)" stroke-width="4" stroke-dasharray="69.1 138.2" stroke-linecap="round" transform="rotate(135 26 26)"/>
+          <circle id="hotIndexArc" cx="26" cy="26" r="22" fill="none" stroke="url(#hotGrad)" stroke-width="4" stroke-dasharray="0 138.2" stroke-linecap="round" transform="rotate(135 26 26)" style="transition: stroke-dasharray 1s ease"/>
+          <defs><linearGradient id="hotGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#feca57"/><stop offset="100%" stop-color="#ff6b6b"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div>
+        <div class="hot-index-value" id="hotIndexValue">--</div>
+        <div class="hot-index-label" id="hotIndexLabel">热度指数</div>
+      </div>
+      <span class="hot-index-trend stable" id="hotIndexTrend">--</span>
+    </div>
   </header>
 
   <div class="search-bar">
@@ -1358,7 +1394,11 @@
         pullRefresh: '下拉刷新',
         pullRelease: '释放刷新',
         pullRefreshing: '刷新中...',
-        pullSuccess: '✓ 已刷新'
+        pullSuccess: '✓ 已刷新',
+        hotIndex: '热度指数',
+        hotIndexHotter: '更热',
+        hotIndexCooler: '降温',
+        hotIndexStable: '→ 平稳'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -1526,7 +1566,11 @@
         pullRefresh: 'Pull down to refresh',
         pullRelease: 'Release to refresh',
         pullRefreshing: 'Refreshing...',
-        pullSuccess: '✓ Refreshed'
+        pullSuccess: '✓ Refreshed',
+        hotIndex: 'Hot Index',
+        hotIndexHotter: 'Hotter',
+        hotIndexCooler: 'Cooler',
+        hotIndexStable: '→ Stable'
       }
     };
 
@@ -1581,6 +1625,7 @@
       renderTabs();
       renderTagFilterBar();
       renderContent();
+      renderHotIndex();
       updateRefreshTime();
       updateAlertsButton();
       updateBottomNav();
@@ -1715,6 +1760,8 @@
         updateAlertsButton();
         renderTagFilterBar();
         renderContent();
+        renderHotIndex();
+        initScrollAnimations();
         checkAndNotifyAlerts();
         const total = allData.reduce((sum, s) => sum + s.items.length, 0);
         const successCount = allData.filter(s => !s.error && s.items.length > 0).length;
@@ -2314,6 +2361,8 @@
         html = `<div class="source-section"><div class="empty-state">${t('noData')}</div></div>`;
       }
       container.innerHTML = html;
+
+      requestAnimationFrame(() => initScrollAnimations());
 
       const latestFetch = allData.find(s => s.fetchedAt);
       if (latestFetch) {
@@ -4424,6 +4473,96 @@
       if (!activeTagFilter) return true;
       const tags = extractTags(title);
       return tags.includes(activeTagFilter);
+    }
+
+    function renderHotIndex() {
+      const bar = document.getElementById('hotIndexBar');
+      if (!bar) return;
+      bar.style.display = 'flex';
+
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const successCount = allData.filter(s => !s.error && s.items.length > 0).length;
+
+      let totalHot = 0;
+      let hotCount = 0;
+      allData.forEach(s => {
+        s.items.forEach(item => {
+          if (item.hot) { totalHot += item.hot; hotCount++; }
+        });
+      });
+      const avgHot = hotCount > 0 ? totalHot / hotCount : 0;
+
+      const crossCount = findCrossPlatformTopics().length;
+
+      const indexScore = Math.round(
+        Math.min(total / 800, 1) * 25 +
+        (successCount / Math.max(allData.length, 1)) * 25 +
+        Math.min(avgHot / 50000, 1) * 25 +
+        Math.min(crossCount / 30, 1) * 25
+      );
+      const clampedScore = Math.min(Math.max(indexScore, 0), 100);
+
+      const valueEl = document.getElementById('hotIndexValue');
+      const arcEl = document.getElementById('hotIndexArc');
+      const trendEl = document.getElementById('hotIndexTrend');
+      const labelEl = document.getElementById('hotIndexLabel');
+
+      labelEl.textContent = t('hotIndex');
+
+      const duration = 1000;
+      const startTime = Date.now();
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(clampedScore * eased);
+        valueEl.textContent = current;
+        const maxDash = 69.1;
+        const dashLen = (current / 100) * maxDash;
+        arcEl.setAttribute('stroke-dasharray', `${dashLen} 138.2`);
+        if (progress >= 1) clearInterval(timer);
+      }, 16);
+
+      let prevScore = parseInt(localStorage.getItem('hotIndexPrev') || '0');
+      if (prevScore === 0) prevScore = clampedScore;
+      const diff = clampedScore - prevScore;
+      if (diff > 3) {
+        trendEl.className = 'hot-index-trend up';
+        trendEl.textContent = `↑${t('hotIndexHotter')}`;
+      } else if (diff < -3) {
+        trendEl.className = 'hot-index-trend down';
+        trendEl.textContent = `↓${t('hotIndexCooler')}`;
+      } else {
+        trendEl.className = 'hot-index-trend stable';
+        trendEl.textContent = t('hotIndexStable');
+      }
+      localStorage.setItem('hotIndexPrev', String(clampedScore));
+    }
+
+    let scrollObserver = null;
+    function initScrollAnimations() {
+      if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.source-section').forEach(el => el.classList.add('visible'));
+        return;
+      }
+      if (scrollObserver) scrollObserver.disconnect();
+      scrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            scrollObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.01, rootMargin: '0px 0px 50px 0px' });
+
+      document.querySelectorAll('.source-section:not(.visible)').forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight + 50 || i < 3) {
+          el.classList.add('visible');
+        } else {
+          scrollObserver.observe(el);
+        }
+      });
     }
 
     function showToast(message, type = 'info') {
