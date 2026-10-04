@@ -2517,6 +2517,8 @@
         trendTitle: '热度趋势',
         trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
         trendNoMatch: '未找到该话题的历史趋势',
+        velocityRising: '快速上升',
+        velocityHot: '热度飙升',
         spreadTitle: '跨平台传播时间线',
         relatedTopics: '相关推荐',
         weeklyHottest: '本周最热',
@@ -2816,6 +2818,8 @@
         trendTitle: 'Heat Trend',
         trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
         trendNoMatch: 'No historical trend found for this topic',
+        velocityRising: 'Rising Fast',
+        velocityHot: 'Hot Surge',
         spreadTitle: 'Cross-Platform Spread Timeline',
         relatedTopics: 'Related Topics',
         weeklyHottest: 'Weekly Hottest',
@@ -4129,7 +4133,7 @@
               <span class="item-rank">${i + 1}</span>
               ${renderPositionChange(source.key, title, i + 1)}
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markAsRead('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()">${displayTitle}</a>${alertBadge}${sentimentBadge}${readBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markAsRead('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()">${displayTitle}</a>${alertBadge}${sentimentBadge}${readBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}${renderVelocityBadge(source.key, title, item.hot || 0)}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
@@ -4456,6 +4460,47 @@
       if (change.type === 'down') return `<span class="position-change down" title="${t('positionDown')} ${change.value}">↓${change.value}</span>`;
       if (change.type === 'new') return `<span class="position-change new-pos" title="${t('positionNew')}">NEW</span>`;
       return '';
+    }
+
+    function getTopicVelocity(sourceKey, title, currentHot) {
+      const map = getPrevPlatformMap();
+      if (!map || !map.size) return null;
+      const prevItems = map.get(sourceKey);
+      if (!prevItems) return null;
+      const norm = normalizeTitle(title);
+      const prevItem = prevItems.find(p => p.norm === norm);
+      if (!prevItem) return null;
+      
+      const prevHot = prevItem.hot || 0;
+      const currentRank = prevItem.rank;
+      const hotChange = currentHot - prevHot;
+      const hotGrowth = prevHot > 0 ? (hotChange / prevHot) * 100 : (currentHot > 0 ? 100 : 0);
+      
+      // Velocity score combines position and hot score changes
+      let velocity = 0;
+      if (hotGrowth > 50) velocity += 3;
+      else if (hotGrowth > 20) velocity += 2;
+      else if (hotGrowth > 0) velocity += 1;
+      
+      if (currentRank <= 10) velocity += 2;
+      else if (currentRank <= 20) velocity += 1;
+      
+      return { velocity, hotGrowth: Math.round(hotGrowth), hotChange };
+    }
+
+    function renderVelocityBadge(sourceKey, title, currentHot) {
+      const vel = getTopicVelocity(sourceKey, title, currentHot);
+      if (!vel || vel.velocity < 2) return '';
+      
+      const labels = ['', '', '🚀', '🔥', '⚡'];
+      const colors = ['', '', '#1dd1a1', '#ff6b6b', '#feca57'];
+      const label = labels[vel.velocity] || '🚀';
+      const color = colors[vel.velocity] || '#1dd1a1';
+      
+      const growthText = vel.hotGrowth > 0 ? `+${vel.hotGrowth}%` : '';
+      const title = growthText ? `热度飙升 ${growthText}` : '快速上升';
+      
+      return `<span class="velocity-badge" style="background:${color};color:#fff;padding:0.15rem 0.4rem;border-radius:8px;font-size:0.7rem;margin-left:0.3rem;display:inline-block" title="${title}">${label}${growthText}</span>`;
     }
 
     function renderChangesView() {
