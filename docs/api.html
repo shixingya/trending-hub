@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API 文档 - Trending Hub</title>
+  <meta name="description" content="Trending Hub API 文档 - 获取全网热门话题数据接口">
+  <meta name="keywords" content="API,热榜,trending,接口,开发者">
+  <meta property="og:title" content="API 文档 - Trending Hub">
+  <meta property="og:description" content="Trending Hub API 文档 - 获取全网热门话题数据接口">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://shixingya.github.io/trending-hub/api.html">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a2e' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif'>TH</text></svg>">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --bg-card: #1a1a1a;
+      --bg-code: #0d1117;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --accent: #48dbfb;
+      --accent-green: #1dd1a1;
+      --accent-yellow: #feca57;
+      --accent-red: #ff6b6b;
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f5;
+      --bg-card: #fff;
+      --bg-code: #f6f8fa;
+      --border: #e0e0e0;
+      --text: #333;
+      --text-secondary: #666;
+      --text-muted: #999;
+      --accent: #0066ff;
+      --accent-green: #28a745;
+      --accent-yellow: #d69e2e;
+      --accent-red: #e53e3e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    [data-theme="light"] .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .header p { font-size: 1.1rem; opacity: 0.9; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .section { margin-bottom: 3rem; }
+    .section-title {
+      font-size: 1.8rem; margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent);
+    }
+    .endpoint {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .method {
+      background: var(--accent-green);
+      color: #fff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .path {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .description { color: var(--text-secondary); margin-bottom: 1rem; }
+    .params { margin: 1rem 0; }
+    .param-title { font-weight: 600; margin-bottom: 0.5rem; }
+    .param-list { list-style: none; }
+    .param-item {
+      padding: 0.5rem;
+      background: var(--bg-code);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    .param-name { color: var(--accent-yellow); font-weight: 600; }
+    .param-type { color: var(--text-muted); margin-left: 0.5rem; }
+    .param-desc { color: var(--text-secondary); margin-left: 0.5rem; }
+    .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-block pre {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .code-block code { color: var(--text); }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .copy-btn:hover { opacity: 1; }
+    .try-it-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: transform 0.2s;
+    }
+    .try-it-btn:hover { transform: scale(1.05); }
+    .response-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+    }
+    .response-box.active { display: block; }
+    .response-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--accent-green);
+    }
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 100;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.8rem; }
+      .container { padding: 1rem; }
+      .endpoint { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+  
+  <div class="header">
+    <h1>🔥 Trending Hub API</h1>
+    <p>全网热门话题数据接口 - 免费 · 开源 · 每2小时更新</p>
+  </div>
+
+  <div class="container">
+    <a href="https://shixingya.github.io/trending-hub/" class="back-link">← 返回首页</a>
+
+    <div class="section">
+      <h2 class="section-title">📖 快速开始</h2>
+      <div class="endpoint">
+        <p class="description">Trending Hub API 提供全网 34 大平台的热门话题数据，包括知乎、微博、B站、GitHub 等。所有数据每 2 小时自动更新一次。</p>
+        <p class="description"><strong>基础 URL：</strong> <code>https://shixingya.github.io/trending-hub/</code></p>
+        <p class="description"><strong>数据格式：</strong> JSON</p>
+        <p class="description"><strong>请求方式：</strong> GET</p>
+        <p class="description"><strong>跨域支持：</strong> 支持 CORS</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🔌 API 端点</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method">GET</span>
+          <span class="path">/data/trending.json</span>
+        </div>
+        <p class="description">获取所有平台的热门话题数据</p>
+        
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('curl-1', this)">cURL</div>
+          <div class="tab" onclick="switchTab('js-1', this)">JavaScript</div>
+          <div class="tab" onclick="switchTab('python-1', this)">Python</div>
+        </div>
+
+        <div class="code-block" id="curl-1">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>curl https://shixingya.github.io/trending-hub/data/trending.json</code></pre>
+        </div>
+
+        <div class="code-block" id="js-1" style="display:none">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>fetch('https://shixingya.github.io/trending-hub/data/trending.json')
+  .then(res => res.json())
+  .then(data => console.log(data));</code></pre>
+        </div>
+
+        <div class="code-block" id="python-1" style="display:none">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>import requests
+
+url = 'https://shixingya.github.io/trending-hub/data/trending.json'
+response = requests.get(url)
+data = response.json()
+print(data)</code></pre>
+        </div>
+
+        <button class="try-it-btn" onclick="tryApi('all')">🚀 试一试</button>
+        <div class="response-box" id="response-all"></div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method">GET</span>
+          <span class="path">/data/trending.json</span>
+        </div>
+        <p class="description">获取单个平台的热门话题（通过 JavaScript 过滤）</p>
+        
+        <div class="params">
+          <div class="param-title">可用平台 (source.key)：</div>
+          <div class="param-list">
+            <div class="param-item"><span class="param-name">zhihu</span> <span class="param-desc">- 知乎热榜</span></div>
+            <div class="param-item"><span class="param-name">weibo</span> <span class="param-desc">- 微博热搜</span></div>
+            <div class="param-item"><span class="param-name">bilibili</span> <span class="param-desc">- B站热门</span></div>
+            <div class="param-item"><span class="param-name">github-trending</span> <span class="param-desc">- GitHub Trending</span></div>
+            <div class="param-item"><span class="param-name">douyin</span> <span class="param-desc">- 抖音热点</span></div>
+            <div class="param-item"><span class="param-name">toutiao</span> <span class="param-desc">- 头条热榜</span></div>
+            <div class="param-item"><span class="param-name">baidu</span> <span class="param-desc">- 百度热搜</span></div>
+            <div class="param-item"><span class="param-name">ithome</span> <span class="param-desc">- IT之家</span></div>
+            <div class="param-item"><span class="param-name">juejin</span> <span class="param-desc">- 掘金热门</span></div>
+            <div class="param-item"><span class="param-name">hupu</span> <span class="param-desc">- 虎扑热帖</span></div>
+            <div class="param-item"><span class="param-name">douban-movie</span> <span class="param-desc">- 豆瓣电影</span></div>
+            <div class="param-item"><span class="param-name">netease-music</span> <span class="param-desc">- 网易云热歌</span></div>
+            <div class="param-item"><span class="param-name">... 共 34 个平台</span></div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>fetch('https://shixingya.github.io/trending-hub/data/trending.json')
+  .then(res => res.json())
+  .then(data => {
+    const zhihu = data.find(d => d.key === 'zhihu');
+    console.log(zhihu.items);
+  });</code></pre>
+        </div>
+
+        <button class="try-it-btn" onclick="tryApi('zhihu')">🚀 获取知乎热榜</button>
+        <div class="response-box" id="response-zhihu"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">📦 响应格式</h2>
+      <div class="endpoint">
+        <p class="description">API 返回一个数组，每个元素代表一个平台的数据：</p>
+        
+        <div class="code-block">
+          <pre><code>[
+  {
+    "source": "知乎热榜",
+    "key": "zhihu",
+    "icon": "知",
+    "color": "#0066ff",
+    "items": [
+      {
+        "title": "话题标题",
+        "url": "https://www.zhihu.com/question/123",
+        "hot": 14420000,
+        "description": "话题描述（可选）"
+      }
+    ],
+    "fetchedAt": "2026-10-05T12:00:00.000Z"
+  }
+]</code></pre>
+        </div>
+
+        <div class="params">
+          <div class="param-title">字段说明：</div>
+          <div class="param-list">
+            <div class="param-item"><span class="param-name">source</span> <span class="param-type">string</span> <span class="param-desc">- 平台名称</span></div>
+            <div class="param-item"><span class="param-name">key</span> <span class="param-type">string</span> <span class="param-desc">- 平台唯一标识</span></div>
+            <div class="param-item"><span class="param-name">icon</span> <span class="param-type">string</span> <span class="param-desc">- 平台图标（emoji 或文字）</span></div>
+            <div class="param-item"><span class="param-name">color</span> <span class="param-type">string</span> <span class="param-desc">- 平台主题色（HEX）</span></div>
+            <div class="param-item"><span class="param-name">items</span> <span class="param-type">array</span> <span class="param-desc">- 话题列表</span></div>
+            <div class="param-item"><span class="param-name">items[].title</span> <span class="param-type">string</span> <span class="param-desc">- 话题标题</span></div>
+            <div class="param-item"><span class="param-name">items[].url</span> <span class="param-type">string</span> <span class="param-desc">- 话题链接</span></div>
+            <div class="param-item"><span class="param-name">items[].hot</span> <span class="param-type">number</span> <span class="param-desc">- 热度值（可选）</span></div>
+            <div class="param-item"><span class="param-name">items[].description</span> <span class="param-type">string</span> <span class="param-desc">- 话题描述（可选）</span></div>
+            <div class="param-item"><span class="param-name">fetchedAt</span> <span class="param-type">string</span> <span class="param-desc">- 数据抓取时间（ISO 8601）</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">💡 使用示例</h2>
+      <div class="endpoint">
+        <p class="description"><strong>示例 1：获取今日 TOP 10 热点</strong></p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>fetch('https://shixingya.github.io/trending-hub/data/trending.json')
+  .then(res => res.json())
+  .then(data => {
+    // 合并所有平台的话题
+    const allItems = data.flatMap(source => 
+      source.items.map(item => ({
+        ...item,
+        source: source.source,
+        sourceIcon: source.icon
+      }))
+    );
+    
+    // 按热度排序，取 TOP 10
+    const top10 = allItems
+      .filter(item => item.hot)
+      .sort((a, b) => b.hot - a.hot)
+      .slice(0, 10);
+    
+    console.log(top10);
+  });</code></pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <p class="description"><strong>示例 2：在网页中显示 GitHub Trending</strong></p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>&lt;ul id="github-trending"&gt;&lt;/ul&gt;
+
+&lt;script&gt;
+fetch('https://shixingya.github.io/trending-hub/data/trending.json')
+  .then(res => res.json())
+  .then(data => {
+    const github = data.find(d => d.key === 'github-trending');
+    const list = document.getElementById('github-trending');
+    
+    github.items.slice(0, 10).forEach(item => {
+      const li = document.createElement('li');
+      li.innerHTML = `&lt;a href="${item.url}" target="_blank"&gt;${item.title}&lt;/a&gt;`;
+      list.appendChild(li);
+    });
+  });
+&lt;/script&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">🔗 其他数据源</h2>
+      <div class="endpoint">
+        <p class="description"><strong>RSS 订阅</strong></p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>https://shixingya.github.io/trending-hub/data/feed.xml</code></pre>
+        </div>
+        <p class="description">在所有 RSS 阅读器中订阅全网热点</p>
+      </div>
+
+      <div class="endpoint">
+        <p class="description"><strong>嵌入小组件</strong></p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">复制</button>
+          <pre><code>&lt;div id="trending-hub-widget" data-source="all" data-count="10"&gt;&lt;/div&gt;
+&lt;script src="https://shixingya.github.io/trending-hub/widget.js"&gt;&lt;/script&gt;</code></pre>
+        </div>
+        <p class="description">在你的网站中嵌入热点小组件，详见<a href="https://github.com/shixingya/trending-hub#嵌入小组件" style="color:var(--accent)">文档</a></p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">⚠️ 使用须知</h2>
+      <div class="endpoint">
+        <ul style="list-style: disc; padding-left: 2rem; color: var(--text-secondary);">
+          <li>API 完全免费，无需认证</li>
+          <li>数据每 2 小时自动更新一次</li>
+          <li>建议缓存数据，避免频繁请求</li>
+          <li>仅供学习研究使用，请遵守相关法律法规</li>
+          <li>数据版权归原作者原平台所有</li>
+          <li>欢迎 Star 支持：<a href="https://github.com/shixingya/trending-hub" style="color:var(--accent)" target="_blank">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.getAttribute('data-theme') === 'light') {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+
+    function switchTab(tabId, tabEl) {
+      const parent = tabEl.parentElement;
+      const codeBlocks = parent.parentElement.querySelectorAll('.code-block');
+      codeBlocks.forEach(block => block.style.display = 'none');
+      
+      const tabs = parent.querySelectorAll('.tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      document.getElementById(tabId).style.display = 'block';
+      tabEl.classList.add('active');
+    }
+
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = '已复制!';
+        setTimeout(() => btn.textContent = '复制', 2000);
+      });
+    }
+
+    async function tryApi(source) {
+      const responseBox = document.getElementById(`response-${source}`);
+      responseBox.classList.add('active');
+      responseBox.innerHTML = '<div class="response-title">加载中...</div>';
+
+      try {
+        const res = await fetch('https://shixingya.github.io/trending-hub/data/trending.json');
+        const data = await res.json();
+        
+        let result;
+        if (source === 'all') {
+          result = data.slice(0, 3).map(d => ({
+            source: d.source,
+            key: d.key,
+            itemCount: d.items.length,
+            sampleItems: d.items.slice(0, 3)
+          }));
+        } else {
+          const sourceData = data.find(d => d.key === source);
+          result = {
+            source: sourceData.source,
+            key: sourceData.key,
+            itemCount: sourceData.items.length,
+            items: sourceData.items.slice(0, 5)
+          };
+        }
+
+        responseBox.innerHTML = `
+          <div class="response-title">✅ 成功 (200 OK)</div>
+          <pre style="font-size:0.85rem;overflow-x:auto">${JSON.stringify(result, null, 2)}</pre>
+        `;
+      } catch (e) {
+        responseBox.innerHTML = `
+          <div class="response-title" style="color:var(--accent-red)">❌ 错误</div>
+          <pre style="color:var(--accent-red)">${e.message}</pre>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

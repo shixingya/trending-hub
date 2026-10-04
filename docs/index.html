@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trending Hub - 全网热点聚合</title>
-  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等32大平台热点话题，实时更新">
+  <meta name="description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等34大平台热点话题，实时更新">
   <meta name="keywords" content="热点,热榜,trending,知乎,百度,微博,B站,抖音,头条,澎湃,IT之家,少数派,豆瓣,游戏,影视,汽车,图书,微信读书,掘金,懂球帝,快手,Dev.to,开源中国,Lobsters">
   <meta name="theme-color" content="#1a1a2e">
   <meta property="og:title" content="Trending Hub - 全网热点聚合">
-  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等32大平台热点话题，实时更新">
+  <meta property="og:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等34大平台热点话题，实时更新">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shixingya.github.io/trending-hub/">
   <meta property="og:site_name" content="Trending Hub">
@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="1024">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Trending Hub - 全网热点聚合">
-  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等32大平台热点话题，实时更新">
+  <meta name="twitter:description" content="一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等34大平台热点话题，实时更新">
   <meta name="twitter:image" content="https://shixingya.github.io/trending-hub/og-image.png">
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -542,6 +542,27 @@
       text-align: center; padding: 1rem 0;
     }
     .stats-label { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+    .trend-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 2000; backdrop-filter: blur(6px);
+      justify-content: center; align-items: center;
+    }
+    .trend-overlay.active { display: flex; }
+    .trend-container {
+      background: var(--bg-card); border-radius: 16px; padding: 2rem;
+      max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border);
+      animation: modalIn 0.2s ease-out;
+    }
+    .trend-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .trend-title { font-size: 1.2rem; font-weight: 600; line-height: 1.4; flex: 1; }
+    .trend-close { background: none; border: none; color: var(--text-muted); font-size: 1.8rem; cursor: pointer; padding: 0 0.25rem; line-height: 1; }
+    .trend-close:hover { color: var(--text-primary); }
+    .trend-canvas { width: 100%; height: 400px; background: var(--bg-input); border-radius: 12px; margin-top: 1rem; }
+    .trend-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .trend-stat-card { background: var(--bg-input); border-radius: 10px; padding: 1rem; text-align: center; }
+    .trend-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .trend-stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
     .trend-chart-container {
       background: var(--bg-input); border-radius: 12px; padding: 1rem;
       margin-top: 1rem; border: 1px solid var(--border);
@@ -1931,7 +1952,7 @@
   </div>
   <header>
     <h1>Trending Hub</h1>
-    <p>全网热点聚合 - 32大平台实时热点</p>
+    <p>全网热点聚合 - 34大平台实时热点</p>
     <div class="header-links">
       <a href="https://github.com/shixingya/trending-hub" target="_blank">GitHub</a>
       <a href="data/feed.xml" target="_blank">RSS</a>
@@ -2003,7 +2024,7 @@
 
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
-    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 32大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
+    <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 34大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="api.html">API 文档</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
     <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-muted)" id="footerShortcuts">快捷键: <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">/</kbd> 搜索 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">T</kbd> 主题 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">W</kbd> 词云 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">C</kbd> 对比 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">E</kbd> 嵌入 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">L</kbd> 时间线 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">G</kbd> 关系图 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">0</kbd> 全部 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">?</kbd> 帮助 · <kbd style="background:var(--bg-input);padding:0.1rem 0.3rem;border-radius:3px">ESC</kbd> 关闭</p>
   </footer>
 
@@ -2276,6 +2297,17 @@
     </div>
   </div>
 
+  <div class="trend-overlay" id="trendOverlay" onclick="if(event.target===this)closeTrend()">
+    <div class="trend-container">
+      <div class="trend-header">
+        <div class="trend-title" id="trendTitle">话题趋势</div>
+        <button class="trend-close" onclick="closeTrend()">✕</button>
+      </div>
+      <canvas id="trendCanvas" class="trend-canvas"></canvas>
+      <div class="trend-stats" id="trendStats"></div>
+    </div>
+  </div>
+
   <div class="pk-overlay" id="pkOverlay" style="display:none" onclick="if(event.target===this)toggleHotPK()">
     <div class="pk-container">
       <div class="pk-header">
@@ -2361,7 +2393,7 @@
     const translations = {
       zh: {
         title: 'Trending Hub - 全网热点聚合',
-        subtitle: '全网热点聚合 - 32大平台实时热点',
+        subtitle: '全网热点聚合 - 34大平台实时热点',
         searchPlaceholder: '搜索热点话题... (按 / 聚焦)',
         exportMD: '导出MD',
         exportCSV: '导出CSV',
@@ -2411,8 +2443,9 @@
         updated: '数据更新于',
         footer: 'Trending Hub - 仅供学习研究，数据版权归原作者原平台所有',
         footerUpdate: '每2小时自动更新',
-        footerPlatforms: '32大平台',
+        footerPlatforms: '34大平台',
         starOnGitHub: 'Star on GitHub',
+        apiDocs: 'API 文档',
         suggestSource: '建议新数据源',
         shortcuts: '快捷键',
         searchKey: '搜索',
@@ -2705,8 +2738,9 @@
         updated: 'Updated',
         footer: 'Trending Hub - For learning only. All rights belong to original owners.',
         footerUpdate: 'Auto-update every 2 hours',
-        footerPlatforms: '32 platforms',
+        footerPlatforms: '34 platforms',
         starOnGitHub: 'Star on GitHub',
+        apiDocs: 'API Docs',
         suggestSource: 'Suggest new source',
         shortcuts: 'Shortcuts',
         searchKey: 'Search',
