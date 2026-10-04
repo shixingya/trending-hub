@@ -928,6 +928,18 @@
     }
     .tag-pill:hover { border-color: var(--accent); color: var(--accent); }
     .tag-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .sentiment-indicator {
+      display: inline-block; font-size: 0.75rem; margin-left: 0.3rem;
+      vertical-align: middle; opacity: 0.8;
+    }
+    .sentiment-positive { filter: saturate(1.2); }
+    .sentiment-negative { filter: saturate(1.2); }
+    .read-indicator {
+      display: inline-block; font-size: 0.7rem; margin-left: 0.3rem;
+      color: #1dd1a1; font-weight: bold; vertical-align: middle;
+    }
+    .item-read { opacity: 0.6; }
+    .item-read .item-title a { color: var(--text-muted); }
     .tag-filter-bar {
       display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 1rem;
       border-bottom: 1px solid var(--border); background: var(--bg-card);
@@ -2434,6 +2446,11 @@
         devDigest: '开发者热点',
         devDigestDesc: 'GitHub/掘金/Dev.to/开源中国/IT之家/少数派 精选',
         newEntry: '新上榜',
+        sentimentPositive: '正面',
+        sentimentNegative: '负面',
+        sentimentNeutral: '中性',
+        readItems: '已读',
+        clearReadingHistory: '清空阅读记录',
         fabRandom: '随机热点',
         fabImage: '生成图片',
         fabBrief: '每日早报',
@@ -2718,6 +2735,11 @@
         devDigest: 'Developer Digest',
         devDigestDesc: 'Curated from GitHub/Juejin/Dev.to/OSChina/ITHome/SSPai',
         newEntry: 'NEW',
+        sentimentPositive: 'Positive',
+        sentimentNegative: 'Negative',
+        sentimentNeutral: 'Neutral',
+        readItems: 'read',
+        clearReadingHistory: 'Clear Reading History',
         fabRandom: 'Random Topic',
         fabImage: 'Generate Image',
         fabBrief: 'Morning Brief',
@@ -3200,6 +3222,8 @@
       }
       html += `<span>${t('platformsCount')} <span class="counter" data-target="${allData.length}">0</span></span><span><span class="counter" data-target="${total}">0</span> ${t('hotTopics')}</span>`;
       if (newCount > 0) html += `<span style="color:var(--accent-red)"><span class="counter" data-target="${newCount}">0</span> ${t('newItems')}</span>`;
+      const readCount = getReadCount();
+      if (readCount > 0) html += `<span style="color:#1dd1a1">✓ ${readCount} ${t('readItems')}</span>`;
       bar.innerHTML = html;
       animateCounters();
     }
@@ -3974,12 +3998,16 @@
             const tagsHtml = itemTags.length > 0 ? `<div class="tag-pills">${itemTags.map(tag => `<span class="tag-pill" onclick="toggleTagFilter('${tag}');event.stopPropagation()">${tag}</span>`).join('')}</div>` : '';
             const isAlerted = checkAlerts(title);
             const alertBadge = isAlerted ? '<span class="item-alert-badge" title="匹配提醒">🔔</span>' : '';
-            const itemClass = isAlerted ? 'item item-alerted' : 'item';
+            const sentiment = analyzeSentiment(title);
+            const sentimentBadge = getSentimentIndicator(sentiment);
+            const readBadge = getReadIndicator(title);
+            const readClass = isRead(title) ? 'item item-read' : 'item';
+            const itemClass = isAlerted ? (isRead(title) ? 'item item-alerted item-read' : 'item item-alerted') : readClass;
             html += `<li class="${itemClass}">
               <span class="item-rank">${i + 1}</span>
               ${renderPositionChange(source.key, title, i + 1)}
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${displayTitle}</a>${alertBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markAsRead('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()">${displayTitle}</a>${alertBadge}${sentimentBadge}${readBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
@@ -7342,6 +7370,66 @@
       if (!activeTagFilter) return true;
       const tags = extractTags(title);
       return tags.includes(activeTagFilter);
+    }
+
+    function analyzeSentiment(title) {
+      const positiveWords = ['成功', '突破', '创新', '胜利', '喜讯', '好消息', '恭喜', '优秀', '精彩', '惊艳', '火爆', '热门', '推荐', '好评', '点赞', '支持', '庆祝', '幸福', '快乐', '开心', '满意', '完美', '出色', '卓越', '进步', '发展', '增长', '上涨', '利好', '正面', '积极', 'success', 'breakthrough', 'innovation', 'victory', 'congratulations', 'excellent', 'amazing', 'awesome', 'great', 'good', 'positive', 'happy', 'love', 'best', 'wonderful', 'fantastic', 'perfect'];
+      const negativeWords = ['失败', '崩溃', '危机', '灾难', '事故', '死亡', '伤亡', '损失', '下跌', '暴跌', '亏损', '裁员', '倒闭', '破产', '违规', '违法', '处罚', '警告', '风险', '问题', '困难', '挑战', '争议', '批评', '质疑', '吐槽', '差评', '失望', '悲伤', '痛苦', '愤怒', '焦虑', '担忧', '恐慌', 'fail', 'crash', 'crisis', 'disaster', 'accident', 'death', 'loss', 'decline', 'bankruptcy', 'violation', 'penalty', 'warning', 'risk', 'problem', 'difficulty', 'controversy', 'criticism', 'negative', 'bad', 'worst', 'terrible', 'horrible', 'angry', 'sad', 'worried'];
+
+      const titleLower = title.toLowerCase();
+      let score = 0;
+      positiveWords.forEach(word => {
+        if (titleLower.includes(word.toLowerCase())) score++;
+      });
+      negativeWords.forEach(word => {
+        if (titleLower.includes(word.toLowerCase())) score--;
+      });
+
+      if (score > 0) return 'positive';
+      if (score < 0) return 'negative';
+      return 'neutral';
+    }
+
+    function getSentimentIndicator(sentiment) {
+      switch(sentiment) {
+        case 'positive': return '<span class="sentiment-indicator sentiment-positive" title="正面">😊</span>';
+        case 'negative': return '<span class="sentiment-indicator sentiment-negative" title="负面">😞</span>';
+        default: return '';
+      }
+    }
+
+    const readingHistory = new Set(JSON.parse(localStorage.getItem('readingHistory') || '[]'));
+
+    function markAsRead(title) {
+      readingHistory.add(title);
+      localStorage.setItem('readingHistory', JSON.stringify(Array.from(readingHistory)));
+      renderContent();
+    }
+    window.markAsRead = markAsRead;
+
+    function isRead(title) {
+      return readingHistory.has(title);
+    }
+
+    function getReadCount() {
+      return readingHistory.size;
+    }
+    window.getReadCount = getReadCount;
+
+    function clearReadingHistory() {
+      if (confirm('确定要清空阅读记录吗？')) {
+        readingHistory.clear();
+        localStorage.removeItem('readingHistory');
+        renderContent();
+      }
+    }
+    window.clearReadingHistory = clearReadingHistory;
+
+    function getReadIndicator(title) {
+      if (isRead(title)) {
+        return '<span class="read-indicator" title="已读">✓</span>';
+      }
+      return '';
     }
 
     function renderHotIndex() {
