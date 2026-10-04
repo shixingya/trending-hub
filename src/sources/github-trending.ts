@@ -6,47 +6,27 @@ export const githubTrending: TrendingSource = {
   icon: 'G',
   color: '#24292F',
   async fetch(): Promise<TrendingItem[]> {
-    const res = await fetch('https://github.com/trending?since=daily', {
+    // Use GitHub API to search for recently created repos with many stars
+    const today = new Date();
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const dateStr = weekAgo.toISOString().split('T')[0];
+    
+    const res = await fetch(`https://api.github.com/search/repositories?q=created:>${dateStr}&sort=stars&order=desc&per_page=30`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'TrendingHub/1.0'
       }
     });
-    if (!res.ok) throw new Error(`GitHub Trending ${res.status}`);
-    const html = await res.text();
-
-    const items: TrendingItem[] = [];
-    const articleRegex = /<article class="Box-row"[^>]*>([\s\S]*?)<\/article>/g;
-    let articleMatch;
-
-    while ((articleMatch = articleRegex.exec(html)) !== null) {
-      const articleContent = articleMatch[1];
-
-      const h2LinkMatch = articleContent.match(/<h2[^>]*>[\s\S]*?href="\/([^"]+)"[\s\S]*?<\/h2>/);
-      if (!h2LinkMatch) continue;
-      const repoPath = h2LinkMatch[1].trim().replace(/\s/g, '');
-      if (!repoPath || repoPath.includes('/')) {
-        const parts = repoPath.split('/');
-        if (parts.length !== 2 || !parts[0] || !parts[1]) continue;
-      }
-
-      const descMatch = articleContent.match(/<p class="col-9[^"]*"[^>]*>([\s\S]*?)<\/p>/);
-      const description = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim() : undefined;
-
-      const starsMatch = articleContent.match(/([\d,]+)\s+stars?\s+today/);
-      const hot = starsMatch ? parseInt(starsMatch[1].replace(/,/g, '')) : undefined;
-
-      const langMatch = articleContent.match(/itemprop="programmingLanguage"[^>]*>([^<]+)</);
-      const language = langMatch ? langMatch[1].trim() : undefined;
-
-      const title = language ? `${repoPath} [${language}]` : repoPath;
-
-      items.push({
-        title,
-        url: `https://github.com/${repoPath}`,
-        description,
-        hot
-      });
-    }
+    
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const data = await res.json();
+    
+    const items: TrendingItem[] = (data.items || []).map((repo: any) => ({
+      title: `${repo.full_name} [${repo.language || 'Unknown'}]`,
+      url: repo.html_url,
+      description: repo.description || undefined,
+      hot: repo.stargazers_count
+    }));
 
     return items;
   }
