@@ -56,7 +56,7 @@
 - 中英文双语支持
 - RSS 订阅，在阅读器中追踪热点
 - PWA 支持，可添加到手机主屏幕
-- RESTful API，方便二次开发
+- RESTful API，方便二次开发 ([API 文档](docs/API.md))
 - GitHub Actions 每 2 小时自动更新，纯静态部署零成本
 - 仅抓取标题和链接，不存储原文内容
 
