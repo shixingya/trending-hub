@@ -448,6 +448,14 @@
     .share-btn:hover { background: rgba(255,255,255,0.25); }
     [data-theme="light"] .share-btn { background: rgba(0,0,0,0.1); color: #333; }
     [data-theme="light"] .share-btn:hover { background: rgba(0,0,0,0.15); }
+    .share-btn-weibo { background: rgba(230,46,36,0.3); }
+    .share-btn-weibo:hover { background: rgba(230,46,36,0.5); }
+    [data-theme="light"] .share-btn-weibo { background: rgba(230,46,36,0.15); color: #e62e24; }
+    [data-theme="light"] .share-btn-weibo:hover { background: rgba(230,46,36,0.25); }
+    .share-btn-qq { background: rgba(12,96,191,0.3); }
+    .share-btn-qq:hover { background: rgba(12,96,191,0.5); }
+    [data-theme="light"] .share-btn-qq { background: rgba(12,96,191,0.15); color: #0c60bf; }
+    [data-theme="light"] .share-btn-qq:hover { background: rgba(12,96,191,0.25); }
     @media (max-width: 600px) {
       header h1 { font-size: 1.4rem; }
       header p { font-size: 0.75rem; }
@@ -1930,11 +1938,14 @@
       <button class="share-btn" onclick="exportData('md')">导出MD</button>
       <button class="share-btn" onclick="exportData('csv')">导出CSV</button>
       <button class="share-btn" onclick="exportData('json')">导出JSON</button>
+      <button class="share-btn" onclick="exportPDF()">导出PDF</button>
       <button class="share-btn" onclick="copyAllTopics()">复制全部</button>
       <button class="share-btn" onclick="showMorningBrief()">早报</button>
       <button class="share-btn" onclick="generateShareImage()">生成图片</button>
       <button class="share-btn" onclick="randomTopic()">随机</button>
       <button class="share-btn" onclick="shareSite()">分享</button>
+      <button class="share-btn share-btn-weibo" onclick="shareToWeibo()" title="分享到微博">微博</button>
+      <button class="share-btn share-btn-qq" onclick="shareToQQ()" title="分享到QQ">QQ</button>
       <button class="share-btn" id="focusBtn" onclick="toggleFocusMode()">专注</button>
       <button class="share-btn" id="compactBtn" onclick="toggleCompactMode()">紧凑</button>
       <button class="share-btn" id="langFilterBtn" onclick="toggleLangFilter()">全部</button>
@@ -2584,6 +2595,11 @@
         sourceHealthOk: '正常',
         sourceHealthError: '异常',
         sourceHealthItems: '条数据',
+        exportPDF: '导出PDF',
+        shareWeibo: '微博',
+        shareQQ: 'QQ',
+        shareToWeibo: '分享到微博',
+        shareToQQ: '分享到QQ',
         changes: '变更',
         changesTitle: '数据变更',
         changesDesc: '与上次快照对比的变化',
@@ -2873,6 +2889,11 @@
         sourceHealthOk: 'OK',
         sourceHealthError: 'Error',
         sourceHealthItems: 'items',
+        exportPDF: 'Export PDF',
+        shareWeibo: 'Weibo',
+        shareQQ: 'QQ',
+        shareToWeibo: 'Share to Weibo',
+        shareToQQ: 'Share to QQ',
         changes: 'Changes',
         changesTitle: 'Data Changes',
         changesDesc: 'Changes compared to previous snapshot',
@@ -4740,6 +4761,124 @@
           showToast(t('toastCopyFailed'), 'error');
         });
       }
+    }
+
+    function shareToWeibo() {
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const text = `🔥 全网热点聚合 - ${total} 条热点\n\n` +
+        allData.filter(s => s.items.length > 0).slice(0, 3).map(s =>
+          `【${s.source} TOP3】\n${s.items.slice(0, 3).map((item, i) => `${i + 1}. ${item.title}`).join('\n')}`
+        ).join('\n\n') +
+        `\n\n查看更多热点: ${location.href}`;
+      const url = encodeURIComponent(location.href);
+      const weiboUrl = `https://service.weibo.com/share/share.php?url=${url}&title=${encodeURIComponent(text)}`;
+      window.open(weiboUrl, '_blank', 'width=600,height=500');
+    }
+
+    function shareToQQ() {
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      const desc = `一站式发现${allData.filter(s => s.items.length > 0).slice(0, 8).map(s => s.source).join('/')}等${allData.length}大平台热点话题，实时更新`;
+      const url = encodeURIComponent(location.href);
+      const title = encodeURIComponent(`Trending Hub - 全网热点聚合 (${total}条热点)`);
+      const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${url}&title=${title}&desc=${encodeURIComponent(desc)}&summary=${encodeURIComponent('全网热门话题聚合')}`;
+      window.open(qqUrl, '_blank', 'width=600,height=500');
+    }
+
+    function exportPDF() {
+      if (allData.length === 0) return;
+      const date = new Date().toISOString().split('T')[0];
+      const total = allData.reduce((sum, s) => sum + s.items.length, 0);
+      
+      let htmlContent = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Trending Hub - 全网热点日报 ${date}</title>
+  <style>
+    @page { size: A4; margin: 1.5cm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif; color: #333; line-height: 1.6; font-size: 11pt; }
+    .header { text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 3px solid #667eea; }
+    .header h1 { font-size: 24pt; color: #667eea; margin-bottom: 0.5rem; }
+    .header p { color: #666; font-size: 10pt; }
+    .stats { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 18pt; font-weight: bold; color: #667eea; }
+    .stat-label { font-size: 9pt; color: #888; }
+    .source-section { margin-bottom: 1.5rem; page-break-inside: avoid; }
+    .source-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.6rem 1rem; border-radius: 8px 8px 0 0; font-size: 13pt; font-weight: bold; }
+    .source-items { border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; }
+    .item { padding: 0.5rem 1rem; border-bottom: 1px solid #f0f0f0; }
+    .item:last-child { border-bottom: none; }
+    .item-rank { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: #f0f0f0; color: #666; border-radius: 50%; font-size: 9pt; font-weight: bold; margin-right: 0.5rem; }
+    .item:nth-child(-n+3) .item-rank { background: #667eea; color: white; }
+    .item-title { color: #333; text-decoration: none; font-size: 10.5pt; }
+    .item-title:hover { color: #667eea; }
+    .item-hot { float: right; color: #ff6b6b; font-size: 9pt; font-weight: bold; }
+    .footer { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e0e0e0; color: #888; font-size: 9pt; }
+    .footer a { color: #667eea; text-decoration: none; }
+    @media print { body { font-size: 10pt; } .source-section { page-break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔥 Trending Hub - 全网热点日报</h1>
+    <p>${date} · 自动生成于 ${new Date().toLocaleString('zh-CN')}</p>
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-value">${allData.filter(s => s.items.length > 0).length}</div>
+        <div class="stat-label">数据平台</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">${total}</div>
+        <div class="stat-label">热点总数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">${Math.round(total / allData.filter(s => s.items.length > 0).length)}</div>
+        <div class="stat-label">平均每平台</div>
+      </div>
+    </div>
+  </div>`;
+
+      for (const source of allData) {
+        if (source.items.length === 0) continue;
+        htmlContent += `
+  <div class="source-section">
+    <div class="source-header">${source.source} (${source.items.length} 条)</div>
+    <div class="source-items">`;
+        source.items.slice(0, 20).forEach((item, i) => {
+          const hotStr = item.hot ? `<span class="item-hot">${formatHot(item.hot)}</span>` : '';
+          htmlContent += `
+      <div class="item">
+        <span class="item-rank">${i + 1}</span>
+        <a href="${item.url}" class="item-title" target="_blank">${escapeHtml(item.title)}</a>
+        ${hotStr}
+      </div>`;
+        });
+        htmlContent += `
+    </div>
+  </div>`;
+      }
+
+      htmlContent += `
+  <div class="footer">
+    <p>数据来源: <a href="${location.origin}/trending-hub/" target="_blank">Trending Hub - 全网热点聚合</a></p>
+    <p>仅供学习研究，数据版权归原作者原平台所有</p>
+    <p style="margin-top: 0.5rem;">GitHub: <a href="https://github.com/shixingya/trending-hub" target="_blank">shixingya/trending-hub</a></p>
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 500);
+    };
+  </script>
+</body>
+</html>`;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      showToast(t('toastExported', { filename: `trending-${date}.pdf` }), 'success');
     }
 
     function randomTopic() {
