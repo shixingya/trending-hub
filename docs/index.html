@@ -404,6 +404,32 @@
     .digest-content { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; justify-content: center; }
     .digest-content.collapsed { display: none; }
     .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+    .contributors-section {
+      text-align: center; padding: 2rem 1rem; background: var(--bg-card);
+      border-top: 1px solid var(--border); margin-top: 2rem;
+    }
+    .contributors-title {
+      font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: var(--text);
+    }
+    .contributors-grid {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;
+      max-width: 800px; margin: 0 auto;
+    }
+    .contributor-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      text-decoration: none; color: var(--text); transition: transform 0.2s;
+    }
+    .contributor-item:hover { transform: scale(1.1); }
+    .contributor-avatar {
+      width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--accent);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .contributor-name {
+      font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;
+    }
+    .contributor-contributions {
+      font-size: 0.7rem; color: var(--text-muted);
+    }
     footer {
       text-align: center; padding: 2rem 1rem; color: var(--text-muted);
       font-size: 0.75rem; border-top: 1px solid var(--border);
@@ -2022,6 +2048,13 @@
   </div>
   <div class="refresh-time" id="refreshTime"></div>
 
+  <div class="contributors-section" id="contributorsSection">
+    <div class="contributors-title" data-i18n="contributorsTitle">👥 贡献者 Contributors</div>
+    <div class="contributors-grid" id="contributorsGrid">
+      <div style="color:var(--text-muted);font-size:0.85rem" data-i18n="loadingContributors">加载中...</div>
+    </div>
+  </div>
+
   <footer>
     <p id="footerText">Trending Hub - 仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top:0.3rem" id="footerUpdate">每2小时自动更新 · 34大平台 · <a href="https://github.com/shixingya/trending-hub">Star on GitHub</a> · <a href="api.html">API 文档</a> · <a href="https://github.com/shixingya/trending-hub/issues">建议新数据源</a></p>
@@ -2447,6 +2480,10 @@
         starOnGitHub: 'Star on GitHub',
         apiDocs: 'API 文档',
         suggestSource: '建议新数据源',
+        contributorsTitle: '👥 贡献者 Contributors',
+        loadingContributors: '加载中...',
+        noContributors: '暂无贡献者',
+        beFirstContributor: '欢迎成为第一位贡献者！',
         shortcuts: '快捷键',
         searchKey: '搜索',
         themeKey: '主题',
@@ -2742,6 +2779,10 @@
         starOnGitHub: 'Star on GitHub',
         apiDocs: 'API Docs',
         suggestSource: 'Suggest new source',
+        contributorsTitle: '👥 Contributors',
+        loadingContributors: 'Loading...',
+        noContributors: 'No contributors yet',
+        beFirstContributor: 'Be the first contributor!',
         shortcuts: 'Shortcuts',
         searchKey: 'Search',
         themeKey: 'Theme',
@@ -3215,6 +3256,32 @@
       searchQuery = query.trim().toLowerCase();
       updateHash();
       renderContent();
+    }
+
+    async function loadContributors() {
+      try {
+        const res = await fetch('https://api.github.com/repos/shixingya/trending-hub/contributors');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const contributors = await res.json();
+        const grid = document.getElementById('contributorsGrid');
+        
+        if (contributors.length === 0) {
+          grid.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem">${t('noContributors')}</div>`;
+          return;
+        }
+        
+        grid.innerHTML = contributors.slice(0, 20).map(contributor => `
+          <a href="${contributor.html_url}" target="_blank" class="contributor-item">
+            <img src="${contributor.avatar_url}" alt="${contributor.login}" class="contributor-avatar">
+            <div class="contributor-name">@${contributor.login}</div>
+            <div class="contributor-contributions">${contributor.contributions} commits</div>
+          </a>
+        `).join('');
+      } catch (err) {
+        console.warn('Failed to load contributors:', err);
+        const grid = document.getElementById('contributorsGrid');
+        grid.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem">${t('beFirstContributor')}</div>`;
+      }
     }
 
     async function loadTrending() {
@@ -4618,6 +4685,7 @@
 
     loadTrending();
     loadTrendHistory();
+    loadContributors();
     initScrollProgress();
     document.addEventListener('click', (e) => {
       const nav = document.getElementById('sectionNav');
