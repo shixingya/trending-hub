@@ -1330,6 +1330,116 @@
       .scroll-top { bottom: 80px; }
       footer { margin-bottom: 0; }
     }
+    .fab-container {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 6rem;
+      z-index: 996;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+    .fab-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .fab-container.open .fab-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .fab-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .fab-menu-item:hover {
+      background: var(--hover-bg);
+      transform: translateX(-4px);
+    }
+    .fab-menu-item-icon {
+      font-size: 1.2rem;
+    }
+    .fab-menu-item-label {
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .fab-main {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-red));
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(72, 219, 251, 0.4);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fab-main:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(72, 219, 251, 0.6);
+    }
+    .fab-container.open .fab-main {
+      transform: rotate(45deg);
+    }
+    .search-voice-btn {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.25rem;
+      border-radius: 50%;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .search-voice-btn:hover {
+      color: var(--accent);
+      background: var(--hover-bg);
+    }
+    .search-voice-btn.listening {
+      color: var(--accent-red);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translateY(-50%) scale(1); }
+      50% { transform: translateY(-50%) scale(1.1); }
+    }
+    @media (max-width: 768px) {
+      .fab-container {
+        right: 1rem;
+        bottom: 5.5rem;
+      }
+      .fab-main {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+      }
+    }
     .pull-refresh {
       position: fixed;
       top: -60px;
@@ -1751,8 +1861,9 @@
     </div>
   </header>
 
-  <div class="search-bar">
-    <input type="text" class="search-input" id="searchInput" placeholder="搜索热点话题... (按 / 聚焦)" oninput="onSearch(this.value)">
+  <div class="search-bar" style="position: relative;">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索热点话题... (按 / 聚焦)" oninput="onSearch(this.value)" style="padding-right: 3rem;">
+    <button class="search-voice-btn" id="voiceSearchBtn" onclick="toggleVoiceSearch()" title="语音搜索">🎤</button>
   </div>
 
   <div class="tabs" id="tabs"></div>
@@ -1797,6 +1908,32 @@
       </div>
     </div>
   </nav>
+
+  <div class="fab-container" id="fabContainer">
+    <div class="fab-menu">
+      <div class="fab-menu-item" onclick="randomTopic(); toggleFab()">
+        <span class="fab-menu-item-icon">🎲</span>
+        <span class="fab-menu-item-label" data-i18n="fabRandom">随机热点</span>
+      </div>
+      <div class="fab-menu-item" onclick="generateShareImage(); toggleFab()">
+        <span class="fab-menu-item-icon">🖼️</span>
+        <span class="fab-menu-item-label" data-i18n="fabImage">生成图片</span>
+      </div>
+      <div class="fab-menu-item" onclick="showMorningBrief(); toggleFab()">
+        <span class="fab-menu-item-icon">☀️</span>
+        <span class="fab-menu-item-label" data-i18n="fabBrief">每日早报</span>
+      </div>
+      <div class="fab-menu-item" onclick="toggleTheme(); toggleFab()">
+        <span class="fab-menu-item-icon">🌓</span>
+        <span class="fab-menu-item-label" data-i18n="fabTheme">切换主题</span>
+      </div>
+      <div class="fab-menu-item" onclick="window.scrollTo({top:0,behavior:'smooth'}); toggleFab()">
+        <span class="fab-menu-item-icon">⬆️</span>
+        <span class="fab-menu-item-label" data-i18n="fabTop">回到顶部</span>
+      </div>
+    </div>
+    <button class="fab-main" onclick="toggleFab()" title="快捷操作">+</button>
+  </div>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
@@ -2179,6 +2316,15 @@
         devDigest: '开发者热点',
         devDigestDesc: 'GitHub/掘金/Dev.to/开源中国/IT之家/少数派 精选',
         newEntry: '新上榜',
+        fabRandom: '随机热点',
+        fabImage: '生成图片',
+        fabBrief: '每日早报',
+        fabTheme: '切换主题',
+        fabTop: '回到顶部',
+        voiceSearch: '语音搜索',
+        voiceNotSupported: '您的浏览器不支持语音识别，请使用 Chrome 或 Edge 浏览器',
+        voiceMicRequired: '请允许麦克风访问以使用语音搜索',
+        voiceNoSpeech: '未检测到语音，请重试',
         sourceHealthTitle: '各平台数据状态',
         shortcutsTitle: '⌨️ 键盘快捷键',
         shortcutsNav: '🧭 导航',
@@ -2451,6 +2597,15 @@
         devDigest: 'Developer Digest',
         devDigestDesc: 'Curated from GitHub/Juejin/Dev.to/OSChina/ITHome/SSPai',
         newEntry: 'NEW',
+        fabRandom: 'Random Topic',
+        fabImage: 'Generate Image',
+        fabBrief: 'Morning Brief',
+        fabTheme: 'Toggle Theme',
+        fabTop: 'Back to Top',
+        voiceSearch: 'Voice Search',
+        voiceNotSupported: 'Your browser does not support speech recognition. Please use Chrome or Edge.',
+        voiceMicRequired: 'Please allow microphone access for voice search',
+        voiceNoSpeech: 'No speech detected. Please try again.',
         sourceHealthTitle: 'Platform Data Status',
         shortcutsTitle: '⌨️ Keyboard Shortcuts',
         shortcutsNav: '🧭 Navigation',
@@ -2688,11 +2843,20 @@
       updateRefreshTime();
       updateAlertsButton();
       updateBottomNav();
+      updateFabLabels();
     }
 
     function updateBottomNav() {
       const navItems = document.querySelectorAll('.bottom-nav-item span[data-i18n]');
       navItems.forEach(item => {
+        const key = item.getAttribute('data-i18n');
+        item.textContent = t(key);
+      });
+    }
+
+    function updateFabLabels() {
+      const fabItems = document.querySelectorAll('.fab-menu-item-label[data-i18n]');
+      fabItems.forEach(item => {
         const key = item.getAttribute('data-i18n');
         item.textContent = t(key);
       });
@@ -4431,6 +4595,74 @@
       const source = sources[Math.floor(Math.random() * sources.length)];
       const item = source.items[Math.floor(Math.random() * source.items.length)];
       if (item && item.url) window.open(item.url, '_blank');
+    }
+
+    function toggleFab() {
+      const fab = document.getElementById('fabContainer');
+      fab.classList.toggle('open');
+    }
+
+    // Close FAB when clicking outside
+    document.addEventListener('click', (e) => {
+      const fab = document.getElementById('fabContainer');
+      if (fab && !fab.contains(e.target)) {
+        fab.classList.remove('open');
+      }
+    });
+
+    let voiceRecognition = null;
+    let isListening = false;
+
+    function toggleVoiceSearch() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert(t('voiceNotSupported'));
+        return;
+      }
+
+      const btn = document.getElementById('voiceSearchBtn');
+      
+      if (isListening) {
+        if (voiceRecognition) {
+          voiceRecognition.stop();
+        }
+        return;
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      voiceRecognition = new SpeechRecognition();
+      voiceRecognition.lang = currentLang === 'zh' ? 'zh-CN' : 'en-US';
+      voiceRecognition.continuous = false;
+      voiceRecognition.interimResults = false;
+
+      voiceRecognition.onstart = () => {
+        isListening = true;
+        btn.classList.add('listening');
+        btn.textContent = '⏹️';
+      };
+
+      voiceRecognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const searchInput = document.getElementById('searchInput');
+        searchInput.value = transcript;
+        onSearch(transcript);
+      };
+
+      voiceRecognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          alert(t('voiceMicRequired'));
+        } else if (event.error === 'no-speech') {
+          alert(t('voiceNoSpeech'));
+        }
+      };
+
+      voiceRecognition.onend = () => {
+        isListening = false;
+        btn.classList.remove('listening');
+        btn.textContent = '🎤';
+      };
+
+      voiceRecognition.start();
     }
 
     function exportData(format) {
