@@ -5,10 +5,12 @@ export { bilibili } from './bilibili.js';
 export { bilibiliRank } from './bilibili-rank.js';
 export { bilibiliHot } from './bilibili-hot.js';
 export { bilibiliPopular } from './bilibili-popular.js';
+export { bilibiliPrecious } from './bilibili-precious.js';
 export { douyin } from './douyin.js';
 export { toutiao } from './toutiao.js';
 export { zhihu } from './zhihu.js';
 export { zhihuDaily } from './zhihu-daily.js';
+export { zhihuHot } from './zhihu-hot.js';
 export { thepaper } from './thepaper.js';
 export { ithome } from './ithome.js';
 export { sspai } from './sspai.js';
@@ -37,10 +39,12 @@ import { bilibili } from './bilibili.js';
 import { bilibiliRank } from './bilibili-rank.js';
 import { bilibiliHot } from './bilibili-hot.js';
 import { bilibiliPopular } from './bilibili-popular.js';
+import { bilibiliPrecious } from './bilibili-precious.js';
 import { douyin } from './douyin.js';
 import { toutiao } from './toutiao.js';
 import { zhihu } from './zhihu.js';
 import { zhihuDaily } from './zhihu-daily.js';
+import { zhihuHot } from './zhihu-hot.js';
 import { thepaper } from './thepaper.js';
 import { ithome } from './ithome.js';
 import { sspai } from './sspai.js';
@@ -66,6 +70,7 @@ import type { TrendingSource } from '../types.js';
 export const allSources: TrendingSource[] = [
   zhihu,
   zhihuDaily,
+  zhihuHot,
   baidu,
   baiduTieba,
   weibo,
@@ -73,6 +78,7 @@ export const allSources: TrendingSource[] = [
   bilibiliRank,
   bilibiliHot,
   bilibiliPopular,
+  bilibiliPrecious,
   douyin,
   toutiao,
   thepaper,

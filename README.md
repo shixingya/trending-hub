@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
 [![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
 
-一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等34大平台热点
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等36大平台热点
 
 [在线体验](https://shixingya.github.io/trending-hub/) · [更新日志](CHANGELOG.md) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
@@ -18,7 +18,7 @@
 
 ## 特性
 
-- 聚合 34 大平台热榜：知乎热榜/日报、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影/读书、网易云热歌、GitHub Trending/新星、虎扑热帖、新浪新闻、微信读书、掘金热门、懂球帝热帖、快手热榜、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow
+- 聚合 36 大平台热榜：知乎热榜/日报/热评、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门/入站必刷、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影/读书、网易云热歌、GitHub Trending/新星、虎扑热帖、新浪新闻、微信读书、掘金热门、懂球帝热帖、快手热榜、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow
 - 暗色/亮色主题切换，自动跟随系统，支持日落自动切换（基于地理位置）
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
