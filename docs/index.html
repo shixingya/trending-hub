@@ -7554,7 +7554,37 @@
           <div class="about-stat-value">${features.length}+</div>
           <div class="about-stat-label">${isZh ? '核心特性' : 'Features'}</div>
         </div>
+        <div class="about-stat-card" id="aboutGithubStars" style="cursor:pointer" onclick="window.open('https://github.com/shixingya/trending-hub','_blank')">
+          <div class="about-stat-value">⭐</div>
+          <div class="about-stat-label">${isZh ? '加载中...' : 'Loading...'}</div>
+        </div>
+        <div class="about-stat-card" id="aboutGithubForks" style="cursor:pointer" onclick="window.open('https://github.com/shixingya/trending-hub','_blank')">
+          <div class="about-stat-value">🍴</div>
+          <div class="about-stat-label">${isZh ? '加载中...' : 'Loading...'}</div>
+        </div>
       `;
+
+      // Fetch live GitHub stats
+      fetch('https://api.github.com/repos/shixingya/trending-hub')
+        .then(r => r.json())
+        .then(data => {
+          const starsCard = document.getElementById('aboutGithubStars');
+          const forksCard = document.getElementById('aboutGithubForks');
+          if (starsCard && data.stargazers_count !== undefined) {
+            starsCard.querySelector('.about-stat-value').textContent = `⭐ ${data.stargazers_count}`;
+            starsCard.querySelector('.about-stat-label').textContent = isZh ? 'GitHub Stars' : 'GitHub Stars';
+          }
+          if (forksCard && data.forks_count !== undefined) {
+            forksCard.querySelector('.about-stat-value').textContent = `🍴 ${data.forks_count}`;
+            forksCard.querySelector('.about-stat-label').textContent = isZh ? 'GitHub Forks' : 'GitHub Forks';
+          }
+        })
+        .catch(() => {
+          const starsCard = document.getElementById('aboutGithubStars');
+          const forksCard = document.getElementById('aboutGithubForks');
+          if (starsCard) starsCard.querySelector('.about-stat-label').textContent = isZh ? 'Star on GitHub' : 'Star on GitHub';
+          if (forksCard) forksCard.querySelector('.about-stat-label').textContent = isZh ? 'Fork on GitHub' : 'Fork on GitHub';
+        });
 
       document.getElementById('aboutTechStack').innerHTML = techStack.map(tech =>
         `<div class="about-tech-badge">${tech.icon} ${tech.name}</div>`
