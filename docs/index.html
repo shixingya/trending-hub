@@ -2731,7 +2731,14 @@
         globalSort: '全局排序',
         shortcutGlobalSort: '全局热度排序',
         buzz: '热度指标',
-        shortcutBuzz: '显示热度指标'
+        shortcutBuzz: '显示热度指标',
+        autoTheme: '自动主题',
+        autoThemeDesc: '根据日出日落自动切换主题',
+        autoThemeOn: '已开启：将在日落时自动切换暗色模式',
+        autoThemeOff: '已关闭',
+        autoThemeEnable: '开启自动主题',
+        autoThemeDisable: '关闭自动主题',
+        shortcutAutoTheme: '切换自动主题'
       },
       en: {
         title: 'Trending Hub - Global Hot Topics',
@@ -3038,7 +3045,14 @@
         globalSort: 'Global Sort',
         shortcutGlobalSort: 'Sort All by Hot Score',
         buzz: 'Buzz',
-        shortcutBuzz: 'Show Buzz Indicators'
+        shortcutBuzz: 'Show Buzz Indicators',
+        autoTheme: 'Auto Theme',
+        autoThemeDesc: 'Automatically switch theme based on sunrise/sunset',
+        autoThemeOn: 'Enabled: will switch to dark mode at sunset',
+        autoThemeOff: 'Disabled',
+        autoThemeEnable: 'Enable Auto Theme',
+        autoThemeDisable: 'Disable Auto Theme',
+        shortcutAutoTheme: 'Toggle auto theme'
       }
     };
 
@@ -3179,24 +3193,101 @@
         body.removeAttribute('data-theme');
         btn.textContent = 'Light';
         localStorage.setItem('theme', 'dark');
-        localStorage.setItem('theme-manual', 'true');
       } else {
         body.setAttribute('data-theme', 'light');
         btn.textContent = 'Dark';
         localStorage.setItem('theme', 'light');
-        localStorage.setItem('theme-manual', 'true');
       }
+      localStorage.setItem('theme-manual', 'true');
+      localStorage.setItem('theme-manual-time', Date.now().toString());
+    }
+
+    function checkManualThemeExpiry() {
+      const manualTime = localStorage.getItem('theme-manual-time');
+      if (manualTime && Date.now() - parseInt(manualTime) > 12 * 3600 * 1000) {
+        localStorage.removeItem('theme-manual');
+        localStorage.removeItem('theme-manual-time');
+      }
+    }
+    checkManualThemeExpiry();
+
+    function toggleAutoTheme() {
+      const current = localStorage.getItem('theme-auto');
+      if (current === 'false') {
+        localStorage.removeItem('theme-auto');
+        localStorage.removeItem('theme-manual');
+        localStorage.removeItem('theme-manual-time');
+        initAutoThemeLocation();
+        applyAutoTheme();
+        showToast(t('autoThemeOn'), 'success');
+      } else {
+        localStorage.setItem('theme-auto', 'false');
+        showToast(t('autoThemeOff'), 'info');
+      }
+    }
+
+    function calculateSunTimes(lat, lng, date = new Date()) {
+      const rad = Math.PI / 180;
+      const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+      const zenith = 90.833;
+      const D = dayOfYear;
+      const K = 2 * Math.PI / 365;
+      const P = Math.asin(0.39795 * Math.sin(K * (D - 80)));
+      const S = Math.atan((Math.tan(P) * Math.cos(lat * rad)) / Math.cos(lat * rad));
+      const noon = 12 - lng / 15;
+      const sunrise = noon - S * 12 / Math.PI;
+      const sunset = noon + S * 12 / Math.PI;
+      return { sunrise, sunset };
+    }
+
+    function getSunTimes() {
+      const cached = localStorage.getItem('theme-location');
+      if (cached) {
+        const { lat, lng } = JSON.parse(cached);
+        return calculateSunTimes(lat, lng);
+      }
+      return null;
+    }
+
+    function initAutoThemeLocation() {
+      if (localStorage.getItem('theme-auto') === 'false') return;
+      if (localStorage.getItem('theme-location')) return;
+      if (!navigator.geolocation) {
+        localStorage.setItem('theme-location', JSON.stringify({ lat: 39.9, lng: 116.4 }));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          localStorage.setItem('theme-location', JSON.stringify({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          }));
+        },
+        () => {
+          localStorage.setItem('theme-location', JSON.stringify({ lat: 39.9, lng: 116.4 }));
+        },
+        { timeout: 5000 }
+      );
     }
 
     function applyAutoTheme() {
       if (localStorage.getItem('theme-manual') === 'true') return;
       if (localStorage.getItem('theme-auto') === 'false') return;
-      
-      const hour = new Date().getHours();
-      const isNightTime = hour >= 18 || hour < 6;
+
+      const now = new Date();
+      const hour = now.getHours() + now.getMinutes() / 60;
+      const sunTimes = getSunTimes();
+      let isNightTime;
+
+      if (sunTimes) {
+        isNightTime = hour < sunTimes.sunrise || hour > sunTimes.sunset;
+      } else {
+        isNightTime = hour >= 18 || hour < 6;
+      }
+
       const body = document.documentElement;
       const btn = document.getElementById('themeToggle');
-      
+
       if (isNightTime && body.getAttribute('data-theme') !== null) {
         body.removeAttribute('data-theme');
         if (btn) btn.textContent = 'Light';
@@ -3215,7 +3306,8 @@
       document.documentElement.setAttribute('data-theme', 'light');
       document.getElementById('themeToggle').textContent = 'Dark';
     }
-    
+
+    initAutoThemeLocation();
     applyAutoTheme();
     setInterval(applyAutoTheme, 300000);
 
@@ -3636,6 +3728,26 @@
                 matched = true;
                 break;
               }
+
+              if (synonymMatch(existingNorm, normalized)) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.urls[source.key] = item.url;
+                  if (item.hot > (existing.maxHot || 0)) existing.maxHot = item.hot;
+                }
+                matched = true;
+                break;
+              }
+
+              if (fuzzyMatch(existingNorm, normalized)) {
+                if (!existing.sources.includes(source.source)) {
+                  existing.sources.push(source.source);
+                  existing.urls[source.key] = item.url;
+                  if (item.hot > (existing.maxHot || 0)) existing.maxHot = item.hot;
+                }
+                matched = true;
+                break;
+              }
             }
           }
           
@@ -3662,6 +3774,58 @@
         if (words2.has(w)) common++;
       }
       return (common * 2) / (words1.size + words2.size);
+    }
+
+    function levenshtein(a, b) {
+      if (a.length === 0) return b.length;
+      if (b.length === 0) return a.length;
+      const matrix = [];
+      for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          const cost = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function fuzzyMatch(str1, str2) {
+      if (str1.length < 6 || str2.length < 6) return false;
+      const maxLen = Math.max(str1.length, str2.length);
+      const dist = levenshtein(str1, str2);
+      const similarity = 1 - dist / maxLen;
+      return similarity > 0.75;
+    }
+
+    const topicSynonyms = [
+      ['特朗普', '川普', 'trump'],
+      ['拜登', 'biden'],
+      ['nba', '篮球', 'cba'],
+      ['世界杯', 'fifa'],
+      ['chatgpt', 'gpt', 'openai'],
+      ['人工智能', 'ai', 'artificial intelligence'],
+      ['抖音', 'tiktok', 'douyin'],
+      ['微博', 'weibo'],
+      ['知乎', 'zhihu'],
+      ['比特币', 'btc', 'bitcoin'],
+      ['以太坊', 'eth', 'ethereum'],
+    ];
+
+    function synonymMatch(str1, str2) {
+      const s1 = str1.toLowerCase();
+      const s2 = str2.toLowerCase();
+      for (const group of topicSynonyms) {
+        const has1 = group.some(s => s1.includes(s));
+        const has2 = group.some(s => s2.includes(s));
+        if (has1 && has2) return true;
+      }
+      return false;
     }
 
     function getTopHotTopics() {
@@ -5683,6 +5847,7 @@
       if (e.key === 'n' || e.key === 'N') { toggleLangFilter(); }
       if (e.key === 's' || e.key === 'S') { toggleGlobalSort(); }
       if (e.key === 'i' || e.key === 'I') { toggleBuzz(); }
+      if (e.key === 'a' || e.key === 'A') { toggleAutoTheme(); }
     });
 
     let focusMode = false;
@@ -6783,6 +6948,7 @@
         ],
         view: [
           { keys: ['T'], desc: t('shortcutToggleTheme') },
+          { keys: ['A'], desc: t('shortcutAutoTheme') },
           { keys: ['F'], desc: t('shortcutFocusMode') },
           { keys: ['M'], desc: t('shortcutCompactMode') },
           { keys: ['K'], desc: t('shortcutPalette') },
@@ -8265,6 +8431,7 @@
         { label: '语言过滤', hint: '快捷键 N', icon: '🌐', color: '#e74c3c', action: () => toggleLangFilter() },
         { label: '全局排序', hint: '快捷键 S', icon: '🔥', color: '#f39c12', action: () => toggleGlobalSort() },
         { label: '热度指标', hint: '快捷键 I', icon: '🔥', color: '#e74c3c', action: () => toggleBuzz() },
+        { label: '自动主题', hint: '快捷键 A · 日落自动切换', icon: '🌓', color: '#3498db', action: () => toggleAutoTheme() },
       ];
       actions.forEach(a => paletteItems.push({ ...a, type: 'action' }));
 
