@@ -2,17 +2,22 @@
 
 <div align="center">
 
-**全网热门话题聚合器**
+**全网热门话题聚合器 · 一站式发现全网热点**
 
 [![GitHub stars](https://img.shields.io/github/stars/shixingya/trending-hub?style=social)](https://github.com/shixingya/trending-hub/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/shixingya/trending-hub?style=social)](https://github.com/shixingya/trending-hub/network/members)
 [![GitHub issues](https://img.shields.io/github/issues/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/issues)
 [![License](https://img.shields.io/github/license/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/blob/main/LICENSE)
 [![Update Frequency](https://img.shields.io/badge/updates-every%202%20hours-brightgreen)](https://github.com/shixingya/trending-hub/actions)
+[![Last Commit](https://img.shields.io/github/last-commit/shixingya/trending-hub)](https://github.com/shixingya/trending-hub/commits/main)
+[![Languages](https://img.shields.io/github/languages/count/shixingya/trending-hub)](https://github.com/shixingya/trending-hub)
+[![Code Size](https://img.shields.io/github/languages/code-size/shixingya/trending-hub)](https://github.com/shixingya/trending-hub)
 
-一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等36大平台热点
+🌐 **36大平台** · 📊 **1200+热点** · 🔄 **自动更新** · 🎨 **精美UI** · 📱 **PWA支持**
 
-[在线体验](https://shixingya.github.io/trending-hub/) · [更新日志](CHANGELOG.md) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow等36大平台热点
+
+[🚀 在线体验](https://shixingya.github.io/trending-hub/) · [📖 API 文档](https://shixingya.github.io/trending-hub/api.html) · [📝 更新日志](CHANGELOG.md) · [🐛 报告问题](https://github.com/shixingya/trending-hub/issues) · [💡 建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
 </div>
 
@@ -239,6 +244,43 @@ npm run dev
 - GitHub Actions（定时数据抓取 + RSS 生成）
 - 纯 HTML/CSS/JS 前端（零依赖，零构建）
 - PWA + Service Worker
+
+## 项目亮点
+
+<div align="center">
+
+| 🌐 数据源 | 📊 热点话题 | ⚡ 更新频率 | 🎨 核心特性 |
+|-----------|------------|------------|------------|
+| **36大平台** | **1200+条** | **每2小时** | **50+功能** |
+
+</div>
+
+### 🏆 核心功能一览
+
+- 📰 **36大平台热榜**：知乎、百度、微博、B站、抖音、头条、GitHub、虎扑、掘金、Hacker News 等
+- 🌓 **暗色/亮色主题**：自动跟随系统，支持日落自动切换
+- 🔍 **智能搜索**：关键词搜索 + 智能分类筛选（娱乐/军事/体育/科技/社会/财经/教育/游戏/健康/汽车）
+- 📊 **数据可视化**：热度趋势图、词云、平台热力图、关系图、时间线
+- 🎮 **互动功能**：热点盲盒、热点PK、猜谜游戏、话题收藏集
+- 📱 **移动端优化**：底部导航栏、下拉刷新、PWA 支持
+- 🌍 **中英文双语**：完整的 i18n 支持
+- 📤 **数据导出**：Markdown、CSV、JSON、PDF 格式
+- 🔗 **社交分享**：微博、QQ 一键分享，生成精美分享卡片
+- ⌨️ **键盘快捷键**：20+ 快捷键，高效操作
+- 🤖 **自动化**：GitHub Actions 每 2 小时自动更新，零成本部署
+- 🔌 **RESTful API**：完整的 API 文档，支持二次开发
+- 📡 **RSS 订阅**：在阅读器中追踪热点
+- 🎨 **嵌入小组件**：一键生成 iframe 代码，嵌入你的网站
+
+### 📈 Star History
+
+<a href="https://star-history.com/#shixingya/trending-hub&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=shixingya/trending-hub&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=shixingya/trending-hub&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=shixingya/trending-hub&type=Date" />
+  </picture>
+</a>
 
 ## 免责声明
 
