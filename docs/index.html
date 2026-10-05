@@ -1777,6 +1777,130 @@
     }
     .pk-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .pk-card.voted { cursor: default; }
+
+    .blindbox-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 3000;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(10px); animation: fadeIn 0.3s ease;
+    }
+    .blindbox-container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 24px; padding: 2.5rem; width: 420px; max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .blindbox-container::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: blindboxShine 3s linear infinite;
+    }
+    @keyframes blindboxShine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .blindbox-header {
+      font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;
+      position: relative; z-index: 1;
+    }
+    .blindbox-subtitle {
+      font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem;
+      position: relative; z-index: 1;
+    }
+    .blindbox-box {
+      width: 180px; height: 180px; margin: 0 auto 2rem; position: relative;
+      cursor: pointer; transition: transform 0.3s ease;
+    }
+    .blindbox-box:hover { transform: scale(1.05); }
+    .blindbox-box.shaking { animation: blindboxShake 0.6s ease-in-out; }
+    @keyframes blindboxShake {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      10% { transform: rotate(-8deg) scale(1.1); }
+      20% { transform: rotate(8deg) scale(1.1); }
+      30% { transform: rotate(-8deg) scale(1.1); }
+      40% { transform: rotate(8deg) scale(1.1); }
+      50% { transform: rotate(0deg) scale(1.2); }
+      60% { transform: rotate(0deg) scale(1.2); }
+      70% { transform: rotate(0deg) scale(1.1) translateY(-20px); }
+      80% { transform: rotate(0deg) scale(1.1) translateY(-20px); }
+      90% { transform: rotate(0deg) scale(1.05) translateY(-10px); }
+      100% { transform: rotate(0deg) scale(1) translateY(0); }
+    }
+    .blindbox-gift {
+      width: 100%; height: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      position: relative; overflow: hidden;
+    }
+    .blindbox-gift::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: blindboxGlint 2s ease-in-out infinite;
+    }
+    @keyframes blindboxGlint {
+      0% { left: -100%; }
+      50%, 100% { left: 100%; }
+    }
+    .blindbox-reveal {
+      display: none; position: relative; z-index: 1;
+      animation: blindboxReveal 0.5s ease-out;
+    }
+    @keyframes blindboxReveal {
+      0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .blindbox-reveal.show { display: block; }
+    .blindbox-topic-source {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.2); padding: 0.4rem 0.8rem;
+      border-radius: 20px; font-size: 0.85rem; color: #fff;
+      margin-bottom: 1rem; backdrop-filter: blur(10px);
+    }
+    .blindbox-topic-source-icon {
+      width: 24px; height: 24px; border-radius: 6px; display: flex;
+      align-items: center; justify-content: center; font-size: 0.9rem;
+    }
+    .blindbox-topic-title {
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+      line-height: 1.5; margin-bottom: 0.8rem; word-break: break-word;
+    }
+    .blindbox-topic-meta {
+      display: flex; gap: 1rem; justify-content: center; align-items: center;
+      font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 1.5rem;
+    }
+    .blindbox-topic-hot { display: flex; align-items: center; gap: 0.3rem; }
+    .blindbox-topic-desc {
+      font-size: 0.9rem; color: rgba(255,255,255,0.9); line-height: 1.6;
+      background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 12px;
+      margin-bottom: 1.5rem; backdrop-filter: blur(10px); text-align: left;
+    }
+    .blindbox-actions {
+      display: flex; gap: 0.8rem; justify-content: center; position: relative; z-index: 1;
+    }
+    .blindbox-btn {
+      padding: 0.8rem 1.5rem; border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; flex: 1;
+    }
+    .blindbox-btn-primary {
+      background: #fff; color: #667eea;
+    }
+    .blindbox-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.3); }
+    .blindbox-btn-secondary {
+      background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(10px);
+    }
+    .blindbox-btn-secondary:hover { background: rgba(255,255,255,0.3); }
+    .blindbox-close {
+      position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2);
+      border: none; width: 36px; height: 36px; border-radius: 50%;
+      color: #fff; font-size: 1.2rem; cursor: pointer; z-index: 2;
+      backdrop-filter: blur(10px); transition: all 0.2s ease;
+    }
+    .blindbox-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
+    .blindbox-stats {
+      margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.2);
+      font-size: 0.85rem; color: rgba(255,255,255,0.7); position: relative; z-index: 1;
+    }
     .pk-card.winner { border-color: #22c55e; background: rgba(34,197,94,0.05); }
     .pk-card.loser { opacity: 0.6; }
     .pk-card-rank {
@@ -2007,6 +2131,7 @@
       <button class="share-btn" id="compareBtn" onclick="toggleCompareMode()">对比</button>
       <button class="share-btn" id="pkBtn" onclick="toggleHotPK()">PK</button>
       <button class="share-btn" onclick="toggleQuiz()">猜</button>
+      <button class="share-btn" id="blindboxBtn" onclick="toggleBlindBox()">🎁</button>
       <button class="share-btn" id="timelineBtn" onclick="toggleTimeline()">时间线</button>
       <button class="share-btn" id="graphBtn" onclick="toggleGraph()">关系图</button>
       <button class="share-btn" id="heatmapBtn" onclick="toggleHeatmap()">热力图</button>
@@ -2090,6 +2215,10 @@
 
   <div class="fab-container" id="fabContainer">
     <div class="fab-menu">
+      <div class="fab-menu-item" onclick="toggleBlindBox(); toggleFab()">
+        <span class="fab-menu-item-icon">🎁</span>
+        <span class="fab-menu-item-label">热点盲盒</span>
+      </div>
       <div class="fab-menu-item" onclick="randomTopic(); toggleFab()">
         <span class="fab-menu-item-icon">🎲</span>
         <span class="fab-menu-item-label" data-i18n="fabRandom">随机热点</span>
@@ -2352,6 +2481,30 @@
       <div class="pk-desc" id="pkDesc">选择你更关注的话题</div>
       <div class="pk-arena" id="pkArena"></div>
       <div class="pk-actions" id="pkActions"></div>
+    </div>
+  </div>
+
+  <div class="blindbox-overlay" id="blindboxOverlay" style="display:none" onclick="if(event.target===this)closeBlindBox()">
+    <div class="blindbox-container">
+      <button class="blindbox-close" onclick="closeBlindBox()">✕</button>
+      <div class="blindbox-header">🎁 热点盲盒</div>
+      <div class="blindbox-subtitle">点击礼盒，探索随机热点话题</div>
+      <div class="blindbox-box" id="blindboxBox" onclick="openBlindBox()">
+        <div class="blindbox-gift">🎁</div>
+      </div>
+      <div class="blindbox-reveal" id="blindboxReveal">
+        <div class="blindbox-topic-source" id="blindboxSource"></div>
+        <div class="blindbox-topic-title" id="blindboxTitle"></div>
+        <div class="blindbox-topic-meta">
+          <div class="blindbox-topic-hot" id="blindboxHot"></div>
+        </div>
+        <div class="blindbox-topic-desc" id="blindboxDesc"></div>
+        <div class="blindbox-actions">
+          <button class="blindbox-btn blindbox-btn-secondary" onclick="openBlindBox()">换一个</button>
+          <button class="blindbox-btn blindbox-btn-primary" id="blindboxOpenBtn" onclick="openBlindBoxTopic()">查看原文</button>
+        </div>
+      </div>
+      <div class="blindbox-stats" id="blindboxStats"></div>
     </div>
   </div>
 
@@ -2715,6 +2868,11 @@
         pkTotalVotes: '共 {count} 人参与',
         pkVoted: '已投票',
         pkNoData: '暂无可PK的话题',
+        blindbox: '🎁 热点盲盒',
+        blindboxSubtitle: '点击礼盒，探索随机热点话题',
+        blindboxOpen: '换一个',
+        blindboxViewOriginal: '查看原文',
+        blindboxStats: '已开启 {count} 次',
         digestHottest: '最热',
         digestActive: '最活跃',
         digestCross: '跨平台',
@@ -3029,6 +3187,11 @@
         pkTotalVotes: '{count} votes total',
         pkVoted: 'Voted',
         pkNoData: 'No topics available for PK',
+        blindbox: '🎁 Trending Blind Box',
+        blindboxSubtitle: 'Click the gift box to discover random trending topics',
+        blindboxOpen: 'Try Another',
+        blindboxViewOriginal: 'View Original',
+        blindboxStats: 'Opened {count} times',
         digestHottest: 'Hottest',
         digestActive: 'Most Active',
         digestCross: 'Cross-platform',
@@ -8741,6 +8904,98 @@
         pkPairIndex = 0;
       }
       renderPKRound();
+    }
+
+    let blindboxOpenedCount = parseInt(localStorage.getItem('trendingHubBlindboxCount') || '0');
+    let currentBlindboxTopic = null;
+
+    function toggleBlindBox() {
+      const overlay = document.getElementById('blindboxOverlay');
+      if (overlay.style.display === 'none') {
+        overlay.style.display = 'flex';
+        resetBlindBox();
+        updateBlindBoxStats();
+      } else {
+        closeBlindBox();
+      }
+    }
+
+    function closeBlindBox() {
+      document.getElementById('blindboxOverlay').style.display = 'none';
+    }
+
+    function resetBlindBox() {
+      const box = document.getElementById('blindboxBox');
+      const reveal = document.getElementById('blindboxReveal');
+      box.style.display = 'block';
+      box.classList.remove('shaking');
+      reveal.classList.remove('show');
+      currentBlindboxTopic = null;
+    }
+
+    function openBlindBox() {
+      if (allData.length === 0) {
+        showToast('暂无数据，请稍后再试', 'error');
+        return;
+      }
+
+      const box = document.getElementById('blindboxBox');
+      const reveal = document.getElementById('blindboxReveal');
+
+      box.classList.add('shaking');
+
+      setTimeout(() => {
+        const sources = allData.filter(s => s.items.length > 0 && !s.error);
+        if (sources.length === 0) return;
+
+        const source = sources[Math.floor(Math.random() * sources.length)];
+        const item = source.items[Math.floor(Math.random() * source.items.length)];
+
+        if (!item || !item.title) return;
+
+        currentBlindboxTopic = {
+          title: item.title,
+          url: item.url,
+          hot: item.hot,
+          description: item.description,
+          source: source.source,
+          icon: source.icon,
+          color: source.color,
+          key: source.key
+        };
+
+        box.style.display = 'none';
+        reveal.classList.add('show');
+
+        document.getElementById('blindboxSource').innerHTML = `
+          <div class="blindbox-topic-source-icon" style="background:${source.color}">${source.icon}</div>
+          <span>${source.source}</span>
+        `;
+        document.getElementById('blindboxTitle').textContent = item.title;
+
+        const hotText = item.hot ? `🔥 ${formatHot(item.hot)}` : '';
+        document.getElementById('blindboxHot').innerHTML = hotText;
+
+        const desc = item.description || '暂无描述';
+        document.getElementById('blindboxDesc').textContent = desc;
+
+        blindboxOpenedCount++;
+        localStorage.setItem('trendingHubBlindboxCount', String(blindboxOpenedCount));
+        updateBlindBoxStats();
+
+      }, 700);
+    }
+
+    function openBlindBoxTopic() {
+      if (currentBlindboxTopic && currentBlindboxTopic.url) {
+        window.open(currentBlindboxTopic.url, '_blank');
+      }
+    }
+
+    function updateBlindBoxStats() {
+      const stats = document.getElementById('blindboxStats');
+      const totalTopics = allData.reduce((sum, s) => sum + s.items.length, 0);
+      stats.innerHTML = `已开启 <strong>${blindboxOpenedCount}</strong> 次 · 当前共 <strong>${totalTopics}</strong> 个热点话题`;
     }
   </script>
   <div class="toast-container" id="toastContainer"></div>
