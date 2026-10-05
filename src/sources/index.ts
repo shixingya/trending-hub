@@ -35,6 +35,7 @@ export { techcrunch } from './techcrunch.js';
 export { arstechnica } from './arstechnica.js';
 export { theverge } from './theverge.js';
 export { wired } from './wired.js';
+export { mittechreview } from './mittechreview.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -73,6 +74,7 @@ import { techcrunch } from './techcrunch.js';
 import { arstechnica } from './arstechnica.js';
 import { theverge } from './theverge.js';
 import { wired } from './wired.js';
+import { mittechreview } from './mittechreview.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -115,5 +117,6 @@ export const allSources: TrendingSource[] = [
   techcrunch,
   arstechnica,
   theverge,
-  wired
+  wired,
+  mittechreview
 ];
