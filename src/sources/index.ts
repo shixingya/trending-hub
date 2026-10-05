@@ -31,6 +31,8 @@ export { oschina } from './oschina.js';
 export { lobsters } from './lobsters.js';
 export { hackernews } from './hackernews.js';
 export { stackoverflow } from './stackoverflow.js';
+export { techcrunch } from './techcrunch.js';
+export { arstechnica } from './arstechnica.js';
 
 import { baidu } from './baidu.js';
 import { baiduMovie, baiduGame, baiduCar, baiduTravel } from './baidu-boards.js';
@@ -65,6 +67,8 @@ import { oschina } from './oschina.js';
 import { lobsters } from './lobsters.js';
 import { hackernews } from './hackernews.js';
 import { stackoverflow } from './stackoverflow.js';
+import { techcrunch } from './techcrunch.js';
+import { arstechnica } from './arstechnica.js';
 import type { TrendingSource } from '../types.js';
 
 export const allSources: TrendingSource[] = [
@@ -103,5 +107,7 @@ export const allSources: TrendingSource[] = [
   oschina,
   lobsters,
   hackernews,
-  stackoverflow
+  stackoverflow,
+  techcrunch,
+  arstechnica
 ];
