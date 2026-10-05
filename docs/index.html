@@ -314,6 +314,8 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .item-hot { font-size: 0.7rem; color: var(--accent-red); white-space: nowrap; flex-shrink: 0; }
+    .sparkline { opacity: 0.7; transition: opacity 0.2s; }
+    .item:hover .sparkline { opacity: 1; }
     .item-comments { font-size: 0.7rem; color: var(--accent); white-space: nowrap; flex-shrink: 0; margin-left: 0.3rem; }
     .item-actions {
       display: none; gap: 0.3rem; margin-left: 0.5rem;
@@ -2517,6 +2519,12 @@
         trendTitle: '热度趋势',
         trendNoData: '暂无历史趋势数据，数据将在多次更新后显示',
         trendNoMatch: '未找到该话题的历史趋势',
+        latest: '最新',
+        change: '变化',
+        peak: '峰值',
+        daysTracked: '追踪天数',
+        platformsCovered: '涉及平台',
+        trendSparkline: '趋势',
         velocityRising: '快速上升',
         velocityHot: '热度飙升',
         spreadTitle: '跨平台传播时间线',
@@ -2818,6 +2826,12 @@
         trendTitle: 'Heat Trend',
         trendNoData: 'No historical trend data yet. Data will appear after multiple updates.',
         trendNoMatch: 'No historical trend found for this topic',
+        latest: 'Latest',
+        change: 'Change',
+        peak: 'Peak',
+        daysTracked: 'Days Tracked',
+        platformsCovered: 'Platforms',
+        trendSparkline: 'Trend',
         velocityRising: 'Rising Fast',
         velocityHot: 'Hot Surge',
         spreadTitle: 'Cross-Platform Spread Timeline',
@@ -4133,11 +4147,12 @@
               <span class="item-rank">${i + 1}</span>
               ${renderPositionChange(source.key, title, i + 1)}
               <div class="item-content">
-                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markAsRead('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()">${displayTitle}</a>${alertBadge}${sentimentBadge}${readBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}${renderVelocityBadge(source.key, title, item.hot || 0)}</div>
+                <div class="item-title"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="markAsRead('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()">${displayTitle}</a>${alertBadge}${sentimentBadge}${readBadge}${isNew(title) ? '<span class="item-new-badge">新</span>' : ''}${getStreakCount(title) >= 2 ? `<span class="item-streak-badge" title="${getStreakCount(title)} ${t('streak')}">🔥${getStreakCount(title)}</span>` : ''}${renderBuzzBadge(item.hot)}${renderVelocityBadge(source.key, title, item.hot || 0)}${getTopicSparkline(title)}</div>
                 ${displayDesc ? `<div class="item-desc">${displayDesc}</div>` : ''}
                 ${tagsHtml}
               </div>
               <div class="item-actions">
+                <button class="item-action-btn" onclick="showTrend('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="趋势">📈</button>
                 <button class="item-action-btn" onclick="showTopicDetail('${escapeHtml(title).replace(/'/g, "\\'")}');event.stopPropagation()" title="跨平台详情">🔍</button>
                 <button class="item-action-btn" onclick="toggleBookmark('${escapeHtml(title).replace(/'/g, "\\'")}', '${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="收藏">☆</button>
                 <button class="item-action-btn" onclick="copyLink('${url.replace(/'/g, "\\'")}');event.stopPropagation()" title="复制链接">📋</button>
@@ -4354,6 +4369,8 @@
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        const trendOverlay = document.getElementById('trendOverlay');
+        if (trendOverlay && trendOverlay.classList.contains('active')) { closeTrend(); return; }
         if (wordCloudActive) { toggleWordCloud(); return; }
         if (compareActive) { toggleCompareMode(); return; }
         if (focusMode) { toggleFocusMode(); return; }
@@ -4498,9 +4515,9 @@
       const color = colors[vel.velocity] || '#1dd1a1';
       
       const growthText = vel.hotGrowth > 0 ? `+${vel.hotGrowth}%` : '';
-      const title = growthText ? `热度飙升 ${growthText}` : '快速上升';
+      const velTitle = growthText ? `热度飙升 ${growthText}` : '快速上升';
       
-      return `<span class="velocity-badge" style="background:${color};color:#fff;padding:0.15rem 0.4rem;border-radius:8px;font-size:0.7rem;margin-left:0.3rem;display:inline-block" title="${title}">${label}${growthText}</span>`;
+      return `<span class="velocity-badge" style="background:${color};color:#fff;padding:0.15rem 0.4rem;border-radius:8px;font-size:0.7rem;margin-left:0.3rem;display:inline-block" title="${velTitle}">${label}${growthText}</span>`;
     }
 
     function renderChangesView() {
@@ -4926,8 +4943,8 @@
       const total = allData.reduce((sum, s) => sum + s.items.length, 0);
       const desc = `一站式发现${allData.filter(s => s.items.length > 0).slice(0, 8).map(s => s.source).join('/')}等${allData.length}大平台热点话题，实时更新`;
       const url = encodeURIComponent(location.href);
-      const title = encodeURIComponent(`Trending Hub - 全网热点聚合 (${total}条热点)`);
-      const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${url}&title=${title}&desc=${encodeURIComponent(desc)}&summary=${encodeURIComponent('全网热门话题聚合')}`;
+      const shareTitle = encodeURIComponent(`Trending Hub - 全网热点聚合 (${total}条热点)`);
+      const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${url}&title=${shareTitle}&desc=${encodeURIComponent(desc)}&summary=${encodeURIComponent('全网热门话题聚合')}`;
       window.open(qqUrl, '_blank', 'width=600,height=500');
     }
 
@@ -5013,11 +5030,11 @@
     <p>仅供学习研究，数据版权归原作者原平台所有</p>
     <p style="margin-top: 0.5rem;">GitHub: <a href="https://github.com/shixingya/trending-hub" target="_blank">shixingya/trending-hub</a></p>
   </div>
-  <script>
+  <scr` + `ipt>
     window.onload = function() {
       setTimeout(function() { window.print(); }, 500);
     };
-  </script>
+  </scr` + `ipt>
 </body>
 </html>`;
 
@@ -5424,10 +5441,10 @@
       if (localStorage.getItem('trending-notifications') !== 'true') return;
       if (matchedItems.length === 0) return;
 
-      const title = `🔥 提醒话题「${keyword}」上榜啦！`;
+      const notifTitle = `🔥 提醒话题「${keyword}」上榜啦！`;
       const body = `${matchedItems.length} 个平台出现相关话题：${matchedItems[0].title}`;
       
-      new Notification(title, {
+      new Notification(notifTitle, {
         body: body,
         icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ff6b6b" width="100" height="100" rx="20"/><text x="50" y="65" font-size="50" text-anchor="middle" fill="white" font-family="sans-serif">🔥</text></svg>',
         tag: `trending-alert-${keyword}`,
@@ -5909,8 +5926,8 @@
           ctx.textAlign = 'left';
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif';
-          const title = item.title.length > 40 ? item.title.substring(0, 40) + '...' : item.title;
-          ctx.fillText(title, 160, y);
+          const shareImgTitle = item.title.length > 40 ? item.title.substring(0, 40) + '...' : item.title;
+          ctx.fillText(shareImgTitle, 160, y);
 
           if (showPlatformBadge && item.sources) {
             ctx.fillStyle = 'rgba(255,255,255,0.25)';
@@ -6526,6 +6543,229 @@
       html += `</div>`;
 
       container.innerHTML = html;
+    }
+
+    function showTrend(title) {
+      const overlay = document.getElementById('trendOverlay');
+      const titleEl = document.getElementById('trendTitle');
+      const statsEl = document.getElementById('trendStats');
+      titleEl.textContent = title;
+      overlay.classList.add('active');
+      loadTrendHistory().then(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => drawTrendOverlay(title), 50);
+        });
+      });
+    }
+
+    function closeTrend() {
+      document.getElementById('trendOverlay').classList.remove('active');
+    }
+
+    function drawTrendOverlay(topicTitle) {
+      const canvas = document.getElementById('trendCanvas');
+      const statsEl = document.getElementById('trendStats');
+      if (!canvas || !trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) {
+        statsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem">${t('trendNoData') || '暂无历史趋势数据'}</div>`;
+        return;
+      }
+
+      const normalized = topicTitle.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+      const snapshots = trendHistoryData.snapshots;
+      const sourceColors = {};
+      const sourceNames = {};
+      allData.forEach(s => { sourceColors[s.key] = s.color; sourceNames[s.key] = s.source; });
+
+      const seriesMap = {};
+      snapshots.forEach(snap => {
+        snap.topics.forEach(topic => {
+          const topicNorm = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          const isMatch = topicNorm === normalized ||
+            (normalized.length >= 6 && topicNorm.includes(normalized)) ||
+            (topicNorm.length >= 6 && normalized.includes(topicNorm));
+          if (isMatch) {
+            if (!seriesMap[topic.source]) seriesMap[topic.source] = [];
+            seriesMap[topic.source].push({ date: snap.date, hot: topic.hot });
+          }
+        });
+      });
+
+      const series = Object.entries(seriesMap).map(([source, data]) => ({
+        source,
+        color: sourceColors[source] || '#888',
+        name: sourceNames[source] || source,
+        data: data.sort((a, b) => a.date.localeCompare(b.date))
+      })).filter(s => s.data.length >= 1);
+
+      if (series.length === 0) {
+        statsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem">${t('trendNoMatch') || '未找到该话题的历史趋势'}</div>`;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = canvas.width = rect.width * dpr;
+      const height = canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+
+      const padding = { top: 40, right: 40, bottom: 60, left: 70 };
+      const chartW = w - padding.left - padding.right;
+      const chartH = h - padding.top - padding.bottom;
+
+      const allDates = [...new Set(snapshots.map(s => s.date))].sort();
+      const allHots = series.flatMap(s => s.data.map(d => d.hot));
+      const maxHot = Math.max(...allHots, 1);
+
+      const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#888';
+      const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#2a2a2a';
+
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (chartH / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(w - padding.right, y);
+        ctx.stroke();
+        const val = maxHot - (maxHot / 5) * i;
+        ctx.fillStyle = textColor;
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(formatHot(val), padding.left - 8, y + 4);
+      }
+
+      allDates.forEach((date, i) => {
+        const x = padding.left + (i / Math.max(allDates.length - 1, 1)) * chartW;
+        ctx.fillStyle = textColor;
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(date.substring(5), x, h - padding.bottom + 20);
+      });
+
+      series.forEach(s => {
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        s.data.forEach((point, i) => {
+          const dateIdx = allDates.indexOf(point.date);
+          const x = padding.left + (dateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+          const y = padding.top + chartH - (point.hot / maxHot) * chartH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartH);
+        gradient.addColorStop(0, s.color + '30');
+        gradient.addColorStop(1, s.color + '05');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        s.data.forEach((point, i) => {
+          const dateIdx = allDates.indexOf(point.date);
+          const x = padding.left + (dateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+          const y = padding.top + chartH - (point.hot / maxHot) * chartH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        const lastPoint = s.data[s.data.length - 1];
+        const lastDateIdx = allDates.indexOf(lastPoint.date);
+        const lastX = padding.left + (lastDateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+        ctx.lineTo(lastX, padding.top + chartH);
+        const firstPoint = s.data[0];
+        const firstDateIdx = allDates.indexOf(firstPoint.date);
+        const firstX = padding.left + (firstDateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+        ctx.lineTo(firstX, padding.top + chartH);
+        ctx.closePath();
+        ctx.fill();
+
+        s.data.forEach((point, i) => {
+          const dateIdx = allDates.indexOf(point.date);
+          const x = padding.left + (dateIdx / Math.max(allDates.length - 1, 1)) * chartW;
+          const y = padding.top + chartH - (point.hot / maxHot) * chartH;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.fill();
+          ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#1a1a1a';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+      });
+
+      let statsHtml = '';
+      series.forEach(s => {
+        const latest = s.data[s.data.length - 1];
+        const first = s.data[0];
+        const change = latest.hot - first.hot;
+        const changePct = first.hot > 0 ? ((change / first.hot) * 100).toFixed(1) : 'N/A';
+        const peak = Math.max(...s.data.map(d => d.hot));
+        const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+        const changeColor = change > 0 ? 'var(--accent-red)' : change < 0 ? '#1dd1a1' : 'var(--text-muted)';
+        statsHtml += `<div class="trend-stat-card">
+          <div style="display:flex;align-items:center;gap:0.5rem;justify-content:center;margin-bottom:0.5rem">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${s.color}"></span>
+            <span style="font-size:0.85rem;font-weight:600">${s.name}</span>
+          </div>
+          <div class="trend-stat-value">${formatHot(latest.hot)}</div>
+          <div class="trend-stat-label">${t('latest') || '最新'}</div>
+          <div style="margin-top:0.5rem;font-size:0.85rem;color:${changeColor};font-weight:600">${arrow} ${changePct}%</div>
+          <div class="trend-stat-label">${t('change') || '变化'}</div>
+          <div style="margin-top:0.3rem;font-size:0.8rem;color:var(--text-secondary)">${formatHot(peak)}</div>
+          <div class="trend-stat-label">${t('peak') || '峰值'}</div>
+        </div>`;
+      });
+      const totalDays = snapshots.length;
+      const platformCount = series.length;
+      statsHtml += `<div class="trend-stat-card">
+        <div class="trend-stat-value">${totalDays}</div>
+        <div class="trend-stat-label">${t('daysTracked') || '追踪天数'}</div>
+        <div style="margin-top:0.5rem" class="trend-stat-value">${platformCount}</div>
+        <div class="trend-stat-label">${t('platformsCovered') || '涉及平台'}</div>
+      </div>`;
+      statsEl.innerHTML = statsHtml;
+    }
+
+    function getTopicSparkline(topicTitle) {
+      if (!trendHistoryData || !trendHistoryData.snapshots || trendHistoryData.snapshots.length < 2) return '';
+      const normalized = topicTitle.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+      const hotByDate = {};
+      trendHistoryData.snapshots.forEach(snap => {
+        for (const topic of snap.topics) {
+          const topicNorm = topic.title.replace(/[^\w\u4e00-\u9fff]/g, '').toLowerCase();
+          if (topicNorm === normalized || (normalized.length >= 6 && topicNorm.includes(normalized))) {
+            if (!hotByDate[snap.date] || topic.hot > hotByDate[snap.date]) {
+              hotByDate[snap.date] = topic.hot || 0;
+            }
+          }
+        }
+      });
+      const dates = Object.keys(hotByDate).sort();
+      if (dates.length < 2) return '';
+      const values = dates.map(d => hotByDate[d]);
+      const max = Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const range = max - min || 1;
+      const w = 48;
+      const h = 16;
+      const points = values.map((v, i) => {
+        const x = (i / (values.length - 1)) * w;
+        const y = h - ((v - min) / range) * (h - 2) - 1;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      });
+      const isUp = values[values.length - 1] > values[0];
+      const color = isUp ? 'var(--accent-red)' : '#1dd1a1';
+      return `<svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="vertical-align:middle;margin-left:6px;flex-shrink:0" title="${t('trendSparkline') || '趋势'}">
+        <polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="${(points[points.length-1].split(',')[0])}" cy="${(points[points.length-1].split(',')[1])}" r="2" fill="${color}"/>
+      </svg>`;
     }
 
     function showShortcuts() {
@@ -7918,10 +8158,10 @@
         if (!source.items || source.error) continue;
         for (let i = 0; i < source.items.length; i++) {
           const item = source.items[i];
-          const title = item.title || '';
-          if (title.length < 6) continue;
+          const pkTitle = item.title || '';
+          if (pkTitle.length < 6) continue;
           candidates.push({
-            title,
+            title: pkTitle,
             url: item.url || '#',
             hot: item.hot || 0,
             source: source.source,
@@ -7929,9 +8169,9 @@
             icon: source.icon,
             color: source.color,
             rank: i + 1,
-            isQuestion: /[？?]/.test(title),
+            isQuestion: /[？?]/.test(pkTitle),
             crossCount: 0,
-            norm: normalizeTitle(title)
+            norm: normalizeTitle(pkTitle)
           });
         }
       }
