@@ -13,9 +13,9 @@
 [![Languages](https://img.shields.io/github/languages/count/shixingya/trending-hub)](https://github.com/shixingya/trending-hub)
 [![Code Size](https://img.shields.io/github/languages/code-size/shixingya/trending-hub)](https://github.com/shixingya/trending-hub)
 
-🌐 **36大平台** · 📊 **1200+热点** · 🔄 **自动更新** · 🎨 **精美UI** · 📱 **PWA支持**
+🌐 **40大平台** · 📊 **1200+热点** · 🔄 **自动更新** · 🎨 **精美UI** · 📱 **PWA支持**
 
-一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow等36大平台热点
+一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow等40大平台热点
 
 [🚀 在线体验](https://shixingya.github.io/trending-hub/) · [📖 API 文档](https://shixingya.github.io/trending-hub/api.html) · [📝 更新日志](CHANGELOG.md) · [🐛 报告问题](https://github.com/shixingya/trending-hub/issues) · [💡 建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
@@ -23,7 +23,7 @@
 
 ## 特性
 
-- 聚合 36 大平台热榜：知乎热榜/日报/热评、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门/入站必刷、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影/读书、网易云热歌、GitHub Trending/新星、虎扑热帖、新浪新闻、微信读书、掘金热门、懂球帝热帖、快手热榜、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow
+- 聚合 40 大平台热榜：知乎热榜/日报/热评、百度热搜/贴吧、微博、B站热门/排行榜/热搜/综合热门/入站必刷、抖音、头条、澎湃、IT之家、少数派、百度影视/游戏/汽车/旅游、豆瓣电影/读书、网易云热歌、GitHub Trending/新星、虎扑热帖、新浪新闻、微信读书、掘金热门、懂球帝热帖、快手热榜、Dev.to、开源中国、Lobsters、Hacker News、StackOverflow、TechCrunch、Ars Technica、The Verge、Wired
 - 暗色/亮色主题切换，自动跟随系统，支持日落自动切换（基于地理位置）
 - 关键词搜索，快速定位感兴趣的话题
 - 智能分类筛选：娱乐/军事/体育/科技/社会/地区/财经/教育
@@ -251,13 +251,13 @@ npm run dev
 
 | 🌐 数据源 | 📊 热点话题 | ⚡ 更新频率 | 🎨 核心特性 |
 |-----------|------------|------------|------------|
-| **36大平台** | **1200+条** | **每2小时** | **50+功能** |
+| **40大平台** | **1200+条** | **每2小时** | **50+功能** |
 
 </div>
 
 ### 🏆 核心功能一览
 
-- 📰 **36大平台热榜**：知乎、百度、微博、B站、抖音、头条、GitHub、虎扑、掘金、Hacker News 等
+- 📰 **40大平台热榜**：知乎、百度、微博、B站、抖音、头条、GitHub、虎扑、掘金、Hacker News 等
 - 🌓 **暗色/亮色主题**：自动跟随系统，支持日落自动切换
 - 🔍 **智能搜索**：关键词搜索 + 智能分类筛选（娱乐/军事/体育/科技/社会/财经/教育/游戏/健康/汽车）
 - 📊 **数据可视化**：热度趋势图、词云、平台热力图、关系图、时间线
