@@ -12,7 +12,7 @@
 
 一站式发现知乎、百度、微博、B站、抖音、头条、澎湃、IT之家、少数派、豆瓣、网易云、贴吧、GitHub、虎扑、新浪、微信读书、掘金、懂球帝、快手、Dev.to、开源中国、Lobsters等34大平台热点
 
-[在线体验](https://shixingya.github.io/trending-hub/) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
+[在线体验](https://shixingya.github.io/trending-hub/) · [更新日志](CHANGELOG.md) · [报告问题](https://github.com/shixingya/trending-hub/issues) · [建议新数据源](https://github.com/shixingya/trending-hub/issues/new?assignees=&labels=enhancement&template=new_source.md)
 
 </div>
 
@@ -115,7 +115,7 @@ GET /api/trending
 GET /api/trending/:source
 ```
 
-source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `douban-book` / `netease-music` / `github-trending` / `hupu` / `sina-news` / `weread` / `juejin` / `dongqiudi` / `kuaishou`
+source 可选值：`zhihu` / `zhihu-daily` / `baidu` / `baidu-tieba` / `weibo` / `bilibili` / `bilibili-rank` / `bilibili-hot` / `bilibili-popular` / `douyin` / `toutiao` / `thepaper` / `ithome` / `sspai` / `baidu-movie` / `baidu-game` / `baidu-car` / `baidu-travel` / `douban-movie` / `douban-book` / `netease-music` / `github-trending` / `github-newrepos` / `hupu` / `sina-news` / `weread` / `juejin` / `dongqiudi` / `kuaishou` / `dev-to` / `oschina` / `lobsters` / `hackernews` / `stackoverflow`
 
 ### CLI 抓取
 ```bash
@@ -176,7 +176,12 @@ src/
     ├── weread.ts           # 微信读书
     ├── juejin.ts           # 掘金热门
     ├── dongqiudi.ts        # 懂球帝热帖
-    └── kuaishou.ts         # 快手热榜
+    ├── kuaishou.ts         # 快手热榜
+    ├── dev-to.ts           # Dev.to 热门
+    ├── oschina.ts          # 开源中国
+    ├── lobsters.ts         # Lobsters
+    ├── hackernews.ts       # Hacker News
+    └── stackoverflow.ts    # StackOverflow
 docs/
 ├── index.html          # GitHub Pages 前端
 ├── widget.js           # 可嵌入小组件脚本
